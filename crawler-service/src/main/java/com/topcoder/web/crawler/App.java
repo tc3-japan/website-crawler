@@ -5,7 +5,7 @@ package com.topcoder.web.crawler;
 
 public class App {
     public String getUsage() {
-        return "java -jar website-cralwer.jar com.yodabashi.web.crawler.App <website-id>";
+        return "java -jar website-cralwer.jar com.topcoder.web.crawler.App <website-id>";
     }
 
     public static void main(String[] args) {
