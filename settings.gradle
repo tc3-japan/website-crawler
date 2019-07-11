@@ -8,3 +8,4 @@
  */
 
 rootProject.name = 'website-crawler'
+include 'crawler-service','crawler-database'

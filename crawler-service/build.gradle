@@ -13,17 +13,21 @@ plugins {
     // Apply the application plugin to add support for building a CLI application
     id 'application'
 
-    // following 3 for Spring Boot 2
-    id 'com.gradle.build-scan' version '2.0.2'
-    id 'org.springframework.boot' version '2.0.5.RELEASE'
+    // following for Spring boot
+    // id 'com.gradle.build-scan' version '2.0.2'
+    id 'org.springframework.boot' version '1.5.7.RELEASE'
     id 'io.spring.dependency-management' version '1.0.7.RELEASE'
 
 }
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -33,7 +37,7 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 
-    implementation 'org.springframework.boot:spring-boot-dependencies:2.0.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
