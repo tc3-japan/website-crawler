@@ -29,7 +29,7 @@ plugins {
     // find bugs
     id "com.github.spotbugs" version "2.0.0"
     // perform quality checks on java code
-    id 'checkstyle'
+    // id 'checkstyle'
     // code analyzer
     id 'pmd'
     // test coverage
