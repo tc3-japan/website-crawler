@@ -1,4 +1,4 @@
-package com.topcoder.web.crawler.service;
+package com.topcoder.crawler.service;
 
 import java.net.URL;
 
