@@ -25,6 +25,8 @@ plugins {
     id 'checkstyle'
     // code analyzer
     id 'pmd'
+    // test coverage
+    id 'jacoco'
 
 }
 
@@ -38,6 +40,14 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
+
+flyway {
+  url = (applicationConfig.spring.datasource.url =~ /(.*\/\/.*\/).*/)[0][1] // Extract URL
+  user = applicationConfig.spring.datasource.username
+  password = applicationConfig.spring.datasource.password
+  schemas = [(applicationConfig.spring.datasource.url =~ /.*\/\/.*\/([^?]*)(\?.*)?/)[0][1]] // Extract DB name
+}
+
 
 repositories {
     // Use jcenter for resolving dependencies.
