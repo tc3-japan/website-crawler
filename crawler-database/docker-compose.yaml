@@ -6,7 +6,7 @@ services:
     ports:
       - 3306:3306
     environment:
-      MYSQL_DATABASE: website-crawler
+      MYSQL_DATABASE: website_crawler
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: mypassword
 
