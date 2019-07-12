@@ -6,6 +6,13 @@
  * User Manual available at https://docs.gradle.org/5.5/userguide/tutorial_java_projects.html
  */
 
+buildscript {
+
+    dependencies {
+            classpath 'org.yaml:snakeyaml:1.21'
+    }
+}
+
 plugins {
     // Apply the java plugin to add support for Java
     id 'java'
@@ -41,12 +48,7 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-flyway {
-  url = (applicationConfig.spring.datasource.url =~ /(.*\/\/.*\/).*/)[0][1] // Extract URL
-  user = applicationConfig.spring.datasource.username
-  password = applicationConfig.spring.datasource.password
-  schemas = [(applicationConfig.spring.datasource.url =~ /.*\/\/.*\/([^?]*)(\?.*)?/)[0][1]] // Extract DB name
-}
+
 
 
 repositories {
@@ -65,6 +67,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
@@ -78,6 +81,23 @@ dependencies {
             }
         }
     }
+}
+
+def profile = '';
+if(project.hasProperty('develop')) {
+  profile = 'develop'
+}
+if(project.hasProperty('production')) {
+  profile = 'production'
+}
+
+def applicationConfig = new org.yaml.snakeyaml.Yaml().load(("crawler-service/src/main/resources/application-${profile ? profile : 'default'}.yml" as File).text)
+
+flyway {
+  url = (applicationConfig.spring.datasource.url =~ /(.*\/\/.*\/).*/)[0][1] // Extract URL
+  user = applicationConfig.spring.datasource.username
+  password = applicationConfig.spring.datasource.password
+  schemas = [(applicationConfig.spring.datasource.url =~ /.*\/\/.*\/([^?]*)(\?.*)?/)[0][1]] // Extract DB name
 }
 
 application {

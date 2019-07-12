@@ -3,6 +3,6 @@ package com.topcoder.web.crawler.service;
 import java.net.URL;
 import java.util.List;
 
-interface Crawler {
+interface CrawlerService {
     List<String> getProductPagesForWebSite(URL url) throws Exception;
 }
