@@ -69,7 +69,7 @@ You should remove all potential bugs or flaws found by Spot Bugs.
 Unit test is integrated in the build process.
 You also can run the tests as below.
     ```bash
-    ./gradlew test
+    ./gradle test
     ```
 
 ## Build
