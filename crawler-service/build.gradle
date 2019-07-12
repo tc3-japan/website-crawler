@@ -102,5 +102,5 @@ flyway {
 
 application {
     // Define the main class for the application
-    mainClassName = 'com.topcoder.web.crawler.App'
+    mainClassName = 'com.topcoder.web.crawler.Application'
 }
