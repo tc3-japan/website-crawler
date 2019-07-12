@@ -2,7 +2,7 @@ package com.topcoder.web.crawler.service;
 
 import java.net.URL;
 
-interface ECWebSiteDBSvc {
+interface ECWebSiteDBService {
 
     URL getSiteURLForWebsiteId(String siteId) throws Exception;
 }

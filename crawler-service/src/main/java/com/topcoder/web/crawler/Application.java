@@ -3,12 +3,12 @@
  */
 package com.topcoder.web.crawler;
 
-public class App {
+public class Application {
     public String getUsage() {
         return "java -jar website-cralwer.jar com.topcoder.web.crawler.App <website-id>";
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getUsage());
+        System.out.println(new Application().getUsage());
     }
 }

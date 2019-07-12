@@ -14,10 +14,26 @@ plugins {
     id 'application'
 
     // following for Spring boot
-    // id 'com.gradle.build-scan' version '2.0.2'
     id 'org.springframework.boot' version '1.5.7.RELEASE'
     id 'io.spring.dependency-management' version '1.0.7.RELEASE'
 
+    // database migration
+    id 'org.flywaydb.flyway' version '5.1.4'
+    // find bugs
+    id "com.github.spotbugs" version "2.0.0"
+    // perform quality checks on java code
+    id 'checkstyle'
+    // code analyzer
+    id 'pmd'
+
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+  excludeFilter = file('../config/spotbugs/spotbugs-exclude.xml')
+  reports {
+    xml.enabled = false
+    html.enabled = true
+  }
 }
 
 sourceCompatibility = '1.8'
