@@ -15,6 +15,24 @@
    cd crawler-database
    docker-compose up
 
+ 2. Edit database settings on src/main/resources/application-default.yml
+    ```yaml
+    spring:
+      datasource:
+        url: jdbc:mysql://{mysql server host}:{port}/website-crawler?useSSL=false
+        username: {username}
+        password: {password}
+    ```
+    
+    The username and password are in the docker-compose.yml file in the 'crawler-database' sub project.
+    
+    NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
+1. Migrate the database
+    ```bash
+    ./gradlew flywayMigrate
+    ```
+1. Insert sample data by executing db/V1.1_create_sample.sql on the database
+
 3. Building with Gradle, in project root:
     ```bash
     ./gradle build
