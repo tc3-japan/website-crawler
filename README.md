@@ -29,7 +29,7 @@
     NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
 1. Migrate the database
     ```bash
-    ./gradlew flywayMigrate
+    ./gradle flywayMigrate
     ```
 1. Insert sample data by executing db/V1.1_create_sample.sql on the database
 
