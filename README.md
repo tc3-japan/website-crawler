@@ -19,7 +19,7 @@
     ```yaml
     spring:
       datasource:
-        url: jdbc:mysql://{mysql server host}:{port}/website-crawler?useSSL=false
+        url: jdbc:mysql://{mysql server host}:{port}/website_crawler?useSSL=false
         username: {username}
         password: {password}
     ```
@@ -46,7 +46,7 @@
     ./gradle run
     ```
 
-6. To Build the Docker Image of website-crawler: 
+6. To Build the Docker Image of website_crawler: 
     ```bash
     cd cralwer-service
     docker build -t website-crawler
