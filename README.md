@@ -21,11 +21,11 @@
     ```
 4. To Run Test case in project root run:
     ```bash
-    ./gradle run
+    ./gradle test
     ```
 5. To Run the website-crawler in project root run::
     ```bash
-    ./gradle build
+    ./gradle run
     ```
 
 6. To Build the Docker Image of website-crawler: 
