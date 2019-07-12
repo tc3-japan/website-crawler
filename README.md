@@ -5,28 +5,36 @@
 * JDK 8
 * MySQL server `8` or higher. Or use latest version as in docker image.
 * Gradle 5.5
+* Spring Boot 1.5.7.RELEASE
+* Docker 18
 
 ## Quick Start
-1. Building with Gradle, in project root:
+
+1. To start the mySql server in Docker:
+   ```bash
+   cd crawler-database
+   docker-compose up
+
+3. Building with Gradle, in project root:
     ```bash
     ./gradle build
     ```
-2. To Run Test case in project root run:
+4. To Run Test case in project root run:
     ```bash
     ./gradle run
     ```
-3. To Run the website-crawler in project root run::
+5. To Run the website-crawler in project root run::
     ```bash
     ./gradle build
     ```
 
-4. To Build the Docker Image of website-crawler: 
+6. To Build the Docker Image of website-crawler: 
     ```bash
     cd cralwer-service
     docker build -t website-crawler
     ```
 
-5. To Run the website-crawler app inside the docker image:
+7. To Run the website-crawler app inside the docker image:
     ```bash
     docker run website-crawler
     ```
