@@ -25,4 +25,7 @@
             <property name="allowCommentedBlocks" value="true"/>
         </properties>
     </rule>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="BeanMembersShouldSerialize"/>
+    </rule>
 </ruleset>

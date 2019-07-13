@@ -9,7 +9,8 @@
 buildscript {
 
     dependencies {
-            classpath 'org.yaml:snakeyaml:1.21'
+        classpath 'mysql:mysql-connector-java:8.0.13'
+        classpath 'org.yaml:snakeyaml:1.21'
     }
 }
 
@@ -23,7 +24,8 @@ plugins {
     // following for Spring boot
     id 'org.springframework.boot' version '1.5.7.RELEASE'
     id 'io.spring.dependency-management' version '1.0.7.RELEASE'
-
+    // lombok
+    id "io.freefair.lombok" version "3.8.0"
     // database migration
     id 'org.flywaydb.flyway' version '5.1.4'
     // find bugs
@@ -31,24 +33,13 @@ plugins {
     // perform quality checks on java code
     // id 'checkstyle'
     // code analyzer
-    id 'pmd'
+    // id 'pmd'
     // test coverage
-    id 'jacoco'
-
-}
-
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
-  excludeFilter = file('../config/spotbugs/spotbugs-exclude.xml')
-  reports {
-    xml.enabled = false
-    html.enabled = true
-  }
+    // id 'jacoco'
 }
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
-
-
 
 
 repositories {
@@ -61,15 +52,26 @@ repositories {
 dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:27.1-jre'
+    implementation 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-web:1.5.7.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:1.5.7.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.7.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-logging:1.5.7.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
+    implementation 'mysql:mysql-connector-java:8.0.13'
+    
+    implementation 'org.flywaydb:flyway-core:5.1.4'
+    // compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
+    
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
-
-    implementation 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    // compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.flywaydb:flyway-core:5.1.4'
+
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.2'
 
     components {
         withModule('org.springframework:spring-beans') {
@@ -93,6 +95,23 @@ if(project.hasProperty('production')) {
 
 def applicationConfig = new org.yaml.snakeyaml.Yaml().load(("crawler-service/src/main/resources/application-${profile ? profile : 'default'}.yml" as File).text)
 
+
+lombok {
+  version = '1.18.8'
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+  excludeFilter = file('../config/spotbugs/spotbugs-exclude.xml')
+  reports {
+    xml.enabled = false
+    html.enabled = true
+  }
+}
+
+//pmd {
+//  ruleSetFiles = files("../config/pmd/pmd.xml")
+//}
+
 flyway {
   url = (applicationConfig.spring.datasource.url =~ /(.*\/\/.*\/).*/)[0][1] // Extract URL
   user = applicationConfig.spring.datasource.username
@@ -102,5 +121,5 @@ flyway {
 
 application {
     // Define the main class for the application
-    mainClassName = 'com.topcoder.web.crawler.Application'
+    mainClassName = 'com.topcoder.productsearch.Application'
 }

@@ -7,6 +7,7 @@
 * Gradle 5.5
 * Spring Boot 1.5.7.RELEASE
 * Docker 18
+* Lombok Latest >= 1.18.8 Install it to your own IDE if needed.
 
 ## Quick Start
 
@@ -27,34 +28,22 @@
     The username and password are in the docker-compose.yml file in the 'crawler-database' sub project.
     
     NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
+
 1. Migrate the database
     ```bash
-    ./gradle flywayMigrate
+    ./gradlew flywayMigrate
     ```
-1. Insert sample data by executing db/V1.1_create_sample.sql on the database
-
-3. Building with Gradle, in project root:
+2. Building with Gradle, in project root:
     ```bash
-    ./gradle build
+    ./gradlew build
     ```
-4. To Run Test case in project root run:
+3. To Run Test case, in project root:
     ```bash
-    ./gradle test
+    ./gradlew test
     ```
-5. To Run the website-crawler in project root run::
+4. To Run the website-crawler, in project root:
     ```bash
-    ./gradle run
-    ```
-
-6. To Build the Docker Image of website_crawler: 
-    ```bash
-    cd cralwer-service
-    docker build -t website-crawler
-    ```
-
-7. To Run the website-crawler app inside the docker image:
-    ```bash
-    docker run website-crawler
+    ./gradlew run
     ```
 
 ## Code formatting
