@@ -123,3 +123,14 @@ application {
     // Define the main class for the application
     mainClassName = 'com.topcoder.productsearch.Application'
 }
+
+bootRun {
+  // with Parameters
+  if (project.hasProperty('args')) {
+    args project.args.split(',')
+  }
+  // with JVM Parameters
+  if ( project.hasProperty('jvmArgs') ) {
+    jvmArgs project.jvmArgs.split(',')
+  }
+}
