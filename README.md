@@ -43,7 +43,7 @@
     ```
 4. To Run the website-crawler, in project root:
     ```bash
-    ./gradlew run
+    ./gradlew bootRun -Pargs=--site=1
     ```
 
 ## Code formatting
