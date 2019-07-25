@@ -15,6 +15,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * the website entity
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,26 +27,26 @@ public class WebSite {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int id;
-  
+  private Integer id;
+
   @Column(name = "name")
   private String name;
-  
+
   @Column(name = "description")
   private String description;
-  
+
   @Column(name = "url")
   private String url;
-  
+
   @Column(name = "content_url_patterns")
   private String contentUrlPatterns;
-  
+
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created_at")
   private Date createdAt;
-  
+
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "last_modified_at")
   private Date lastModifiedAt;
-  
+
 }
