@@ -1,4 +1,4 @@
-package com.topcoder.productsearch.common.model;
+package com.topcoder.productsearch.crawler;
 
 import com.topcoder.productsearch.common.entity.WebSite;
 import lombok.AllArgsConstructor;

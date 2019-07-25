@@ -9,11 +9,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.model.CrawlerTask;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.util.DomHelper;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
-import com.topcoder.productsearch.crawler.util.DomHelper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

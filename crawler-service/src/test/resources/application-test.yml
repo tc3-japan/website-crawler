@@ -15,4 +15,4 @@ cors:
   allowed-origins: "*"
   allowed-methods: HEAD,GET,PUT,POST,DELETE
 
-application-settings:
+crawler-settings:

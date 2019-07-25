@@ -6,7 +6,7 @@ import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.DestinationURL;
 import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.model.CrawlerTask;
+import com.topcoder.productsearch.crawler.CrawlerTask;
 
 
 /**

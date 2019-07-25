@@ -3,7 +3,7 @@ package com.topcoder.productsearch.crawler.service;
 
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.model.CrawlerTask;
+import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
 import org.junit.Before;
 import org.junit.Test;

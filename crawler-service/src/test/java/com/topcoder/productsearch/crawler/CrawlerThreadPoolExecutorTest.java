@@ -2,7 +2,7 @@ package com.topcoder.productsearch.crawler;
 
 
 import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.model.CrawlerTask;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ActiveProfiles;

@@ -7,13 +7,13 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.DestinationURL;
-import com.topcoder.productsearch.common.model.CrawlerTask;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.common.util.DomHelper;
+import com.topcoder.productsearch.common.util.SpringTool;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
-import com.topcoder.productsearch.crawler.util.Common;
-import com.topcoder.productsearch.crawler.util.DomHelper;
-import com.topcoder.productsearch.crawler.util.SpringTool;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -165,9 +165,8 @@ public class CrawlerThread implements Runnable {
       if (dbPage == null) {
         dbPage = new CPage();
         dbPage.setCreatedAt(Date.from(Instant.now()));
-      } else {
-        dbPage.setLastModifiedAt(Date.from(Instant.now()));
       }
+      dbPage.setLastModifiedAt(Date.from(Instant.now()));
 
       dbPage.setUrl(crawlerTask.getUrl());
       dbPage.setSiteId(crawlerTask.getSite().getId());

@@ -1,10 +1,11 @@
 package com.topcoder.productsearch.crawler.service;
 
 import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.model.CrawlerTask;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
 import com.topcoder.productsearch.crawler.CrawlerThreadPoolExecutor;
-import com.topcoder.productsearch.crawler.util.Common;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -38,31 +39,31 @@ public class CrawlerService {
   /**
    * Time limit for crawling an entire single site (seconds)
    */
-  @Value("${application-settings.time-limit}")
+  @Value("${crawler-settings.time-limit}")
   private Float siteTimeLimit;
 
   /**
    * Interval between each subsequent request (milliseconds)
    */
-  @Value("${application-settings.interval}")
+  @Value("${crawler-settings.interval}")
   private Integer taskInterval;
 
   /**
    * Timeout for downloading a page (minutes)
    */
-  @Value("${application-settings.timeout-download}")
+  @Value("${crawler-settings.timeout-download}")
   private Float timeout;
 
   /**
    * Max number of times to retry a single page.
    */
-  @Value("${application-settings.retry-times}")
+  @Value("${crawler-settings.retry-times}")
   private Integer maxRetryTimes;
 
   /**
    * Max depth that will be allowed to crawl for a site
    */
-  @Value("${application-settings.max-depth}")
+  @Value("${crawler-settings.max-depth}")
   private Integer maxDepth;
 
   /**
@@ -80,7 +81,7 @@ public class CrawlerService {
    *
    * @param parallelSize task parallel size
    */
-  public CrawlerService(@Value("${application-settings.parallel-size}") int parallelSize) {
+  public CrawlerService(@Value("${crawler-settings.parallel-size}") int parallelSize) {
 
     threadPoolExecutor = new CrawlerThreadPoolExecutor(parallelSize, parallelSize * 2, 0L,
         TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(parallelSize * 2));
