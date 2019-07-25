@@ -11,14 +11,11 @@ public class Application {
 
   /**
    * The entry main method.
-   * 
+   *
    * @param args the arguments
    * @throws Exception if any error occurs
    */
   public static void main(String[] args) {
-    
-    boolean server = false;
-    
-    new SpringApplicationBuilder(Application.class).web(server).run(args);
+    new SpringApplicationBuilder(Application.class).web(false).run(args);
   }
 }
