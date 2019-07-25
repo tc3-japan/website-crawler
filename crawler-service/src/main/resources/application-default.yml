@@ -37,7 +37,7 @@ cors:
   allowed-origins: "*"
   allowed-methods: HEAD,GET,PUT,POST,DELETE
 
-application-settings:
+crawler-settings:
   #Interval between each subsequent request (milliseconds)
   interval: 1000
 

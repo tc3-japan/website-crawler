@@ -6,7 +6,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = {FlywayAutoConfiguration.class})
-@ComponentScan({"com.topcoder.productsearch.crawler"})
+@ComponentScan({"com.topcoder.productsearch.common", "com.topcoder.productsearch.crawler", "com.topcoder.productsearch.converter"})
 public class Application {
 
   /**

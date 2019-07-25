@@ -1,4 +1,4 @@
-package com.topcoder.productsearch.crawler.util;
+package com.topcoder.productsearch.common.util;
 
 import com.topcoder.productsearch.common.entity.WebSite;
 
@@ -43,6 +43,7 @@ public class Common {
    * @return the updated url
    */
   public static String normalize(String url) {
+    // TODO: The site-specific code
     String[] parts = url.split("&");
     return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
   }

@@ -20,8 +20,10 @@ CREATE TABLE `pages`  (
   `body`              longtext NULL,
   `etag`              varchar(256) NULL,
   `last_modified`     varchar(256) NULL DEFAULT 'CURRENT_TIMESTAMP',
-  `created_at`        datetime NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_modified_at`  datetime NULL,
+  `created_at`        datetime NOT NULL,
+  `last_modified_at`  datetime NOT NULL,
+  `last_processed_at` datetime NULL,
+  `deleted`           tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
@@ -69,13 +71,20 @@ ALTER TABLE `pages`
   FOREIGN KEY(`site_id`)
   REFERENCES `web_sites`(`id`)
   ON DELETE NO ACTION ;
-  
+
+CREATE INDEX `idx_destination_urls_pageid` USING BTREE 
+  ON `destination_urls`(`page_id`);
+
 CREATE INDEX `idx_pages_siteid_type_lastmodifiedat` USING BTREE 
   ON `pages`(`site_id`, `type`, `last_modified_at` DESC);
 
 CREATE UNIQUE INDEX `idx_pages_url` USING BTREE 
   ON `pages`(`url`);
 
+CREATE INDEX `idx_source_urls_pageid` USING BTREE 
+  ON `source_urls`(`page_id`);
+
 CREATE INDEX `idx_web_sites_name` USING BTREE 
   ON `web_sites`(`name`);
+
 
