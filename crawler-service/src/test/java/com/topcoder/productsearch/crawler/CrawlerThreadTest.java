@@ -11,9 +11,9 @@ import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
-import com.topcoder.productsearch.common.util.DomHelper;
-import com.topcoder.productsearch.crawler.service.CrawlerService;
 
+
+import com.topcoder.productsearch.common.util.DomHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +66,8 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   private WebSite webSite = createWebSite();
   private CPage cPage = createPage();
   private CrawlerTask task = createTask();
-  private WebRequest matchedUrl = new WebRequest(new URL("https://www.uniqlo.com/us/en/boys-jersey-easy-shorts-416524.html?dwvar_416524_color=COL57&cgid=boys-pants-shorts"));
+  private WebRequest matchedUrl = new WebRequest(new URL("https://www.uniqlo.com/us/en/boys-jersey-easy-" +
+      "shorts-416524.html?dwvar_416524_color=COL57&cgid=boys-pants-shorts"));
   private WebRequest rootURL = new WebRequest(new URL(webSite.getUrl()));
 
 
@@ -88,7 +89,8 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.setTaskInterval(0);
     crawlerThread.setMaxDepth(2);
     crawlerThread.setCrawlerTask(task);
-    crawlerThread.setTimeout(60 * 1000);
+    crawlerThread.setTimeout(600 * 1000);
+    task.setStartTime(System.currentTimeMillis());
     crawlerThread.setRetryTimes(1);
     crawlerThread.init();
     crawlerThread.setWebClient(webClient);
@@ -171,6 +173,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(webResponse.getStatusCode()).thenReturn(305);
     when(webResponse.getResponseHeaderValue("Location")).thenReturn("http://test.com");
     crawlerThread.getExpandUrl().clear();
+    crawlerThread.getCrawlerTask().setStartTime(System.currentTimeMillis());
     crawlerThread.download(rootURL);
     assertEquals(crawlerThread.getExpandUrl().size(), 1);
   }
@@ -187,5 +190,11 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(webResponse.getStatusCode()).thenReturn(500);
     crawlerThread.download(rootURL);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
+  }
+
+  @Test
+  public void testTimeout() {
+    crawlerThread.getCrawlerTask().setStartTime(0L);
+    crawlerThread.download(rootURL);
   }
 }

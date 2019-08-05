@@ -112,6 +112,9 @@ public class CrawlerService {
    * @param webSite the website
    */
   public void crawler(WebSite webSite) {
+    // set timeout for each thread
+    threadPoolExecutor.setKeepAliveTime((long) (timeout * 60 * 1000),TimeUnit.MILLISECONDS);
+
     CrawlerTask crawlerTask = new CrawlerTask(webSite.getUrl(), webSite); // root page
     pushTask(crawlerTask);
     checkTask();

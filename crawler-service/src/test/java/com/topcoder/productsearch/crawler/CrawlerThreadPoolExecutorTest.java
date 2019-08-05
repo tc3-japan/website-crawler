@@ -40,10 +40,12 @@ public class CrawlerThreadPoolExecutorTest {
 
     threadPoolExecutor.execute(thread);
     assertEquals(threadPoolExecutor.getRunningCount(), Integer.valueOf(1));
-    assertTrue(threadPoolExecutor.getAllCostTime(1) > 0);
-    threadPoolExecutor.setExecutedHandler(runnable -> assertEquals(threadPoolExecutor.getRunningCount(), Integer.valueOf(0)));
+    assertEquals(0, threadPoolExecutor.getAllCostTime(1));
+    threadPoolExecutor.setExecutedHandler(runnable -> assertEquals(threadPoolExecutor.getRunningCount(),
+        Integer.valueOf(0)));
     try {
       sleep(20);
+
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
