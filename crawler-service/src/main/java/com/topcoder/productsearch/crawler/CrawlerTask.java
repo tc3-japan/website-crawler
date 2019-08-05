@@ -28,7 +28,7 @@ public class CrawlerTask {
   /**
    * task startTime
    */
-  private Long startTime = System.currentTimeMillis();
+  private Long startTime = -1L;
 
   /**
    * the full url

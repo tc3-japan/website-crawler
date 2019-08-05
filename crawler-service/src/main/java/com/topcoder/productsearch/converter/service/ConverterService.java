@@ -1,19 +1,55 @@
 package com.topcoder.productsearch.converter.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.topcoder.productsearch.cleaner.service.CleanerService;
+import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.converter.ConvertThread;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * the converter service
+ */
 @Service
+@Setter
 public class ConverterService {
 
+
   /**
-   * the logger instance
+   * the page repository
    */
-  private static final Logger logger = LoggerFactory.getLogger(ConverterService.class);
+  @Autowired
+  private PageRepository pageRepository;
 
-  public ConverterService() {
-    logger.debug("Cjust debugging.");
+  /**
+   * the parallel/page size
+   */
+  @Value("${crawler-settings.parallel-size}")
+  private int parallelSize;
+
+  /**
+   * the solr service
+   */
+  @Autowired
+  SolrService solrService;
+
+  /**
+   * the cleaner service
+   */
+  @Autowired
+  CleanerService cleanerService;
+
+
+  /**
+   * convert page into solr
+   *
+   * @param webSiteId the website id
+   * @throws InterruptedException when thread interrupted
+   */
+  public void convert(Integer webSiteId) throws InterruptedException {
+    Common.readAndProcessPage(webSiteId, parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
+        threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService)));
   }
-
 }
