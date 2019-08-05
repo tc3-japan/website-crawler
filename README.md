@@ -15,8 +15,8 @@
    ```bash
    cd crawler-database
    docker-compose up
-```
-   
+   ```
+
  2. Edit database settings on src/main/resources/application-default.yml
     ```yaml
     spring:
@@ -36,34 +36,32 @@
     crawler-settings:
       solr-uri: http://localhost:8983/solr/manufacturer_product
     ```
-    
-    
-    
+ 
     NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
-    
+ 
 1. Migrate the database
     ```bash
     ./gradlew flywayMigrate
     ```
-    
+ 
 2. Building with Gradle, in project root:
     ```bash
     ./gradlew build
     ```
     
        after build, you can found bug report in *./⁨crawler-service⁩/build⁩/⁨reports⁩/⁨spotbugs⁩/index.html*
-    
+ 
 3. To Run Test case, in project root:
     ```bash
     ./gradlew clean test jacocoTestReport
     ```
     after test, you can found report in *./crawler-service/build/jacoco/index.html*
-    
+
 4. To Run the website-crawler, in project root:
     ```bash
     ./gradlew bootRun -Pargs=--site=1,--proc=crawler
     ```
-    
+
 5. Download and Run the Docker Image for pre-configured Solr Core:
   
 		1. Download the Solr docker image.
