@@ -55,3 +55,12 @@ crawler-settings:
 
   #Max depth that will be allowed to crawl for a site
   max-depth: 3
+
+converter-settings:
+  # Solr Client settings
+  solr:
+    base-url: "http://localhost:8983/solr"
+  # Converter processing batch size: number of pages to read from the database in one batch
+  batch-size: 500
+  # Number of days since last modified for a page to be considered expired.
+  time-lapse-period-in-days: 365

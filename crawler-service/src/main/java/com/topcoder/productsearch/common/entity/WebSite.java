@@ -49,4 +49,11 @@ public class WebSite {
   @Column(name = "last_modified_at")
   private Date lastModifiedAt;
 
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "last_processed_at")
+  private Date lastProcessedAt;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "last_cleaned_up_at")
+  private Date lastCleanedUpAt;
 }

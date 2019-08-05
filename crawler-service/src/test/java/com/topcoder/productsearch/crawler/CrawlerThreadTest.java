@@ -1,6 +1,16 @@
 package com.topcoder.productsearch.crawler;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.isNotNull;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -12,8 +22,11 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
 import com.topcoder.productsearch.common.util.DomHelper;
-import com.topcoder.productsearch.crawler.service.CrawlerService;
-
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,14 +34,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * unit test for crawler thread
@@ -187,5 +192,22 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(webResponse.getStatusCode()).thenReturn(500);
     crawlerThread.download(rootURL);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
+  }
+
+  @Test
+  public void test404() {
+    crawlerThread.getExpandUrl().clear();
+    when(webResponse.getStatusCode()).thenReturn(404);
+    crawlerThread.setRetryTimes(1);
+    task.setUrl(matchedUrl.getUrl().toString());
+    when(pageRepository.findByUrl(matchedUrl.getUrl().toString()))
+        .thenReturn(cPage);
+
+    crawlerThread.download(matchedUrl);
+
+    assertEquals(crawlerThread.getExpandUrl().size(), 0);
+    assertTrue(cPage.isDeleted());
+    assertNotNull(cPage.getLastModifiedAt());
+    verify(pageRepository, times(1)).save(cPage);
   }
 }

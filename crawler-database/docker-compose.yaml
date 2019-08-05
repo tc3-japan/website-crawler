@@ -9,4 +9,9 @@ services:
       MYSQL_DATABASE: website_crawler
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: mypassword
-
+  solr:
+    image: gigops/solr-productsearch:8.1.1-challenge
+    ports:
+      - 8983:8983
+    working_dir: "/opt/solr-8.1.1"
+    command: ["bin/solr", "-f", "-force"]

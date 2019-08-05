@@ -65,6 +65,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
     implementation 'mysql:mysql-connector-java:8.0.13'
     compile("net.sourceforge.htmlunit:htmlunit:2.33")
+    compile("org.apache.solr:solr-solrj:8.1.0")
+    compile("commons-codec:commons-codec:1.13")
 
     implementation 'org.flywaydb:flyway-core:5.1.4'
     // compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
@@ -105,6 +107,7 @@ def applicationConfig = new org.yaml.snakeyaml.Yaml().load(("crawler-service/src
 lombok {
     version = '1.18.8'
 }
+lombok.config['lombok.log.fieldname'] = 'logger'
 
 tasks.withType(com.github.spotbugs.SpotBugsTask) {
     excludeFilter = file('../config/spotbugs/spotbugs-exclude.xml')

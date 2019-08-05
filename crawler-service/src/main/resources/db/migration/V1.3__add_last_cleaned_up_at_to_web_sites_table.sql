@@ -1,0 +1,1 @@
+alter table `web_sites` add column `last_cleaned_up_at` datetime null;

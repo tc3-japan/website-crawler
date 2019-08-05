@@ -50,4 +50,11 @@ public class CPage {
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "last_modified_at")
   private Date lastModifiedAt;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "last_processed_at")
+  private Date lastProcessedAt;
+
+  @Column(name = "deleted")
+  private boolean deleted;
 }

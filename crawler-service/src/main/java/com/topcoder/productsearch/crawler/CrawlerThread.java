@@ -104,7 +104,8 @@ public class CrawlerThread implements Runnable {
    * init thread
    */
   public void init() {
-    webClient = new WebClient(new BrowserVersion.BrowserVersionBuilder(BrowserVersion.CHROME).build());
+    webClient = new WebClient(
+        new BrowserVersion.BrowserVersionBuilder(BrowserVersion.CHROME).build());
     webClient.getOptions().setJavaScriptEnabled(false);
     webClient.getOptions().setThrowExceptionOnScriptError(false);
     webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
@@ -116,7 +117,8 @@ public class CrawlerThread implements Runnable {
 
     if (SpringTool.getApplicationContext() != null) {
       pageRepository = SpringTool.getApplicationContext().getBean(PageRepository.class);
-      destinationURLRepository = SpringTool.getApplicationContext().getBean(DestinationURLRepository.class);
+      destinationURLRepository = SpringTool.getApplicationContext()
+          .getBean(DestinationURLRepository.class);
     }
     domHelper = new DomHelper();
     expandUrl = new HashSet<>();
@@ -156,13 +158,17 @@ public class CrawlerThread implements Runnable {
    *
    * @param page the html page
    */
-  private void handlingPage(HtmlPage page) {
+  private void handlingPage(HtmlPage page, boolean notFound) {
 
     Integer pageId = null;
     if (Common.isMatch(crawlerTask.getSite(), crawlerTask.getUrl())) {
       CPage dbPage = pageRepository.findByUrl(crawlerTask.getUrl());
 
       if (dbPage == null) {
+        if (notFound) {
+          // Do not create if page was not found on the server.
+          return;
+        }
         dbPage = new CPage();
         dbPage.setCreatedAt(Date.from(Instant.now()));
       }
@@ -171,58 +177,61 @@ public class CrawlerThread implements Runnable {
       dbPage.setUrl(crawlerTask.getUrl());
       dbPage.setSiteId(crawlerTask.getSite().getId());
       dbPage.setType("product");
-      dbPage.setTitle(page.getTitleText());
-      dbPage.setBody(page.getBody().asXml());
-      dbPage.setEtag(page.getWebResponse().getResponseHeaderValue("ETag"));
-      dbPage.setLastModified(page.getWebResponse().getResponseHeaderValue("Last-Modified"));
+      if (!notFound) {
+        dbPage.setTitle(page.getTitleText());
+        dbPage.setBody(page.getBody().asXml());
+        dbPage.setEtag(page.getWebResponse().getResponseHeaderValue("ETag"));
+        dbPage.setLastModified(page.getWebResponse().getResponseHeaderValue("Last-Modified"));
+      }
+      dbPage.setDeleted(notFound);
       pageRepository.save(dbPage);
 
       pageId = dbPage.getId();
       logger.info("saved page = " + pageId + ", url = " + crawlerTask.getUrl());
     }
+    if (!notFound) {
+      // find all links
+      Integer finalPageId = pageId;
+      List<String> urls = domHelper.findAllUrls(page);
+      urls.forEach(url -> {
+        String homeUrl = crawlerTask.getSite().getUrl();
 
-    // find all links
-    Integer finalPageId = pageId;
-    List<String> urls = domHelper.findAllUrls(page);
-    urls.forEach(url -> {
-      String homeUrl = crawlerTask.getSite().getUrl();
+        if (url.startsWith("http") && !url.contains(crawlerTask.getSite().getUrl())) {
+          // Filter out external URLs
+          return;
+        }
 
-      if (url.startsWith("http") && !url.contains(crawlerTask.getSite().getUrl())) {
-        // Filter out external URLs
-        return;
-      }
+        if (!url.startsWith("/") && !url.contains(crawlerTask.getSite().getUrl())) {
+          return;
+        }
 
-      if (!url.startsWith("/") && !url.contains(crawlerTask.getSite().getUrl())) {
-        return;
-      }
+        if (url.startsWith("/")) { // relative url
+          String[] part1s = homeUrl.split("//");
+          String[] part2s = part1s[1].split("/");
+          url = part1s[0] + "//" + part2s[0] + url;
+        }
+        url = Common.removeHashFromURL(url);
 
-      if (url.startsWith("/")) { // relative url
-        String[] part1s = homeUrl.split("//");
-        String[] part2s = part1s[1].split("/");
-        url = part1s[0] + "//" + part2s[0] + url;
-      }
-      url = Common.removeHashFromURL(url);
-
-
-      if (finalPageId != null) {
-        DestinationURL destinationURL = destinationURLRepository.findByUrl(url);
-        // this page may already have been processed from a previous thread during the execution and should be skipped.
-        if (destinationURL != null) {
-          destinationURL.setLastModifiedAt(Date.from(Instant.now()));
-          destinationURL.setPageId(finalPageId);
-          destinationURLRepository.save(destinationURL);
+        if (finalPageId != null) {
+          DestinationURL destinationURL = destinationURLRepository.findByUrl(url);
+          // this page may already have been processed from a previous thread during the execution and should be skipped.
+          if (destinationURL != null) {
+            destinationURL.setLastModifiedAt(Date.from(Instant.now()));
+            destinationURL.setPageId(finalPageId);
+            destinationURLRepository.save(destinationURL);
+          } else {
+            destinationURL = new DestinationURL();
+            destinationURL.setCreatedAt(Date.from(Instant.now()));
+            destinationURL.setUrl(url);
+            destinationURL.setPageId(finalPageId);
+            destinationURLRepository.save(destinationURL);
+            enqueue(url);
+          }
         } else {
-          destinationURL = new DestinationURL();
-          destinationURL.setCreatedAt(Date.from(Instant.now()));
-          destinationURL.setUrl(url);
-          destinationURL.setPageId(finalPageId);
-          destinationURLRepository.save(destinationURL);
           enqueue(url);
         }
-      } else {
-        enqueue(url);
-      }
-    });
+      });
+    }
   }
 
   /**
@@ -271,7 +280,6 @@ public class CrawlerThread implements Runnable {
 
       logger.info("start download page = " + url);
 
-
       HtmlPage page = webClient.getPage(request);
       int code = page.getWebResponse().getStatusCode();
 
@@ -280,7 +288,7 @@ public class CrawlerThread implements Runnable {
       }
 
       if (code <= 204) { // think download successful
-        handlingPage(page);
+        handlingPage(page, false);
       } else if (code == 304) {
         // When getting 304 response (Not Modified), skip further processing for this page, and output a log
         logger.info("got 304 for url = " + url + ", so skip this url");
@@ -288,8 +296,13 @@ public class CrawlerThread implements Runnable {
         // When getting some 30x response and "Location" header,  enqueue a new request for the URL in Location header
         expandUrl.add(page.getWebResponse().getResponseHeaderValue("Location"));
       } else if (code >= 400 && code < 500) {
-        logger.error("unexpected status code = " + code);
-        logger.error(page.getTitleText());
+        if (code == 404) {
+          logger.error("Page not found: {}", url);
+          handlingPage(page, true);
+        } else {
+          logger.error("unexpected status code = " + code);
+          logger.error(page.getTitleText());
+        }
       } else if (code >= 500) {
         throw new Exception(url + " got 500 error");
       }
@@ -299,4 +312,5 @@ public class CrawlerThread implements Runnable {
       this.retry(request);
     }
   }
+
 }
