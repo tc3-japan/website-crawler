@@ -20,10 +20,10 @@ CREATE TABLE `pages`  (
   `body`              longtext NULL,
   `etag`              varchar(256) NULL,
   `last_modified`     varchar(256) NULL DEFAULT 'CURRENT_TIMESTAMP',
-  `created_at`        datetime NOT NULL,
-  `last_modified_at`  datetime NOT NULL,
+  `created_at`        datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_modified_at`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_processed_at` datetime NULL,
-  `deleted`           tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  `deleted`           tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB

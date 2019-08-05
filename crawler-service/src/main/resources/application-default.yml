@@ -55,3 +55,9 @@ crawler-settings:
 
   #Max depth that will be allowed to crawl for a site
   max-depth: 3
+
+  # the convert solr uri
+  solr-uri: http://localhost:8983/solr/manufacturer_product
+
+  #Time lapse period for Expired pages in number of Days.
+  page-expired-period: 30
