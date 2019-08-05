@@ -103,7 +103,7 @@ public class CrawlerThreadPoolExecutor extends ThreadPoolExecutor {
   public long getAllCostTime(Integer siteId) {
     return runningList.stream()
         .map(thread -> (CrawlerThread) thread)
-        .filter(t -> t.getCrawlerTask().getSite().getId().equals(siteId))
+        .filter(t -> t.getCrawlerTask().getSite().getId().equals(siteId) && t.getCrawlerTask().getStartTime() > 0)
         .mapToLong(t -> (System.currentTimeMillis() - t.getCrawlerTask().getStartTime()))
         .sum();
   }
