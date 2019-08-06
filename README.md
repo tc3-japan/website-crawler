@@ -50,6 +50,10 @@
 		
 		4. Execute the default query (q field = *:*) and in the response numFound will have a value = 835.  That is 835 records exists in the Solr Index. 
 
+3.  In the base code (from challenges 1 and 2) we have created api/controller sub directories for a SampleController.java class which maybe used.  A corresponding Unit Test class in the test directory was also added.  
+
+4.  Please use the API defined in OpenAPI 3.0 Swaggerhub as linked in the Design specs for the requirements. 
+
 
 ## Code formatting
 We use (google code style)[https://google.github.io/styleguide/javaguide.html].  
