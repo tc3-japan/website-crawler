@@ -87,6 +87,10 @@ public class ProcessLauncher implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) throws Exception {
     // parameters
+    if (args.containsOption("rest")) {
+      return;
+    }
+    
     List<String> procs = args.getOptionValues("proc");
     if (procs == null || procs.isEmpty() || "converter".equalsIgnoreCase(procs.get(0))) {
       WebSite site = getSite(args);

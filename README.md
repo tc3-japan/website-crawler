@@ -12,14 +12,13 @@
 
 ## Quick Start
 
-
 1. To start the mySql server in Docker:
    ```bash
    cd crawler-database
    docker-compose up
    ```
 
- 2. Edit database settings on src/main/resources/application-default.yml
+1. Edit database settings on src/main/resources/application-default.yml
     ```yaml
     spring:
       datasource:
@@ -41,33 +40,33 @@
  
     NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
  
-3. Migrate the database
+1. Migrate the database
     ```bash
     ./gradlew flywayMigrate
     ```
  
-4. Building with Gradle, in project root:
+1. Building with Gradle, in project root:
     ```bash
     ./gradlew build
     ```
     
        after build, you can found bug report in *./⁨crawler-service⁩/build⁩/⁨reports⁩/⁨spotbugs⁩/index.html*
  
-5. To Run Test case, in project root:
+1. To Run Test case, in project root:
     ```bash
     ./gradlew clean test jacocoTestReport
     ```
     after test, you can found report in *./crawler-service/build/jacoco/index.html*
 
-6. To Run the website-crawler, in project root:
+1. To Run the website-crawler, in project root:
     ```bash
     ./gradlew bootRun -Pargs=--site=1,--proc=crawler
     ```
 
-7. Download and Run the Docker Image for pre-configured Solr Core with Test Data:
+1. Download and Run the Docker Image for pre-configured Solr Core with Test Data:
   
 		1. Download the Solr docker image.
-		docker pull azh4r/solr-productsearch-test_data:8.1.1
+		    docker pull azh4r/solr-productsearch-test_data:8.1.1
 		
 		2. Run the Docker container. 
 			docker run -d -t --name tc3 -p 0.0.0.0:8983:8983 azh4r/solr-productsearch-test_data:8.1.1
@@ -78,9 +77,7 @@
 			cd opt/solr-8.1.1
 			bin/solr start -force
 		
-		Now Solr is running in docker image mapped to port 8983 on your host.	
-	
-	
+		Now Solr is running in docker image mapped to port 8983 on your host.
 	
 	To verify the Solr core:
 	
@@ -92,9 +89,14 @@
 		
 		4. Execute the default query (q field = *:*) and in the response numFound will have a value = 835.  That is 835 records exists in the Solr Index. 
 
-8.  In the base code (from challenges 1 and 2) we have created api/controller sub directories for a SampleController.java class which maybe used.  A corresponding Unit Test class in the test directory was also added.  
+1.  To Run the API service, in project root:
+    ```bash
+    ./gradlew bootRun -Pargs=--rest
+    ``` 
 
-9.  Please use the API defined in OpenAPI 3.0 Swaggerhub as linked in the Design specs for the requirements. 
+    The service is running at http://localhost:8090/api/
+    The example endpoint:
+    > http://localhost:8090/api/websites/1
 
 
 ## Code formatting

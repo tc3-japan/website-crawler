@@ -1,6 +1,3 @@
-server.port: 8090
-server.servlet.context-path: /api
-
 debug: false
 logging.level:
   root: INFO
@@ -28,6 +25,8 @@ management:
         health: healthcheck
 
 server:
+  port: 8090
+  servlet-path: /api
   compression:
     enabled: true
     mime-types: application/json

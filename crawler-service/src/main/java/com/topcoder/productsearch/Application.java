@@ -7,10 +7,12 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = {FlywayAutoConfiguration.class, SolrAutoConfiguration.class})
-@ComponentScan({"com.topcoder.productsearch.common",
-    "com.topcoder.productsearch.crawler",
-    "com.topcoder.productsearch.converter",
-    "com.topcoder.productsearch.cleaner"})
+@ComponentScan({
+  "com.topcoder.productsearch.api",
+  "com.topcoder.productsearch.common",
+  "com.topcoder.productsearch.crawler",
+  "com.topcoder.productsearch.converter",
+  "com.topcoder.productsearch.cleaner"})
 public class Application {
 
   /**
@@ -20,6 +22,14 @@ public class Application {
    * @throws Exception if any error occurs
    */
   public static void main(String[] args) {
-    new SpringApplicationBuilder(Application.class).web(false).run(args);
+    
+    boolean isRestMode = false;
+    for (String arg : args) {
+      if ("--rest".equalsIgnoreCase(arg)) {
+        isRestMode = true;
+      }
+    }
+
+    new SpringApplicationBuilder(Application.class).web(isRestMode).run(args);
   }
 }
