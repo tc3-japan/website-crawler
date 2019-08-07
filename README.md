@@ -1,8 +1,9 @@
 
-# Solr-API 
+# Website-Crawler & Solr-API 
 
 ## Requirements
 * JDK 8
+* MySQL server `8` or higher. Or use latest version as in docker image.
 * Gradle 5.5
 * Spring Boot 1.5.7.RELEASE
 * Docker 18
@@ -12,8 +13,25 @@
 ## Quick Start
 
 
- 1. Edit database settings on src/main/resources/application-default.yml
- 
+1. To start the mySql server in Docker:
+   ```bash
+   cd crawler-database
+   docker-compose up
+   ```
+
+ 2. Edit database settings on src/main/resources/application-default.yml
+    ```yaml
+    spring:
+      datasource:
+        url: jdbc:mysql://{mysql server host}:{port}/website_crawler?useSSL=false
+        username: {username}
+        password: {password}
+    ```
+    
+    The username and password are in the docker-compose.yml file in the 'crawler-database' sub project.
+    
+    
+
     you can update solr-uri if you need
     
     ```
@@ -21,8 +39,32 @@
       solr-uri: http://localhost:8983/solr/manufacturer_product
     ```
  
+    NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
+ 
+3. Migrate the database
+    ```bash
+    ./gradlew flywayMigrate
+    ```
+ 
+4. Building with Gradle, in project root:
+    ```bash
+    ./gradlew build
+    ```
+    
+       after build, you can found bug report in *./⁨crawler-service⁩/build⁩/⁨reports⁩/⁨spotbugs⁩/index.html*
+ 
+5. To Run Test case, in project root:
+    ```bash
+    ./gradlew clean test jacocoTestReport
+    ```
+    after test, you can found report in *./crawler-service/build/jacoco/index.html*
 
-2. Download and Run the Docker Image for pre-configured Solr Core with Test Data:
+6. To Run the website-crawler, in project root:
+    ```bash
+    ./gradlew bootRun -Pargs=--site=1,--proc=crawler
+    ```
+
+7. Download and Run the Docker Image for pre-configured Solr Core with Test Data:
   
 		1. Download the Solr docker image.
 		docker pull azh4r/solr-productsearch-test_data:8.1.1
@@ -50,9 +92,9 @@
 		
 		4. Execute the default query (q field = *:*) and in the response numFound will have a value = 835.  That is 835 records exists in the Solr Index. 
 
-3.  In the base code (from challenges 1 and 2) we have created api/controller sub directories for a SampleController.java class which maybe used.  A corresponding Unit Test class in the test directory was also added.  
+8.  In the base code (from challenges 1 and 2) we have created api/controller sub directories for a SampleController.java class which maybe used.  A corresponding Unit Test class in the test directory was also added.  
 
-4.  Please use the API defined in OpenAPI 3.0 Swaggerhub as linked in the Design specs for the requirements. 
+9.  Please use the API defined in OpenAPI 3.0 Swaggerhub as linked in the Design specs for the requirements. 
 
 
 ## Code formatting
@@ -65,3 +107,15 @@ You should remove all potential bugs or flaws found by Spot Bugs.
 
 ## Unit Test
 Unit test is integrated in the build process
+
+## Verifcation starting from web-crawler to converter.  
+
+Following is not necessarily needed for challenge#3 F2F, but is here as a reference if the developer needs to reproduce the data.
+
+1. startup solr service first
+2. run `./gradlew bootRun -Pargs=--site=1,--proc=crawler` to fetch some page data ( need few mins to fetch data and almost need 2 hours to finish) , you can exit crawler when got data to test converter process
+3. use `./gradlew bootRun -Pargs=--proc=converter,--site=1`  to run converter process
+   - after run, check the solr(Select manufacturer_product Core from the drop down Menu on the LHS Navigation menu, and then click **Query**, click "**Execute Query**")
+   - update deleted to 1 in pages table, then run this again and check the solr service
+   - update some last_modified_at in pages table to 2018-10-10, then run this again and check the solr service
+4. update pages table last_modified_at value, then use `./gradlew bootRun -Pargs=--proc=converter,--only-data-cleanup,--site=1` to run cleanup process independently
