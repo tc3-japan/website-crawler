@@ -95,8 +95,9 @@
     ``` 
 
     The service is running at http://localhost:8090/api/
+
     The example endpoint:
-    > http://localhost:8090/api/websites/1
+    http://localhost:8090/api/websites/1
 
 
 ## Code formatting
