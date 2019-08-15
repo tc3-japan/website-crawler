@@ -1,6 +1,8 @@
 package com.topcoder.productsearch.converter.service;
 
 import com.topcoder.productsearch.AbstractUnitTest;
+import com.topcoder.productsearch.api.models.ProductSearchRequest;
+import com.topcoder.productsearch.api.models.SolrProduct;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -18,6 +20,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -100,5 +106,46 @@ public class SolrServiceTest extends AbstractUnitTest {
     solrService.createOrUpdate(cPage);
     verify(httpSolrClient, times(2)).add(any(SolrInputDocument.class));
     verify(httpSolrClient, times(2)).commit();
+  }
+
+  @Test
+  public void testSearchProduct() throws IOException, SolrServerException {
+
+    ProductSearchRequest request = new ProductSearchRequest();
+    List<String> query = new LinkedList<>();
+    query.add("women");
+    query.add("leg");
+    request.setQuery(query);
+    when(solrDocumentList.size()).thenReturn(10);
+    when(solrDocumentList.get(any(Integer.class))).thenReturn(solrDocument);
+    when(solrDocument.get("id")).thenReturn("id");
+    when(solrDocument.getFieldValue("page_updated_at")).thenReturn(Date.from(Instant.now()));
+    when(solrDocument.get("manufacturer_name")).thenReturn("manufacturer_name");
+    when(solrDocument.get("score")).thenReturn("1.23");
+    when(solrDocument.get("product_url")).thenReturn("product_url");
+    List<SolrProduct> solrProducts = solrService.searchProduct(request);
+
+    verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
+    assertEquals(10, solrProducts.size());
+  }
+
+
+  @Test
+  public void testSearchProductEmpty() throws IOException, SolrServerException {
+    ProductSearchRequest request = new ProductSearchRequest();
+    when(solrDocumentList.size()).thenReturn(0);
+    List<SolrProduct> solrProducts = solrService.searchProduct(request);
+    verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
+    assertEquals(0, solrProducts.size());
+  }
+
+  @Test
+  public void testSearchProductEmpty02() throws IOException, SolrServerException {
+    ProductSearchRequest request = new ProductSearchRequest();
+    request.setQuery(new LinkedList<>());
+    when(solrDocumentList.size()).thenReturn(0);
+    List<SolrProduct> solrProducts = solrService.searchProduct(request);
+    verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
+    assertEquals(0, solrProducts.size());
   }
 }

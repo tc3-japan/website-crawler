@@ -1,5 +1,7 @@
 package com.topcoder.productsearch.converter.service;
 
+import com.topcoder.productsearch.api.models.ProductSearchRequest;
+import com.topcoder.productsearch.api.models.SolrProduct;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
@@ -10,7 +12,10 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,9 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * the solr service
@@ -27,6 +35,11 @@ import java.util.Date;
 @Getter
 public class SolrService {
 
+
+  /**
+   * the logger
+   */
+  private static final Logger logger = LoggerFactory.getLogger(SolrService.class);
 
   /**
    * the website repository
@@ -97,6 +110,48 @@ public class SolrService {
   }
 
   /**
+   * search product
+   *
+   * @param request the search request
+   * @return the list of product
+   */
+  public List<SolrProduct> searchProduct(ProductSearchRequest request) throws IOException, SolrServerException {
+    SolrQuery query = new SolrQuery();
+
+    logger.info("search product with params " + request.toString());
+    if (request.getQuery() != null && request.getQuery().size() > 0) {
+      String title = request.getQuery().stream().map(keyword -> "html_title:" + keyword)
+          .collect(Collectors.joining(" AND "));
+      String body = request.getQuery().stream().map(keyword -> "html_body:" + keyword)
+          .collect(Collectors.joining(" AND "));
+      String q = String.format("(%s) OR (%s)", title, body);
+      logger.info("search q = " + q);
+      query.set("q", q);
+    } else {
+      query.set("q", "*:*");
+    }
+    query.set("start", request.getStart());
+    query.set("rows", request.getRows());
+    query.set("fl", "id,manufacturer_name,product_url, page_updated_at,score");
+
+    QueryResponse response = httpSolrClient.query(query);
+    List<SolrProduct> products = new LinkedList<>();
+    for (int i = 0; i < response.getResults().size(); i++) {
+      SolrProduct solrProduct = new SolrProduct();
+      SolrDocument document = response.getResults().get(i);
+      solrProduct.setId(document.get("id").toString());
+      solrProduct.setLastModifiedAt((Date) document.getFieldValue("page_updated_at"));
+      solrProduct.setManufacturerName(document.get("manufacturer_name").toString());
+      solrProduct.setScore(Float.valueOf(document.get("score").toString()));
+      solrProduct.setUrl(document.get("product_url").toString());
+      products.add(solrProduct);
+    }
+    return products;
+
+  }
+
+
+  /**
    * convert page entity to solr input document
    *
    * @param page the page entity
@@ -120,6 +175,5 @@ public class SolrService {
     document.addField("page_updated_at", Date.from(Instant.now()));
     return document;
   }
-
 
 }
