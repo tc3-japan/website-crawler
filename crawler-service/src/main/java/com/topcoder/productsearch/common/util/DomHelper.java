@@ -1,4 +1,4 @@
-package com.topcoder.productsearch.crawler.util;
+package com.topcoder.productsearch.common.util;
 
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;

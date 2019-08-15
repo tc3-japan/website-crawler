@@ -16,7 +16,7 @@ import com.topcoder.productsearch.common.repository.WebSiteRepository;
 /**
  * Crawler Runner, entry for CLI App
  */
-@Component
+//@Component
 public class CrawlerRunner implements ApplicationRunner {
 
   /**

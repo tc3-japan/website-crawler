@@ -1,4 +1,4 @@
-package com.topcoder.productsearch.common.model;
+package com.topcoder.productsearch.crawler;
 
 import com.topcoder.productsearch.common.entity.WebSite;
 import lombok.AllArgsConstructor;
@@ -28,7 +28,7 @@ public class CrawlerTask {
   /**
    * task startTime
    */
-  private Long startTime = System.currentTimeMillis();
+  private Long startTime = -1L;
 
   /**
    * the full url

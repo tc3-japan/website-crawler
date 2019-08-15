@@ -1,6 +1,3 @@
-server.port: 8090
-server.servlet.context-path: /api
-
 debug: false
 logging.level:
   root: INFO
@@ -28,6 +25,8 @@ management:
         health: healthcheck
 
 server:
+  port: 8090
+  servlet-path: /api
   compression:
     enabled: true
     mime-types: application/json
@@ -37,7 +36,7 @@ cors:
   allowed-origins: "*"
   allowed-methods: HEAD,GET,PUT,POST,DELETE
 
-application-settings:
+crawler-settings:
   #Interval between each subsequent request (milliseconds)
   interval: 1000
 
@@ -55,3 +54,9 @@ application-settings:
 
   #Max depth that will be allowed to crawl for a site
   max-depth: 3
+
+  # the convert solr uri
+  solr-uri: http://localhost:8983/solr/manufacturer_product
+
+  #Time lapse period for Expired pages in number of Days.
+  page-expired-period: 30
