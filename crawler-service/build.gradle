@@ -63,8 +63,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-logging:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
+    compile group: 'org.apache.solr', name: 'solr-solrj', version: '8.2.0'
     implementation 'mysql:mysql-connector-java:8.0.13'
     compile("net.sourceforge.htmlunit:htmlunit:2.33")
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.12'
+
 
     implementation 'org.flywaydb:flyway-core:5.1.4'
     // compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'

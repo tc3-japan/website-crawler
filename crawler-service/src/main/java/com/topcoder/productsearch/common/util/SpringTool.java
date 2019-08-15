@@ -1,4 +1,4 @@
-package com.topcoder.productsearch.crawler.util;
+package com.topcoder.productsearch.common.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
