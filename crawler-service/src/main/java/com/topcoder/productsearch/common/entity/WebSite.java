@@ -49,4 +49,7 @@ public class WebSite {
   @Column(name = "last_modified_at")
   private Date lastModifiedAt;
 
+  @Column(name = "supports_robots_txt")
+  private Boolean supportsRobotsTxt;
+
 }

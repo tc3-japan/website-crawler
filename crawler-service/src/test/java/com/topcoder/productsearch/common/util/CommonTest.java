@@ -96,4 +96,10 @@ public class CommonTest {
       assertEquals(Integer.valueOf(1), cPage.getId());
     });
   }
+
+  @Test
+  public void testHasAccess() {
+    assertEquals(false, Common.isHasAccess("http://google.com/a.pdf"));
+    assertEquals(true, Common.isHasAccess("http://google.com/a/cpanel/a/a/b.html"));
+  }
 }

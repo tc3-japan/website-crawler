@@ -1,5 +1,6 @@
 package com.topcoder.productsearch.common.util;
 
+import com.panforge.robotstxt.RobotsTxt;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.PageRepository;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,6 +33,10 @@ public class Common {
    */
   private static final Logger logger = LoggerFactory.getLogger(Common.class);
 
+  /**
+   * the RobotsTxt instance
+   */
+  private static RobotsTxt robotsTxt = null;
 
   /**
    * remove hash from url
@@ -44,6 +50,27 @@ public class Common {
       return url.substring(0, lastHash);
     }
     return url;
+  }
+
+  /**
+   * check the url by robots.txt
+   *
+   * @param url the url string
+   * @return the result
+   */
+  public synchronized static Boolean isHasAccess(String url) {
+    if (robotsTxt == null) {
+      try {
+        InputStream inputStream = Common.class.getClassLoader().getResourceAsStream("robots.txt");
+        robotsTxt = RobotsTxt.read(inputStream);
+      } catch (IOException e) {
+        logger.error("read robots.txt failed, will return true for all robots check");
+        e.printStackTrace();
+        robotsTxt = null;
+        return true;
+      }
+    }
+    return robotsTxt.query(null, url);
   }
 
   /**
