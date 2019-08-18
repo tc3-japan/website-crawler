@@ -96,4 +96,12 @@ public class CommonTest {
       assertEquals(Integer.valueOf(1), cPage.getId());
     });
   }
+
+  @Test
+  public void testIsUnnecessary() {
+    assertEquals(true, Common.isUnnecessary("https://www.ikea.com/furniture-dealer.pdf"));
+    assertEquals(true, Common.isUnnecessary(null));
+    assertEquals(false, Common.isUnnecessary("/women/plants"));
+    assertEquals(false, Common.isUnnecessary("http://test.com/a.html"));
+  }
 }
