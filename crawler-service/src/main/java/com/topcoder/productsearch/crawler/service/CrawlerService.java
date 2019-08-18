@@ -93,7 +93,7 @@ public class CrawlerService {
           if (shouldVisit.getOrDefault(Common.normalize(url), Boolean.FALSE).equals(Boolean.TRUE)) {
             return;
           }
-          CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite());
+          CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite(), thread.getCrawlerTask().getUrl());
           task.setDepth(thread.getCrawlerTask().getDepth() + 1);
           pushTask(task);
         });
@@ -115,7 +115,7 @@ public class CrawlerService {
     // set timeout for each thread
     threadPoolExecutor.setKeepAliveTime((long) (timeout * 60 * 1000),TimeUnit.MILLISECONDS);
 
-    CrawlerTask crawlerTask = new CrawlerTask(webSite.getUrl(), webSite); // root page
+    CrawlerTask crawlerTask = new CrawlerTask(webSite.getUrl(), webSite, null); // root page
     pushTask(crawlerTask);
     checkTask();
   }

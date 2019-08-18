@@ -28,7 +28,7 @@ public abstract class AbstractUnitTest {
 
   protected CrawlerTask createTask() {
     WebSite webSite = createWebSite();
-    CrawlerTask task = new CrawlerTask(webSite.getUrl(), webSite);
+    CrawlerTask task = new CrawlerTask(webSite.getUrl(), webSite, null);
     return task;
   }
 
