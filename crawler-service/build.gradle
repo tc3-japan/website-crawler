@@ -64,6 +64,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
     compile group: 'org.apache.solr', name: 'solr-solrj', version: '8.2.0'
+    compile group: 'com.panforge', name: 'robots', version: '1.4.2'
     implementation 'mysql:mysql-connector-java:8.0.13'
     compile("net.sourceforge.htmlunit:htmlunit:2.33")
     compile group: 'commons-codec', name: 'commons-codec', version: '1.12'
