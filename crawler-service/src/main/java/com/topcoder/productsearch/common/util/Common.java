@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +68,28 @@ public class Common {
     // TODO: The site-specific code
     String[] parts = url.split("&");
     return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
+  }
+
+  /**
+   * check the url is unnecessary or not
+   * @param url the url
+   * @return  the result
+   */
+  public static boolean isUnnecessary(String url) {
+    if (url == null) {
+      return true;
+    }
+
+    String[] parts = url.split(Pattern.quote("."));
+    if (parts.length <= 1) {
+      return false;
+    }
+
+    String ext = parts[parts.length - 1];
+    if (ext.equalsIgnoreCase("pdf")) {
+      return true;
+    }
+    return false;
   }
 
 
