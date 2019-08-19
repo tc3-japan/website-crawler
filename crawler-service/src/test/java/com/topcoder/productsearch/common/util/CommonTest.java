@@ -99,7 +99,7 @@ public class CommonTest {
 
   @Test
   public void testHasAccess() {
-    assertEquals(false, Common.isHasAccess("http://google.com/a.pdf"));
-    assertEquals(true, Common.isHasAccess("http://google.com/a/cpanel/a/a/b.html"));
+    assertEquals(false, Common.hasAccess("http://google.com/a.pdf"));
+    assertEquals(true, Common.hasAccess("http://google.com/a/cpanel/a/a/b.html"));
   }
 }

@@ -58,7 +58,7 @@ public class Common {
    * @param url the url string
    * @return the result
    */
-  public synchronized static Boolean isHasAccess(String url) {
+  public synchronized static Boolean hasAccess(String url) {
     if (robotsTxt == null) {
       try {
         InputStream inputStream = Common.class.getClassLoader().getResourceAsStream("robots.txt");
