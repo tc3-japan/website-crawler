@@ -32,6 +32,12 @@ public class Common {
    */
   private static final Logger logger = LoggerFactory.getLogger(Common.class);
 
+  /**
+   * regex pattern to filter out the unnecessary link
+   */
+  private static final Pattern ignorePattern = Pattern
+      .compile("css|js|bmp|gif|jpe?g|png" +
+          "|tiff|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf|rm|smil|wmv|swf|wma|zip|rar|gz", Pattern.CASE_INSENSITIVE);
 
   /**
    * remove hash from url
@@ -86,7 +92,7 @@ public class Common {
     }
 
     String ext = parts[parts.length - 1];
-    if (ext.equalsIgnoreCase("pdf")) {
+    if (ignorePattern.matcher(ext).matches()) {
       return true;
     }
     return false;
