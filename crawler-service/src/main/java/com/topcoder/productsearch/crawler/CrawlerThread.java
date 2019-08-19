@@ -235,7 +235,7 @@ public class CrawlerThread implements Runnable {
       logger.info("skip " + url + " , because of reached max depth");
       return;
     }
-    if (crawlerTask.getSite().getSupportsRobotsTxt() && !Common.isHasAccess(url)) {
+    if (crawlerTask.getSite().getSupportsRobotsTxt() && !Common.hasAccess(url)) {
       logger.info("skip " + url + " , because of robots.txt disallow this");
     }
     expandUrl.add(url);
