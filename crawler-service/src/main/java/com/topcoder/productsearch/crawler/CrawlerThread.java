@@ -211,6 +211,10 @@ public class CrawlerThread implements Runnable {
       }
       url = Common.removeHashFromURL(url);
 
+      if (Common.isUnnecessary(url)) {
+        return;
+      }
+
       // Create records in the source_urls table with following data
       if (crawlerTask.getSourceUrl() != null && finalPageId != null) {
         SourceURL sourceURL = sourceURLRepository.findByUrlAndPageId(crawlerTask.getSourceUrl(), finalPageId);
@@ -224,6 +228,7 @@ public class CrawlerThread implements Runnable {
         }
         sourceURLRepository.save(sourceURL);
       }
+      
       if (finalPageId != null) {
         DestinationURL destinationURL = destinationURLRepository.findByUrl(url);
         // this page may already have been processed from a previous thread during the execution and should be skipped.
