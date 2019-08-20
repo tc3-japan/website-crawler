@@ -117,6 +117,10 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.download(rootURL);
     assertEquals(crawlerThread.getExpandUrl().size(), 2);
 
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("/a.pdf"));
+    crawlerThread.download(rootURL);
+    assertEquals(crawlerThread.getExpandUrl().size(), 2);
+
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
     crawlerThread.getExpandUrl().clear();
     task.setUrl(matchedUrl.getUrl().toString());
