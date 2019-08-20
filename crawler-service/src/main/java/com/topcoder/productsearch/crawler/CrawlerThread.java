@@ -203,6 +203,9 @@ public class CrawlerThread implements Runnable {
       }
       url = Common.removeHashFromURL(url);
 
+      if (Common.isUnnecessary(url)) {
+        return;
+      }
 
       if (finalPageId != null) {
         DestinationURL destinationURL = destinationURLRepository.findByUrl(url);
