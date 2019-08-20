@@ -102,4 +102,12 @@ public class CommonTest {
     assertEquals(false, Common.hasAccess("http://google.com/a.pdf"));
     assertEquals(true, Common.hasAccess("http://google.com/a/cpanel/a/a/b.html"));
   }
+  
+  @Test
+  public void testIsUnnecessary() {
+    assertEquals(true, Common.isUnnecessary("https://www.ikea.com/furniture-dealer.pdf"));
+    assertEquals(true, Common.isUnnecessary(null));
+    assertEquals(false, Common.isUnnecessary("/women/plants"));
+    assertEquals(false, Common.isUnnecessary("http://test.com/a.html"));
+  }
 }

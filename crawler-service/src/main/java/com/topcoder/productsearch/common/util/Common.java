@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +38,13 @@ public class Common {
    * the RobotsTxt instance
    */
   private static RobotsTxt robotsTxt = null;
+
+  /**
+   * regex pattern to filter out the unnecessary link
+   */
+  private static final Pattern ignorePattern = Pattern
+      .compile("css|js|bmp|gif|jpe?g|png" +
+          "|tiff|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf|rm|smil|wmv|swf|wma|zip|rar|gz", Pattern.CASE_INSENSITIVE);
 
   /**
    * remove hash from url
@@ -94,6 +102,28 @@ public class Common {
     // TODO: The site-specific code
     String[] parts = url.split("&");
     return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
+  }
+
+  /**
+   * check the url is unnecessary or not
+   * @param url the url
+   * @return  the result
+   */
+  public static boolean isUnnecessary(String url) {
+    if (url == null) {
+      return true;
+    }
+
+    String[] parts = url.split(Pattern.quote("."));
+    if (parts.length <= 1) {
+      return false;
+    }
+
+    String ext = parts[parts.length - 1];
+    if (ignorePattern.matcher(ext).matches()) {
+      return true;
+    }
+    return false;
   }
 
 
