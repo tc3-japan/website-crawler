@@ -144,7 +144,7 @@ jacocoTestReport {
     }
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: 'com/**/Application**')
+            fileTree(dir: it, exclude: ['com/**/Application**', 'com/panforge/robotstxt/**'])
         }))
     }
 }
