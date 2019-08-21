@@ -30,7 +30,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
   @Before
   public void init() {
     crawlerService = new CrawlerService(1);
-    crawlerService.setMaxDepth(2);
+    site.setCrawlMaxDepth(2);
     crawlerService.setMaxRetryTimes(2);
     crawlerService.setSiteTimeLimit(1.f);
     crawlerService.setTaskInterval(1000);
