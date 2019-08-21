@@ -40,9 +40,6 @@ crawler-settings:
   #Interval between each subsequent request (milliseconds)
   interval: 1000
 
-  #Time limit for crawling an entire single site (seconds)
-  time-limit: 300
-
   #task parallel size
   parallel-size: 12
 
