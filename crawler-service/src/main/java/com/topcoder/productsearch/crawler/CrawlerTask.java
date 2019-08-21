@@ -15,9 +15,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CrawlerTask {
 
-  public CrawlerTask(String url, WebSite site) {
+  public CrawlerTask(String url, WebSite site, String sourceUrl) {
     this.url = url;
     this.site = site;
+    this.sourceUrl = sourceUrl;
   }
 
   /**
@@ -39,4 +40,9 @@ public class CrawlerTask {
    * the site
    */
   private WebSite site;
+
+  /**
+   * the source url
+   */
+  private String sourceUrl;
 }

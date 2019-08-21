@@ -81,7 +81,7 @@ CREATE INDEX `idx_pages_siteid_type_lastmodifiedat` USING BTREE
 CREATE UNIQUE INDEX `idx_pages_url` USING BTREE 
   ON `pages`(`url`);
 
-CREATE INDEX `idx_source_urls_pageid` USING BTREE 
+CREATE INDEX `idx_source_urls_pageid` USING BTREE
   ON `source_urls`(`page_id`);
 
 CREATE INDEX `idx_web_sites_name` USING BTREE 

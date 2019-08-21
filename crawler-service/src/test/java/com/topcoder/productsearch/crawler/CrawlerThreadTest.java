@@ -8,11 +8,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.SourceURL;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
 
 
+import com.topcoder.productsearch.common.repository.SourceURLRepository;
 import com.topcoder.productsearch.common.util.DomHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +30,9 @@ import java.net.URL;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 /**
  * unit test for crawler thread
@@ -55,6 +59,9 @@ public class CrawlerThreadTest extends AbstractUnitTest {
 
   @Mock
   DestinationURLRepository destinationURLRepository;
+
+  @Mock
+  SourceURLRepository sourceURLRepository;
 
   @Mock
   DomHelper domHelper;
@@ -124,16 +131,24 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
     crawlerThread.getExpandUrl().clear();
     task.setUrl(matchedUrl.getUrl().toString());
+    task.setSourceUrl("http://test.com");
     when(pageRepository.findByUrl(matchedUrl.getUrl().toString())).thenReturn(cPage);
     when(destinationURLRepository.findByUrl(webSite.getUrl())).thenReturn(createDestinationURL());
+    when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(new SourceURL());
+    when(sourceURLRepository.save(any(SourceURL.class))).thenReturn(new SourceURL());
     crawlerThread.download(matchedUrl);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
+    verify(sourceURLRepository, times(1)).findByUrlAndPageId(any(String.class), any(Integer.class));
+    verify(sourceURLRepository, times(1)).save(any(SourceURL.class));
 
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl() + "/test"));
     crawlerThread.getExpandUrl().clear();
+    when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(null);
     task.setUrl(matchedUrl.getUrl().toString());
     crawlerThread.download(matchedUrl);
     assertEquals(crawlerThread.getExpandUrl().size(), 1);
+    verify(sourceURLRepository, times(2)).findByUrlAndPageId(any(String.class), any(Integer.class));
+    verify(sourceURLRepository, times(2)).save(any(SourceURL.class));
 
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
     crawlerThread.getExpandUrl().clear();
