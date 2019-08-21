@@ -99,8 +99,10 @@ public class CommonTest {
 
   @Test
   public void testHasAccess() {
-    assertEquals(false, Common.hasAccess("http://google.com/a.pdf"));
-    assertEquals(true, Common.hasAccess("http://google.com/a/cpanel/a/a/b.html"));
+    WebSite site = new WebSite();
+    site.setUrl("https://www.uniqlo.com/us/en");
+    assertEquals(false, Common.hasAccess(site, "https://www.uniqlo.com/us/en/search"));
+    assertEquals(true, Common.hasAccess(site, "https://www.uniqlo.com/us/en/test.html"));
   }
   
   @Test
