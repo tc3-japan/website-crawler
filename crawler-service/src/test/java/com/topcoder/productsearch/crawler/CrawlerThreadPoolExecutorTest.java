@@ -25,8 +25,7 @@ public class CrawlerThreadPoolExecutorTest {
 
   @Test
   public void testThreadPool() {
-    CrawlerThreadPoolExecutor threadPoolExecutor = new CrawlerThreadPoolExecutor(2, 2 * 2, 0L,
-        TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(2 * 2));
+    CrawlerThreadPoolExecutor threadPoolExecutor = new CrawlerThreadPoolExecutor(2);
 
 
     WebSite site = new WebSite();
@@ -38,7 +37,7 @@ public class CrawlerThreadPoolExecutorTest {
     thread.setTaskInterval(10);
     thread.setCrawlerTask(task);
 
-    threadPoolExecutor.execute(thread);
+    threadPoolExecutor.schedule(thread, 0, TimeUnit.MILLISECONDS);
     assertEquals(threadPoolExecutor.getRunningCount(), Integer.valueOf(1));
     assertEquals(0, threadPoolExecutor.getAllCostTime(1));
     threadPoolExecutor.setExecutedHandler(runnable -> assertEquals(threadPoolExecutor.getRunningCount(),

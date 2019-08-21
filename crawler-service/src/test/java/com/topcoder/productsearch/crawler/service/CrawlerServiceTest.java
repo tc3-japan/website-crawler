@@ -60,6 +60,8 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Test
   public void testServiceOutOfQueue() {
+    crawlerService.getThreadPoolExecutor().setRunningCount(1);
+    crawlerService.getThreadPoolExecutor().setCorePoolSize(1);
     crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site, null));
     crawlerService.crawler(site);
     assertEquals(crawlerService.getQueueTasks().size(), 1);
