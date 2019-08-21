@@ -50,6 +50,7 @@ CREATE TABLE `web_sites`  (
   `content_url_patterns`  varchar(2048) NULL,
   `created_at`            datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified_at`      datetime NULL,
+  `crawl_time_limit`  MEDIUMINT(8) UNSIGNED NULL DEFAULT 0,
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
