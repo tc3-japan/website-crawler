@@ -49,4 +49,7 @@ public class WebSite {
   @Column(name = "last_modified_at")
   private Date lastModifiedAt;
 
+  @Column(name = "crawl_max_depth")
+  private Integer crawlMaxDepth;
+
 }
