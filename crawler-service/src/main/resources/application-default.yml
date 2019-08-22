@@ -38,7 +38,7 @@ cors:
 
 crawler-settings:
   #Interval between each subsequent request (milliseconds)
-  interval: 1000
+  interval: 2000
 
   #Time limit for crawling an entire single site (seconds)
   time-limit: 300
