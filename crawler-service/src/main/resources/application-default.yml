@@ -7,6 +7,7 @@ logging.level:
 spring:
   datasource:
     url: jdbc:mysql://mycontainername:3306/website_crawler?useSSL=false&nullNamePatternMatchesAll=true&allowPublicKeyRetrieval=true
+    url_flyway: jdbc:mysql://localhost:3306/website_crawler?useSSL=false&nullNamePatternMatchesAll=true&allowPublicKeyRetrieval=true
     username: root
     password: mypassword
     driver-class-name: com.mysql.cj.jdbc.Driver

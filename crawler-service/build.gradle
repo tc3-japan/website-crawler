@@ -124,7 +124,7 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 //}
 
 flyway {
-    url = (applicationConfig.spring.datasource.url =~ /(.*\/\/.*\/).*/)[0][1] // Extract URL
+    url = (applicationConfig.spring.datasource.url_flyway =~ /(.*\/\/.*\/).*/)[0][1] // Extract URL
     user = applicationConfig.spring.datasource.username
     password = applicationConfig.spring.datasource.password
     schemas = [(applicationConfig.spring.datasource.url =~ /.*\/\/.*\/([^?]*)(\?.*)?/)[0][1]] // Extract DB name
