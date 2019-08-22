@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
   mysql:
     #image: mysql:8.0.12
@@ -9,4 +9,10 @@ services:
       MYSQL_DATABASE: website_crawler
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: mypassword
-
+    networks:
+      network1:
+    container_name: mycontainername
+    hostname: myhostname
+networks:
+  network1:
+    name: crawler_network

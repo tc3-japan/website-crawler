@@ -40,6 +40,7 @@ plugins {
     // id 'pmd'
     // test coverage
     // id 'jacoco'
+    
 }
 
 sourceCompatibility = '1.8'
@@ -54,9 +55,10 @@ repositories {
 }
 
 dependencies {
+    
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:27.1-jre'
-    implementation 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
+    runtime 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc:1.5.7.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.7.RELEASE'
@@ -159,3 +161,17 @@ bootRun {
         jvmArgs project.jvmArgs.split(',')
     }
 }
+
+// for defining the fat jar
+
+// jar {
+//     manifest {
+//         attributes "Main-Class": "com.topcoder.productsearch.Application"
+//     }
+ 
+//     from {
+//         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+//     }
+// }
+
+    
