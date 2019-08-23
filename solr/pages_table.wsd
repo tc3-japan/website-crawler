@@ -1,0 +1,25 @@
+@startuml pages
+
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+
+entity "pages" as pg {
+  *id : int(11)
+  --
+  *site_id : int(11) <<FK>>
+  *url : varchar(768) <<Index>>
+  *type: varchar(20) <<Index>>
+  title: varchar(1024)
+  body: longtext
+  etag: varchar(256)
+  last_modified: varchar(256)
+  created_at: datetime
+  last_modified_at: datetime 
+  last_processed_at: datetime 
+}
+
+@enduml

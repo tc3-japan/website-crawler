@@ -1,0 +1,1 @@
+Dockerfile to create Solr image in docker container with the required schema

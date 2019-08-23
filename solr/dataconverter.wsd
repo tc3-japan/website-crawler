@@ -1,0 +1,54 @@
+@startuml dataconverter
+
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+package MySQL <<Database>> {
+  entity "web_sites" as ws {
+    *id : int(11)
+  --
+    *name : varchar(200)
+    description : varchar(1024)
+    url: varchar(768)
+    content_url_patterns: varchar(2048)
+    created_at: datetime 
+    last_modified_at: datetime 
+  }
+
+  entity "pages" as pg {
+    *id : int(11)
+    --
+    *site_id : int(11) <<FK>>
+    *url : varchar(768)
+    *type: varchar(20)
+    title: varchar(1024)
+    body: longtext
+    etag: varchar(256)
+    last_modified: varchar(256)
+    created_at: datetime
+    last_modified_at: datetime <<index>>
+    last_processed_at: datetime 
+    deleted: boolean
+}
+
+}
+
+
+
+ws ||..o{ pg
+
+
+package Solr <<Database>> {
+  entity "manufacturer_product" as mp #99FF99 {
+    manufacturer_name: string
+    product_url: string
+    html_title: text_ja
+    html_body: text_ja
+    page_updated_at: pdate  
+  }
+}
+
+@enduml
