@@ -43,6 +43,7 @@ plugins {
     
 }
 
+version = '1.0'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
@@ -57,16 +58,16 @@ repositories {
 dependencies {
     
     // This dependency is used by the application.
-    implementation 'com.google.guava:guava:27.1-jre'
+    compile 'com.google.guava:guava:27.1-jre'
     compile 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-web:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-logging:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-jdbc:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-logging:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
     compile group: 'org.apache.solr', name: 'solr-solrj', version: '8.2.0'
-    implementation 'mysql:mysql-connector-java:8.0.13'
+    compile 'mysql:mysql-connector-java:8.0.13'
     compile("net.sourceforge.htmlunit:htmlunit:2.33")
     compile group: 'commons-codec', name: 'commons-codec', version: '1.12'
 
@@ -174,4 +175,18 @@ bootRun {
 //     }
 // }
 
-    
+//create a single Jar with all dependencies
+// task fatJar(type: Jar) {
+// 	manifest {
+//         attributes 'Implementation-Title': 'Gradle Jar File Example',  
+//         	'Implementation-Version': version,
+//         	'Main-Class': 'com.topcoder.productsearch.Application'
+//     }
+//     baseName = project.name + '-all'
+//     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+//     with jar
+// }
+
+bootRepackage {
+    mainClass = 'com.topcoder.productsearch.Application'
+}
