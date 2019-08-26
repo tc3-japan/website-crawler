@@ -116,15 +116,21 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
 
 
-    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()+"/test.html"));
     crawlerThread.download(rootURL);
     assertEquals(crawlerThread.getExpandUrl().size(), 1);
 
-    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("/a.html"));
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections
+        .singletonList(webSite.getUrl() + "/us/en/men-u-crew-neck-short-sleeve-t-shirt-414351.html?" +
+            "dwvar_414351_color=COL46&cgid=men-wear-to-work"));
     crawlerThread.download(rootURL);
     assertEquals(crawlerThread.getExpandUrl().size(), 2);
 
-    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("/a.pdf"));
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("/us/en/orders"));
+    crawlerThread.download(rootURL);
+    assertEquals(crawlerThread.getExpandUrl().size(), 2);
+
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("/us/en/a.pdf"));
     crawlerThread.download(rootURL);
     assertEquals(crawlerThread.getExpandUrl().size(), 2);
 
