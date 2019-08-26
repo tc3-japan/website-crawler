@@ -98,6 +98,14 @@ public class CommonTest {
   }
 
   @Test
+  public void testHasAccess() {
+    WebSite site = new WebSite();
+    site.setUrl("https://www.uniqlo.com/us/en");
+    assertEquals(false, Common.hasAccess(site, "https://www.uniqlo.com/us/en/search"));
+    assertEquals(true, Common.hasAccess(site, "https://www.uniqlo.com/us/en/test.html"));
+  }
+  
+  @Test
   public void testIsUnnecessary() {
     assertEquals(true, Common.isUnnecessary("https://www.ikea.com/furniture-dealer.pdf"));
     assertEquals(true, Common.isUnnecessary(null));

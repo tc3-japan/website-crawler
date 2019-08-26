@@ -32,7 +32,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
     crawlerService = new CrawlerService(1);
     site.setCrawlMaxDepth(2);
     crawlerService.setMaxRetryTimes(2);
-    crawlerService.setSiteTimeLimit(1.f);
+    site.setCrawlTimeLimit(1);
     crawlerService.setTaskInterval(1000);
     crawlerService.setTimeout(1.2f);
   }
@@ -44,7 +44,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
     assertEquals(crawlerService.getQueueTasks().size(), 0);
 
     CrawlerThread thread = new CrawlerThread();
-    thread.setCrawlerTask(new CrawlerTask(site.getUrl(), site));
+    thread.setCrawlerTask(new CrawlerTask(site.getUrl(), site, null));
     thread.setExpandUrl(new HashSet<>(Arrays.asList(site.getUrl(), "http://google.com")));
     crawlerService.getThreadPoolExecutor().getExecutedHandler().done(thread);
     assertEquals(crawlerService.getShouldVisit().getOrDefault("http://google.com", Boolean.FALSE), Boolean.TRUE);
@@ -53,14 +53,14 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Test
   public void testServiceTimeLimit() {
-    crawlerService.setSiteTimeLimit(-1.f);
+    site.setCrawlTimeLimit(-1);
     crawlerService.crawler(site);
     assertEquals(crawlerService.getQueueTasks().size(), 0);
   }
 
   @Test
   public void testServiceOutOfQueue() {
-    crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site));
+    crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site, null));
     crawlerService.crawler(site);
     assertEquals(crawlerService.getQueueTasks().size(), 1);
   }
