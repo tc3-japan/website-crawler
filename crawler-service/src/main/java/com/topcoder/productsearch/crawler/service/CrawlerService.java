@@ -81,9 +81,10 @@ public class CrawlerService {
    *
    * @param parallelSize task parallel size
    */
-  public CrawlerService(@Value("${crawler-settings.parallel-size}") int parallelSize) {
+  public CrawlerService(@Value("${crawler-settings.parallel-size}") int parallelSize,
+      @Value("${crawler-settings.interval}") int taskInterval) {
 
-    threadPoolExecutor = new CrawlerThreadPoolExecutor(parallelSize);
+    threadPoolExecutor = new CrawlerThreadPoolExecutor(parallelSize, taskInterval);
     // set task completed callback
     threadPoolExecutor.setExecutedHandler(runnable -> {
       CrawlerThread thread = (CrawlerThread) runnable;
@@ -126,7 +127,7 @@ public class CrawlerService {
    */
   private void pushTask(CrawlerTask task) {
     shouldVisit.put(Common.normalize(task.getUrl()), Boolean.TRUE);
-    logger.info("add new task url = " + task.getUrl() + ", depth = " + task.getDepth());
+    logger.debug("add new task url = " + task.getUrl() + ", depth = " + task.getDepth());
     queueTasks.add(task);
   }
 
@@ -135,7 +136,7 @@ public class CrawlerService {
    */
   private void checkTask() {
 
-    logger.info(String.format("pending task = %d, and running task = %d", queueTasks.size(),
+    logger.debug(String.format("pending task = %d, and running task = %d", queueTasks.size(),
         threadPoolExecutor.getRunningCount()));
 
     while (!queueTasks.isEmpty()) {
@@ -159,19 +160,16 @@ public class CrawlerService {
 
       thread.setCrawlerTask(task);
       thread.setTaskInterval(taskInterval);
-
-      // add random time, avoid website reject task
-      thread.setTimeout((int) (timeout * 60 * 1000 + Math.random() * 1000));
+      thread.setTimeout((int) (timeout * 60 * 1000));
       thread.setRetryTimes(maxRetryTimes);
       thread.setMaxDepth(maxDepth);
       thread.setCrawlerService(this);
       thread.init();
 
-      shouldVisit.put(thread.getCrawlerTask().getUrl(), Boolean.TRUE);
+      shouldVisit.put(Common.normalize(thread.getCrawlerTask().getUrl()), Boolean.TRUE);
       // schedule execute task after taskInterval
-      // here cannot use scheduleAtFixedRate, because of we only run once for each task
       threadPoolExecutor.schedule(thread, taskInterval, TimeUnit.MILLISECONDS);
-      logger.info("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
+      logger.debug("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
           + ", total running time(ms) = " + costTime);
     }
 
