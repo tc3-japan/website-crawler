@@ -32,7 +32,7 @@ public class CrawlerThreadPoolExecutorTest {
     WebSite site = new WebSite();
     site.setId(1);
     site.setUrl("https://www.uniqlo.com/us/en/");
-    CrawlerTask task = new CrawlerTask("https://www.uniqlo.com/us/en/", site);
+    CrawlerTask task = new CrawlerTask("https://www.uniqlo.com/us/en/", site, null);
 
     CrawlerThread thread = new CrawlerThread();
     thread.setTaskInterval(10);

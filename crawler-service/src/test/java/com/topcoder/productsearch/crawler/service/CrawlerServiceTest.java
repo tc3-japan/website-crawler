@@ -44,7 +44,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
     assertEquals(crawlerService.getQueueTasks().size(), 0);
 
     CrawlerThread thread = new CrawlerThread();
-    thread.setCrawlerTask(new CrawlerTask(site.getUrl(), site));
+    thread.setCrawlerTask(new CrawlerTask(site.getUrl(), site, null));
     thread.setExpandUrl(new HashSet<>(Arrays.asList(site.getUrl(), "http://google.com")));
     crawlerService.getThreadPoolExecutor().getExecutedHandler().done(thread);
     assertEquals(crawlerService.getShouldVisit().getOrDefault("http://google.com", Boolean.FALSE), Boolean.TRUE);
@@ -60,7 +60,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Test
   public void testServiceOutOfQueue() {
-    crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site));
+    crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site, null));
     crawlerService.crawler(site);
     assertEquals(crawlerService.getQueueTasks().size(), 1);
   }
