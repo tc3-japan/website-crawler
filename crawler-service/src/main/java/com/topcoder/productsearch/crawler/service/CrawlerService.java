@@ -37,12 +37,6 @@ public class CrawlerService {
   private CrawlerThreadPoolExecutor threadPoolExecutor;
 
   /**
-   * Time limit for crawling an entire single site (seconds)
-   */
-  @Value("${crawler-settings.time-limit}")
-  private Float siteTimeLimit;
-
-  /**
    * Interval between each subsequent request (milliseconds)
    */
   @Value("${crawler-settings.interval}")
@@ -87,7 +81,7 @@ public class CrawlerService {
           if (shouldVisit.getOrDefault(Common.normalize(url), Boolean.FALSE).equals(Boolean.TRUE)) {
             return;
           }
-          CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite());
+          CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite(), thread.getCrawlerTask().getUrl());
           task.setDepth(thread.getCrawlerTask().getDepth() + 1);
           pushTask(task);
         });
@@ -109,7 +103,7 @@ public class CrawlerService {
     // set timeout for each thread
     threadPoolExecutor.setKeepAliveTime((long) (timeout * 60 * 1000),TimeUnit.MILLISECONDS);
 
-    CrawlerTask crawlerTask = new CrawlerTask(webSite.getUrl(), webSite); // root page
+    CrawlerTask crawlerTask = new CrawlerTask(webSite.getUrl(), webSite, null); // root page
     pushTask(crawlerTask);
     checkTask();
   }
@@ -136,12 +130,12 @@ public class CrawlerService {
     while (!queueTasks.isEmpty()) {
       CrawlerTask task = queueTasks.poll();
       long costTime = threadPoolExecutor.getAllCostTime(task.getSite().getId());
-      if (costTime > siteTimeLimit * 1000) {
+      if (costTime > task.getSite().getCrawlTimeLimit() * 1000) {
         // the elapsed time from the start reaches the time limit for a crawling process
         // stop creating a new request
         logger.warn(String.format("the elapsed time from the start reaches the time limit for a crawling process," +
-                " stop creating a new task, %d > %f",
-            costTime, siteTimeLimit * 1000));
+                " stop creating a new task, %d > %d",
+            costTime, task.getSite().getCrawlTimeLimit() * 1000));
         break;
       }
 
