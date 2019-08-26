@@ -55,12 +55,6 @@ public class CrawlerService {
   private Integer maxRetryTimes;
 
   /**
-   * Max depth that will be allowed to crawl for a site
-   */
-  @Value("${crawler-settings.max-depth}")
-  private Integer maxDepth;
-
-  /**
    * pending task queue
    */
   private LinkedBlockingQueue<CrawlerTask> queueTasks;
@@ -154,7 +148,7 @@ public class CrawlerService {
       // add random time, avoid website reject task
       thread.setTimeout((int) (timeout * 60 * 1000 + Math.random() * 1000));
       thread.setRetryTimes(maxRetryTimes);
-      thread.setMaxDepth(maxDepth);
+      thread.setMaxDepth(task.getSite().getCrawlMaxDepth());
       thread.setCrawlerService(this);
       thread.init();
 
