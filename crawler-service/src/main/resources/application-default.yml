@@ -49,9 +49,6 @@ crawler-settings:
   #Max number of times to retry a single page.
   retry-times: 2
 
-  #Max depth that will be allowed to crawl for a site
-  max-depth: 3
-
   # the convert solr uri
   solr-uri: http://localhost:8983/solr/manufacturer_product
 
