@@ -25,7 +25,7 @@ public class CrawlerThreadPoolExecutorTest {
 
   @Test
   public void testThreadPool() {
-    CrawlerThreadPoolExecutor threadPoolExecutor = new CrawlerThreadPoolExecutor(2);
+    CrawlerThreadPoolExecutor threadPoolExecutor = new CrawlerThreadPoolExecutor(2, 10);
 
 
     WebSite site = new WebSite();
