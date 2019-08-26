@@ -136,9 +136,6 @@ public class CrawlerThread implements Runnable {
    */
   @Override
   public void run() {
-
-    // wait some time for each subsequent request
-    waitInterval();
     crawlerTask.setStartTime(System.currentTimeMillis());
     try {
       download(new WebRequest(new URL(crawlerTask.getUrl())));
