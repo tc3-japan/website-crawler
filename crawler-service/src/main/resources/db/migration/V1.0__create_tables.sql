@@ -51,6 +51,7 @@ CREATE TABLE `web_sites`  (
   `created_at`            datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified_at`      datetime NULL,
   `supports_robots_txt` 	tinyint(1) UNSIGNED NULL DEFAULT 1,
+  `crawl_time_limit`  MEDIUMINT(8) UNSIGNED NULL DEFAULT 0,
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
