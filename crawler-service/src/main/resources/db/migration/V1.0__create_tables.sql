@@ -50,6 +50,7 @@ CREATE TABLE `web_sites`  (
   `content_url_patterns`  varchar(2048) NULL,
   `created_at`            datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified_at`      datetime NULL,
+  `supports_robots_txt` 	tinyint(1) UNSIGNED NULL DEFAULT 1,
   `crawl_time_limit`  MEDIUMINT(8) UNSIGNED NULL DEFAULT 0,
   PRIMARY KEY(`id`)
 )
@@ -82,7 +83,7 @@ CREATE INDEX `idx_pages_siteid_type_lastmodifiedat` USING BTREE
 CREATE UNIQUE INDEX `idx_pages_url` USING BTREE 
   ON `pages`(`url`);
 
-CREATE INDEX `idx_source_urls_pageid` USING BTREE 
+CREATE INDEX `idx_source_urls_pageid` USING BTREE
   ON `source_urls`(`page_id`);
 
 CREATE INDEX `idx_web_sites_name` USING BTREE 

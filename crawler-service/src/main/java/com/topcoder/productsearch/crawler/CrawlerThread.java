@@ -7,8 +7,10 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.DestinationURL;
+import com.topcoder.productsearch.common.entity.SourceURL;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.repository.SourceURLRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.common.util.DomHelper;
 import com.topcoder.productsearch.common.util.SpringTool;
@@ -90,6 +92,11 @@ public class CrawlerThread implements Runnable {
   private DestinationURLRepository destinationURLRepository;
 
   /**
+   * the source url database repository
+   */
+  private SourceURLRepository sourceURLRepository;
+
+  /**
    * parsed urls that maybe need create new task to download
    */
   private Set<String> expandUrl;
@@ -117,6 +124,7 @@ public class CrawlerThread implements Runnable {
     if (SpringTool.getApplicationContext() != null) {
       pageRepository = SpringTool.getApplicationContext().getBean(PageRepository.class);
       destinationURLRepository = SpringTool.getApplicationContext().getBean(DestinationURLRepository.class);
+      sourceURLRepository = SpringTool.getApplicationContext().getBean(SourceURLRepository.class);
     }
     domHelper = new DomHelper();
     expandUrl = new HashSet<>();
@@ -207,6 +215,20 @@ public class CrawlerThread implements Runnable {
         return;
       }
 
+      // Create records in the source_urls table with following data
+      if (crawlerTask.getSourceUrl() != null && finalPageId != null) {
+        SourceURL sourceURL = sourceURLRepository.findByUrlAndPageId(crawlerTask.getSourceUrl(), finalPageId);
+        if (sourceURL == null) {
+          sourceURL = new SourceURL();
+          sourceURL.setUrl(crawlerTask.getSourceUrl());
+          sourceURL.setPageId(finalPageId);
+          sourceURL.setCreatedAt(Date.from(Instant.now()));
+        } else {
+          sourceURL.setLastModifiedAt(Date.from(Instant.now()));
+        }
+        sourceURLRepository.save(sourceURL);
+      }
+      
       if (finalPageId != null) {
         DestinationURL destinationURL = destinationURLRepository.findByUrl(url);
         // this page may already have been processed from a previous thread during the execution and should be skipped.
@@ -234,9 +256,13 @@ public class CrawlerThread implements Runnable {
    * @param url the url
    */
   private void enqueue(String url) {
-
     if (crawlerTask.getDepth() >= maxDepth) {
       logger.info("skip " + url + " , because of reached max depth");
+      return;
+    }
+    if (Boolean.TRUE.equals(crawlerTask.getSite().getSupportsRobotsTxt())
+        && !Common.hasAccess(crawlerTask.getSite(), url)) {
+      logger.info("skip " + url + " , because of robots.txt disallow this");
       return;
     }
     expandUrl.add(url);
