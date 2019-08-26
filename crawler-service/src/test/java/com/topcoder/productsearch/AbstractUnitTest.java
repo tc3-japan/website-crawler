@@ -17,6 +17,9 @@ public abstract class AbstractUnitTest {
     webSite.setId(1);
     webSite.setUrl("https://www.uniqlo.com/us/en/");
     webSite.setContentUrlPatterns("https://www.uniqlo.com/us/en/[^/]+?.html.*?cgid=.*?$");
+    webSite.setSupportsRobotsTxt(true);
+    webSite.setCrawlMaxDepth(3);
+    webSite.setCrawlTimeLimit(300);
     return webSite;
   }
 

@@ -1,5 +1,7 @@
 package com.topcoder.productsearch.common.util;
 
+import com.panforge.robotstxt.CustomRobotsTxtReader;
+import com.panforge.robotstxt.RobotsTxt;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.PageRepository;
@@ -10,11 +12,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +35,11 @@ public class Common {
    * the logger instance
    */
   private static final Logger logger = LoggerFactory.getLogger(Common.class);
+
+  /**
+   * the RobotsTxt instances
+   */
+  private static ConcurrentHashMap<String, RobotsTxt> robotsTxtConcurrentHashMap = new ConcurrentHashMap<>();
 
   /**
    * regex pattern to filter out the unnecessary link
@@ -51,6 +60,31 @@ public class Common {
       return url.substring(0, lastHash);
     }
     return url;
+  }
+
+  /**
+   * check the url by robots.txt
+   *
+   * @param site the website instance
+   * @param url the url string
+   * @return the result
+   */
+  public static Boolean hasAccess(WebSite site, String url) {
+    if (robotsTxtConcurrentHashMap.get(site.getUrl()) != null) {
+      return robotsTxtConcurrentHashMap.get(site.getUrl()).query(null, url);
+    }
+
+    try {
+      URL siteURL = new URL(site.getUrl());
+      URL robotsURL = new URL(siteURL.getProtocol() + "://" + siteURL.getHost() + "/robots.txt");
+      RobotsTxt robotsTxt = new CustomRobotsTxtReader().read(robotsURL.openStream());
+      robotsTxtConcurrentHashMap.put(site.getUrl(), robotsTxt);
+      return robotsTxt.query(null, url);
+    } catch (IOException e) {
+      logger.error("read robots.txt failed, will return true for all robots check");
+      e.printStackTrace();
+      return true;
+    }
   }
 
   /**

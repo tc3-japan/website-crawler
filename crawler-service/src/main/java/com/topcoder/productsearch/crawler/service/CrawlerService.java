@@ -37,12 +37,6 @@ public class CrawlerService {
   private CrawlerThreadPoolExecutor threadPoolExecutor;
 
   /**
-   * Time limit for crawling an entire single site (seconds)
-   */
-  @Value("${crawler-settings.time-limit}")
-  private Float siteTimeLimit;
-
-  /**
    * Interval between each subsequent request (milliseconds)
    */
   @Value("${crawler-settings.interval}")
@@ -59,12 +53,6 @@ public class CrawlerService {
    */
   @Value("${crawler-settings.retry-times}")
   private Integer maxRetryTimes;
-
-  /**
-   * Max depth that will be allowed to crawl for a site
-   */
-  @Value("${crawler-settings.max-depth}")
-  private Integer maxDepth;
 
   /**
    * pending task queue
@@ -142,12 +130,12 @@ public class CrawlerService {
     while (!queueTasks.isEmpty()) {
       CrawlerTask task = queueTasks.poll();
       long costTime = threadPoolExecutor.getAllCostTime(task.getSite().getId());
-      if (costTime > siteTimeLimit * 1000) {
+      if (costTime > task.getSite().getCrawlTimeLimit() * 1000) {
         // the elapsed time from the start reaches the time limit for a crawling process
         // stop creating a new request
         logger.warn(String.format("the elapsed time from the start reaches the time limit for a crawling process," +
-                " stop creating a new task, %d > %f",
-            costTime, siteTimeLimit * 1000));
+                " stop creating a new task, %d > %d",
+            costTime, task.getSite().getCrawlTimeLimit() * 1000));
         break;
       }
 
@@ -162,7 +150,7 @@ public class CrawlerService {
       thread.setTaskInterval(taskInterval);
       thread.setTimeout((int) (timeout * 60 * 1000));
       thread.setRetryTimes(maxRetryTimes);
-      thread.setMaxDepth(maxDepth);
+      thread.setMaxDepth(task.getSite().getCrawlMaxDepth());
       thread.setCrawlerService(this);
       thread.init();
 
