@@ -32,7 +32,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
     crawlerService = new CrawlerService(1);
     crawlerService.setMaxDepth(2);
     crawlerService.setMaxRetryTimes(2);
-    crawlerService.setSiteTimeLimit(1.f);
+    site.setCrawlTimeLimit(1);
     crawlerService.setTaskInterval(1000);
     crawlerService.setTimeout(1.2f);
   }
@@ -53,7 +53,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Test
   public void testServiceTimeLimit() {
-    crawlerService.setSiteTimeLimit(-1.f);
+    site.setCrawlTimeLimit(-1);
     crawlerService.crawler(site);
     assertEquals(crawlerService.getQueueTasks().size(), 0);
   }

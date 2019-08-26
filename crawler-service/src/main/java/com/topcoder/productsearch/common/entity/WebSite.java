@@ -52,4 +52,6 @@ public class WebSite {
   @Column(name = "supports_robots_txt")
   private Boolean supportsRobotsTxt;
 
+  @Column(name = "crawl_time_limit")
+  private Integer crawlTimeLimit;
 }
