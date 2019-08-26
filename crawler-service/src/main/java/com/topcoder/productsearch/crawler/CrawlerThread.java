@@ -256,9 +256,13 @@ public class CrawlerThread implements Runnable {
    * @param url the url
    */
   private void enqueue(String url) {
-
     if (crawlerTask.getDepth() >= maxDepth) {
       logger.info("skip " + url + " , because of reached max depth");
+      return;
+    }
+    if (Boolean.TRUE.equals(crawlerTask.getSite().getSupportsRobotsTxt())
+        && !Common.hasAccess(crawlerTask.getSite(), url)) {
+      logger.info("skip " + url + " , because of robots.txt disallow this");
       return;
     }
     expandUrl.add(url);
