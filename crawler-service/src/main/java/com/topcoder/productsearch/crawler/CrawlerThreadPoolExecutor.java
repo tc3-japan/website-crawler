@@ -1,12 +1,18 @@
 package com.topcoder.productsearch.crawler;
 
-import com.topcoder.productsearch.common.util.JobDiscoverer;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.*;
+import com.topcoder.productsearch.common.util.JobDiscoverer;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * The Crawler Thread Pool Executor
@@ -28,9 +34,24 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
   private static final Logger logger = LoggerFactory.getLogger(CrawlerThreadPoolExecutor.class);
 
   /**
+   * minimum interval in executions
+   */
+  private Integer taskInterval = 0;
+  
+  /**
    * current running count
    */
   private Integer runningCount = 0;
+
+  /**
+   * the time when the last task was executed
+   */
+  private long lastExecutionTime = 0L;
+  
+  /**
+   * lock
+   */
+  private final ReentrantLock lock = new ReentrantLock(true);
 
   /**
    * completed callback
@@ -48,9 +69,10 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
    * @param corePoolSize    the number of threads to keep in the pool, even
    *                        if they are idle, unless {@code allowCoreThreadTimeOut} is set
    */
-  public CrawlerThreadPoolExecutor(int corePoolSize) {
+  public CrawlerThreadPoolExecutor(int corePoolSize, int taskInterval) {
     super(corePoolSize);
-    crawlerThreads = new ConcurrentHashMap<>();
+    this.taskInterval = taskInterval;
+    this.crawlerThreads = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -69,6 +91,24 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
     CrawlerThread taskThread = (CrawlerThread) JobDiscoverer.findRealTask(r);
     crawlerThreads.put(r, taskThread);
     super.beforeExecute(t, r);
+    
+    if (getTaskInterval() <= 0) {
+      return;
+    }
+    
+    try {
+      lock.lock();
+      long elapsedTimeSinceLastExec = System.currentTimeMillis() - getLastExecutionTime();
+      if (elapsedTimeSinceLastExec < getTaskInterval()) {
+        try {
+          Thread.sleep(getTaskInterval() - elapsedTimeSinceLastExec);
+        } catch (InterruptedException e) {
+        }
+      }
+      setLastExecutionTime(System.currentTimeMillis());      
+    } finally {
+      lock.unlock();
+    }
   }
 
 
@@ -85,7 +125,6 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
     CrawlerThread thread = crawlerThreads.get(r);
     crawlerThreads.remove(r);
     executedHandler.done(thread);
-
   }
 
   /**
