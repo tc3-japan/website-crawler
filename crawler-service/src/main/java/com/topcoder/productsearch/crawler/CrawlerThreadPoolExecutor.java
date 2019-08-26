@@ -1,22 +1,19 @@
 package com.topcoder.productsearch.crawler;
 
+import com.topcoder.productsearch.common.util.JobDiscoverer;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * The Crawler Thread Pool Executor
  */
 @Getter
 @Setter
-public class CrawlerThreadPoolExecutor extends ThreadPoolExecutor {
+public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
 
   /**
    * completed callback handler
@@ -41,44 +38,39 @@ public class CrawlerThreadPoolExecutor extends ThreadPoolExecutor {
   private ExecutedHandler executedHandler;
 
   /**
-   * current running task list
+   * current running task map
    */
-  private List<Runnable> runningList;
+  private ConcurrentHashMap<Runnable,CrawlerThread> crawlerThreads;
 
   /**
    * Creates a new ThreadPoolExecutor with the given initial parameters
    *
    * @param corePoolSize    the number of threads to keep in the pool, even
    *                        if they are idle, unless {@code allowCoreThreadTimeOut} is set
-   * @param maximumPoolSize the maximum number of threads to allow in the
-   *                        pool
-   * @param keepAliveTime   when the number of threads is greater than
-   *                        the core, this is the maximum time that excess idle threads
-   *                        will wait for new tasks before terminating.
-   * @param unit            the time unit for the {@code keepAliveTime} argument
-   * @param workQueue       the queue to use for holding tasks before they are
-   *                        executed.  This queue will hold only the {@code Runnable}
-   *                        tasks submitted by the {@code execute} method.
    */
-  public CrawlerThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
-                                   long keepAliveTime, TimeUnit unit,
-                                   BlockingQueue<Runnable> workQueue) {
-    super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
-    runningList = new LinkedList<>();
+  public CrawlerThreadPoolExecutor(int corePoolSize) {
+    super(corePoolSize);
+    crawlerThreads = new ConcurrentHashMap<>();
   }
 
+  @Override
+  public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+    runningCount += 1;
+    return super.schedule(command, delay, unit);
+  }
 
   /**
-   * execute task
-   *
-   * @param command the task
+   * before execute task
+   * @param t the thread
+   * @param r the runnable
    */
   @Override
-  public void execute(Runnable command) {
-    runningCount += 1;
-    runningList.add(command);
-    super.execute(command);
+  protected void beforeExecute(Thread t, Runnable r) {
+    CrawlerThread taskThread = (CrawlerThread) JobDiscoverer.findRealTask(r);
+    crawlerThreads.put(r, taskThread);
+    super.beforeExecute(t, r);
   }
+
 
   /**
    * after execute
@@ -90,8 +82,10 @@ public class CrawlerThreadPoolExecutor extends ThreadPoolExecutor {
   protected void afterExecute(Runnable r, Throwable t) {
     super.afterExecute(r, t);
     runningCount -= 1;
-    runningList.remove(r);
-    executedHandler.done(r);
+    CrawlerThread thread = crawlerThreads.get(r);
+    crawlerThreads.remove(r);
+    executedHandler.done(thread);
+
   }
 
   /**
@@ -101,8 +95,7 @@ public class CrawlerThreadPoolExecutor extends ThreadPoolExecutor {
    * @return the cost time
    */
   public long getAllCostTime(Integer siteId) {
-    return runningList.stream()
-        .map(thread -> (CrawlerThread) thread)
+    return crawlerThreads.values().stream()
         .filter(t -> t.getCrawlerTask().getSite().getId().equals(siteId) && t.getCrawlerTask().getStartTime() > 0)
         .mapToLong(t -> (System.currentTimeMillis() - t.getCrawlerTask().getStartTime()))
         .sum();

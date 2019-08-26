@@ -71,8 +71,7 @@ public class CrawlerService {
    */
   public CrawlerService(@Value("${crawler-settings.parallel-size}") int parallelSize) {
 
-    threadPoolExecutor = new CrawlerThreadPoolExecutor(parallelSize, parallelSize * 2, 0L,
-        TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(parallelSize * 2));
+    threadPoolExecutor = new CrawlerThreadPoolExecutor(parallelSize);
     // set task completed callback
     threadPoolExecutor.setExecutedHandler(runnable -> {
       CrawlerThread thread = (CrawlerThread) runnable;
@@ -139,6 +138,10 @@ public class CrawlerService {
         break;
       }
 
+      if (threadPoolExecutor.getRunningCount() >= threadPoolExecutor.getCorePoolSize()) {
+        break;
+      }
+
       // put into thread pool, start download page
       CrawlerThread thread = new CrawlerThread();
 
@@ -153,12 +156,11 @@ public class CrawlerService {
       thread.init();
 
       shouldVisit.put(thread.getCrawlerTask().getUrl(), Boolean.TRUE);
-      threadPoolExecutor.execute(thread);
-      logger.info("execute a new task, current running count = " + threadPoolExecutor.getRunningCount()
+      // schedule execute task after taskInterval
+      // here cannot use scheduleAtFixedRate, because of we only run once for each task
+      threadPoolExecutor.schedule(thread, taskInterval, TimeUnit.MILLISECONDS);
+      logger.info("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
           + ", total running time(ms) = " + costTime);
-      if (threadPoolExecutor.getRunningCount() >= threadPoolExecutor.getCorePoolSize()) {
-        break;
-      }
     }
 
     int taskSize = threadPoolExecutor.getRunningCount();
