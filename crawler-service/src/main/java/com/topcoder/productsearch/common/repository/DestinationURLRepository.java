@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DestinationURLRepository extends CrudRepository<DestinationURL, Integer> {
-  DestinationURL findByUrl(String url);
+  DestinationURL findByUrlAndPageId(String url, Integer pageId);
 }
