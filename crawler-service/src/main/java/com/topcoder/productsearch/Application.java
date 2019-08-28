@@ -8,11 +8,12 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = {FlywayAutoConfiguration.class, SolrAutoConfiguration.class})
 @ComponentScan({
-  "com.topcoder.productsearch.api",
-  "com.topcoder.productsearch.common",
-  "com.topcoder.productsearch.crawler",
-  "com.topcoder.productsearch.converter",
-  "com.topcoder.productsearch.cleaner"})
+    "com.topcoder.productsearch.api",
+    "com.topcoder.productsearch.common",
+    "com.topcoder.productsearch.crawler",
+    "com.topcoder.productsearch.converter",
+    "com.topcoder.productsearch.validatePages",
+    "com.topcoder.productsearch.cleaner"})
 public class Application {
 
   /**

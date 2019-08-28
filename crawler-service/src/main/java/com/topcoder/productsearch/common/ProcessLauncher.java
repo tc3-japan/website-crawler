@@ -5,6 +5,7 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.validatePages.service.ValidatePagesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,11 @@ public class ProcessLauncher implements ApplicationRunner {
   @Autowired
   CleanerService cleanerService;
 
+  /**
+   * the validate pages service
+   */
+  @Autowired
+  ValidatePagesService validatePagesService;
 
   /**
    * get site by input args if exist
@@ -79,6 +85,26 @@ public class ProcessLauncher implements ApplicationRunner {
   }
 
   /**
+   * is need run converter process
+   *
+   * @param procs the process name
+   * @return the result
+   */
+  private boolean isConverter(List<String> procs) {
+    return procs != null && "converter".equalsIgnoreCase(procs.get(0));
+  }
+
+  /**
+   * is need run validate pages process
+   *
+   * @param procs the process name
+   * @return the result
+   */
+  private boolean isValidatePages(List<String> procs) {
+    return procs != null && "validate-pages".equalsIgnoreCase(procs.get(0));
+  }
+
+  /**
    * run cli app
    *
    * @param args the args
@@ -92,15 +118,21 @@ public class ProcessLauncher implements ApplicationRunner {
     }
     
     List<String> procs = args.getOptionValues("proc");
-    if (procs == null || procs.isEmpty() || "converter".equalsIgnoreCase(procs.get(0))) {
+    if (procs == null || procs.isEmpty()
+        || isConverter(procs)
+        || isValidatePages(procs)
+    ) {
       WebSite site = getSite(args);
       Integer webSiteId = site == null ? null : site.getId();
       if (isOnlyClean(args)) {
         logger.info("run clean up process ...");
         cleanerService.clean(webSiteId);
-      } else {
+      } else if (isConverter(procs)) {
         logger.info("running converter process ...");
         converterService.convert(webSiteId);
+      } else if (isValidatePages(procs)) {
+        logger.info("running validate pages service process ...");
+        validatePagesService.validate(webSiteId);
       }
     } else if ("crawler".equalsIgnoreCase(procs.get(0))) {
       WebSite website = getSite(args);
