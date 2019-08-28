@@ -139,7 +139,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     task.setUrl(matchedUrl.getUrl().toString());
     task.setSourceUrl("http://test.com");
     when(pageRepository.findByUrl(matchedUrl.getUrl().toString())).thenReturn(cPage);
-    when(destinationURLRepository.findByUrl(webSite.getUrl())).thenReturn(createDestinationURL());
+    when(destinationURLRepository.findByUrlAndPageId(webSite.getUrl(), 1)).thenReturn(createDestinationURL());
     when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(new SourceURL());
     when(sourceURLRepository.save(any(SourceURL.class))).thenReturn(new SourceURL());
     crawlerThread.download(matchedUrl);
