@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
@@ -39,7 +38,7 @@ public class CrawlerThreadPoolExecutorTest {
 
     threadPoolExecutor.schedule(thread, 0, TimeUnit.MILLISECONDS);
     assertEquals(threadPoolExecutor.getRunningCount(), Integer.valueOf(1));
-    assertTrue(CrawlerThreadPoolExecutor.isReachedTimelimt(0));
+    assertTrue(CrawlerThreadPoolExecutor.isReachedTimeLimit(0));
     threadPoolExecutor.setExecutedHandler(runnable -> assertEquals(threadPoolExecutor.getRunningCount(),
         Integer.valueOf(0)));
     try {

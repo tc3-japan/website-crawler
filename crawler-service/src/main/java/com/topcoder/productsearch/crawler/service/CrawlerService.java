@@ -131,7 +131,7 @@ public class CrawlerService {
     while (!queueTasks.isEmpty()) {
       CrawlerTask task = queueTasks.poll();
 
-      if (CrawlerThreadPoolExecutor.isReachedTimelimt(task.getSite().getCrawlTimeLimit())) {
+      if (CrawlerThreadPoolExecutor.isReachedTimeLimit(task.getSite().getCrawlTimeLimit())) {
         // the elapsed time from the start reaches the time limit for a crawling process
         // stop creating new task and ignore/drop this task
         logger.warn(String.format("the elapsed time from the start reaches the time limit " +
