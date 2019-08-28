@@ -15,7 +15,7 @@ INSERT INTO `web_sites`
 'https://www.uniqlo.com/us/en/',
 'https://www.uniqlo.com/us/en/[^/]+?.html.*?cgid=.*?$',
 3,
-300
+600
 );
 
 

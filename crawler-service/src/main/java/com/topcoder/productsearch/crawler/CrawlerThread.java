@@ -253,6 +253,10 @@ public class CrawlerThread implements Runnable {
    * @param url the url
    */
   private void enqueue(String url) {
+//    if (CrawlerThreadPoolExecutor.isReachedTimelimt(crawlerTask.getSite().getCrawlTimeLimit())) {
+//      logger.info("skip " + url + " , because of reached time limit");
+//      return;
+//    }
     if (crawlerTask.getDepth() >= maxDepth) {
       logger.info("skip " + url + " , because of reached max depth");
       return;

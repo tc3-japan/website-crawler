@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -102,6 +103,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.init();
     crawlerThread.setWebClient(webClient);
     crawlerThread.setDomHelper(domHelper);
+    CrawlerThreadPoolExecutor.startedTime = new Date();
   }
 
   @Test
