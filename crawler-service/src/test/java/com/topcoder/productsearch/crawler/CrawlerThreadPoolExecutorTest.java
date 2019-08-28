@@ -39,7 +39,7 @@ public class CrawlerThreadPoolExecutorTest {
 
     threadPoolExecutor.schedule(thread, 0, TimeUnit.MILLISECONDS);
     assertEquals(threadPoolExecutor.getRunningCount(), Integer.valueOf(1));
-    assertEquals(0, threadPoolExecutor.getAllCostTime(1));
+    assertTrue(CrawlerThreadPoolExecutor.isReachedTimelimt(0));
     threadPoolExecutor.setExecutedHandler(runnable -> assertEquals(threadPoolExecutor.getRunningCount(),
         Integer.valueOf(0)));
     try {

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -129,14 +130,13 @@ public class CrawlerService {
 
     while (!queueTasks.isEmpty()) {
       CrawlerTask task = queueTasks.poll();
-      long costTime = threadPoolExecutor.getAllCostTime(task.getSite().getId());
-      if (costTime > task.getSite().getCrawlTimeLimit() * 1000) {
+
+      if (CrawlerThreadPoolExecutor.isReachedTimelimt(task.getSite().getCrawlTimeLimit())) {
         // the elapsed time from the start reaches the time limit for a crawling process
-        // stop creating a new request
-        logger.warn(String.format("the elapsed time from the start reaches the time limit for a crawling process," +
-                " stop creating a new task, %d > %d",
-            costTime, task.getSite().getCrawlTimeLimit() * 1000));
-        break;
+        // stop creating new task and ignore/drop this task
+        logger.warn(String.format("the elapsed time from the start reaches the time limit " +
+            "for a crawling process, ignore/drop this task %s", task.getUrl()));
+        continue;
       }
 
       if (threadPoolExecutor.getRunningCount() >= threadPoolExecutor.getCorePoolSize()) {
@@ -157,8 +157,8 @@ public class CrawlerService {
       shouldVisit.put(Common.normalize(thread.getCrawlerTask().getUrl()), Boolean.TRUE);
       // schedule execute task after taskInterval
       threadPoolExecutor.schedule(thread, taskInterval, TimeUnit.MILLISECONDS);
-      logger.debug("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
-          + ", total running time(ms) = " + costTime);
+      logger.info("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
+          + ", total running time(ms) = " + (new Date().getTime() - CrawlerThreadPoolExecutor.startedTime.getTime()));
     }
 
     int taskSize = threadPoolExecutor.getRunningCount();
