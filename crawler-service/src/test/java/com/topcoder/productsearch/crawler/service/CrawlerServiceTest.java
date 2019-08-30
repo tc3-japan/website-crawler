@@ -61,7 +61,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Test
   public void testServiceOutOfQueue() {
-    CrawlerThreadPoolExecutor.startedTime = new Date();
+    crawlerService.getThreadPoolExecutor().setStartedTime(new Date());
     crawlerService.getThreadPoolExecutor().setRunningCount(1);
     crawlerService.getThreadPoolExecutor().setCorePoolSize(1);
     crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site, null));
