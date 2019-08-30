@@ -131,7 +131,7 @@ public class CrawlerService {
     while (!queueTasks.isEmpty()) {
       CrawlerTask task = queueTasks.poll();
 
-      if (CrawlerThreadPoolExecutor.isReachedTimeLimit(task.getSite().getCrawlTimeLimit())) {
+      if (threadPoolExecutor.isReachedTimeLimit(task.getSite().getCrawlTimeLimit())) {
         // the elapsed time from the start reaches the time limit for a crawling process
         // stop creating new task and ignore/drop this task
         logger.warn(String.format("the elapsed time from the start reaches the time limit " +
@@ -158,7 +158,7 @@ public class CrawlerService {
       // schedule execute task after taskInterval
       threadPoolExecutor.schedule(thread, taskInterval, TimeUnit.MILLISECONDS);
       logger.info("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
-          + ", total running time(ms) = " + (new Date().getTime() - CrawlerThreadPoolExecutor.startedTime.getTime()));
+          + ", total running time(ms) = " + (new Date().getTime() - threadPoolExecutor.getStartedTime().getTime()));
     }
 
     int taskSize = threadPoolExecutor.getRunningCount();

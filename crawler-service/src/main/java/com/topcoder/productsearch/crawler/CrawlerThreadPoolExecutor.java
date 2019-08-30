@@ -22,8 +22,10 @@ import lombok.Setter;
 @Setter
 public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
 
-
-  public static Date startedTime = null;
+  /**
+   * the app start time
+   */
+  private Date startedTime = null;
 
   /**
    * completed callback handler
@@ -140,7 +142,7 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
    * @param timeLimit the website timeLimit
    * @return the result
    */
-  public static boolean isReachedTimeLimit(int timeLimit) {
+  public boolean isReachedTimeLimit(int timeLimit) {
     return new Date().getTime() - startedTime.getTime() >= timeLimit * 1000;
   }
 }
