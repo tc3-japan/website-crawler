@@ -1,4 +1,4 @@
-package com.topcoder.productsearch.validatePages.service;
+package com.topcoder.productsearch.cleaner.service;
 
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.repository.PageRepository;
