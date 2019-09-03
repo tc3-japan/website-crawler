@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "page_updated_at",
+    "type": "pdate",
+    "required": true,
+    "indexed": false,
+    "stored": true
+  }
+}

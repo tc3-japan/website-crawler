@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "product_url",
+    "type": "string",
+    "required": true,
+    "indexed": false,
+    "stored": true
+  }
+}
