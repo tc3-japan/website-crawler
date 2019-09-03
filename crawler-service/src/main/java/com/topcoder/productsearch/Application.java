@@ -12,7 +12,6 @@ import org.springframework.context.annotation.ComponentScan;
     "com.topcoder.productsearch.common",
     "com.topcoder.productsearch.crawler",
     "com.topcoder.productsearch.converter",
-    "com.topcoder.productsearch.validatePages",
     "com.topcoder.productsearch.cleaner"})
 public class Application {
 

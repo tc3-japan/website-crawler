@@ -4,7 +4,9 @@ import com.panforge.robotstxt.CustomRobotsTxtReader;
 import com.panforge.robotstxt.RobotsTxt;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.specifications.PageSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -12,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -168,13 +169,13 @@ public class Common {
    * 3. and process this pages in multiple thread
    * 4. add page number, then fetch and process again util no pages
    *
-   * @param webSiteId      the website id, can be null
+   * @param searchCriteria the searchCriteria
    * @param parallelSize   the parallel/page size
    * @param pageRepository the page repository
    * @param processHandler the process handler
    * @throws InterruptedException when thread interrupt
    */
-  public static void readAndProcessPage(Integer webSiteId,
+  public static void readAndProcessPage(PageSearchCriteria searchCriteria,
                                         int parallelSize,
                                         PageRepository pageRepository,
                                         ProcessHandler processHandler
@@ -191,7 +192,7 @@ public class Common {
         TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(totalQueueSize));
 
     do {
-      cPages = Common.fetch(pageRepository, webSiteId, pageable);
+      cPages = Common.fetch(pageRepository, searchCriteria, pageable);
       if (cPages.size() <= 0) {
         break;
       }
@@ -222,18 +223,13 @@ public class Common {
    * fetch pages
    *
    * @param pageRepository the page repository
-   * @param webSiteId      the website id
+   * @param searchCriteria the page search searchCriteria
    * @param pageable       the page request
    * @return the paged pages
    */
-  public static List<CPage> fetch(PageRepository pageRepository, Integer webSiteId, Pageable pageable) {
-    List<CPage> pages;
-    if (webSiteId != null) {
-      pages = pageRepository.findAllBySiteId(webSiteId, pageable);
-    } else {
-      Page<CPage> dbPage = pageRepository.findAll(pageable);
-      pages = dbPage.getContent();
-    }
-    return pages;
+  public static List<CPage> fetch(PageRepository pageRepository, PageSearchCriteria searchCriteria, Pageable pageable) {
+    Page<CPage> pages = pageRepository.findAll(new PageSpecification(searchCriteria), pageable);
+    logger.info("fetch pages searchCriteria = " + searchCriteria.toString());
+    return pages.getContent();
   }
 }

@@ -3,20 +3,25 @@ package com.topcoder.productsearch.common.util;
 
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.specifications.PageSpecification;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.sound.midi.Track;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * unit test for common class
@@ -30,6 +35,9 @@ public class CommonTest {
 
   @Mock
   Page springPage;
+
+  @Mock
+  Page<CPage> pages;
 
   @Test
   public void testRemoveHash() {
@@ -69,23 +77,21 @@ public class CommonTest {
   public void testFetch() {
     PageRequest pageRequest = new PageRequest(0, 1);
     when(springPage.getContent()).thenReturn(new LinkedList());
-    when(pageRepository.findAll(pageRequest)).thenReturn(springPage);
-    when(pageRepository.findAllBySiteId(1, pageRequest)).thenReturn(new LinkedList<>());
+    when(pageRepository.findAll(any(PageSpecification.class), any(Pageable.class))).thenReturn(pages);
 
-    List<CPage> pages = Common.fetch(pageRepository, 1, pageRequest);
+    List<CPage> pages = Common.fetch(pageRepository, new PageSearchCriteria(1, null), pageRequest);
     assertEquals(0, pages.size());
-    pages = Common.fetch(pageRepository, null, pageRequest);
+    pages = Common.fetch(pageRepository, new PageSearchCriteria(1, true), pageRequest);
     assertEquals(0, pages.size());
   }
 
   @Test
   public void testReadAndProcessPage() throws InterruptedException {
-    List<CPage> pages = new LinkedList<>();
-    CPage page = new CPage();
-    page.setId(1);
-    pages.add(page);
-    when(pageRepository.findAllBySiteId(1, new PageRequest(0, 4))).thenReturn(pages);
-    Common.readAndProcessPage(1, 4, pageRepository, (threadPoolExecutor, cPage) -> {
+    List<CPage> pageList = new LinkedList<>();
+    when(pages.getContent()).thenReturn(pageList);
+    when(pageRepository.findAll(any(PageSpecification.class), any(Pageable.class))).thenReturn(pages);
+    Common.readAndProcessPage(new PageSearchCriteria(1, null), 4, pageRepository,
+        (threadPoolExecutor, cPage1) -> {
       threadPoolExecutor.submit(() -> {
         try {
           Thread.sleep(10);
@@ -93,7 +99,7 @@ public class CommonTest {
           e.printStackTrace();
         }
       });
-      assertEquals(Integer.valueOf(1), cPage.getId());
+      verify(pageRepository, times(1)).findAll(any(PageSpecification.class), any(Pageable.class));
     });
   }
 
