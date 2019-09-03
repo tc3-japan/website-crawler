@@ -5,6 +5,7 @@ import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
+import com.topcoder.productsearch.crawler.CrawlerThreadPoolExecutor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
@@ -59,6 +61,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Test
   public void testServiceOutOfQueue() {
+    crawlerService.getThreadPoolExecutor().setStartedTime(new Date());
     crawlerService.getThreadPoolExecutor().setRunningCount(1);
     crawlerService.getThreadPoolExecutor().setCorePoolSize(1);
     crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site, null));
