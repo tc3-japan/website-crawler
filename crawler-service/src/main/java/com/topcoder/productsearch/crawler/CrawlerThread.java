@@ -225,15 +225,12 @@ public class CrawlerThread implements Runnable {
         }
         sourceURLRepository.save(sourceURL);
       }
-      
+
       if (finalPageId != null) {
-        DestinationURL destinationURL = destinationURLRepository.findByUrl(url);
-        // this page may already have been processed from a previous thread during the execution and should be skipped.
-        if (destinationURL != null) {
-          destinationURL.setLastModifiedAt(Date.from(Instant.now()));
-          destinationURL.setPageId(finalPageId);
-          destinationURLRepository.save(destinationURL);
-        } else {
+        DestinationURL destinationURL = destinationURLRepository.findByUrlAndPageId(url, finalPageId);
+        // page already have been processed from a previous thread during the execution and should be skipped.
+        // only process not exist destinationURL
+        if (destinationURL == null) {
           destinationURL = new DestinationURL();
           destinationURL.setCreatedAt(Date.from(Instant.now()));
           destinationURL.setUrl(url);
