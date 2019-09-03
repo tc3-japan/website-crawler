@@ -13,6 +13,8 @@ buildscript {
     dependencies {
         classpath 'mysql:mysql-connector-java:8.0.13'
         classpath 'org.yaml:snakeyaml:1.21'
+        classpath 'gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.22.1'
+        classpath 'com.google.guava:guava:27.0.1-jre'
     }
 }
 
@@ -41,7 +43,9 @@ plugins {
     // test coverage
     // id 'jacoco'
 }
+apply plugin: 'com.palantir.docker'
 
+version = '1.0'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
@@ -55,19 +59,20 @@ repositories {
 
 dependencies {
     // This dependency is used by the application.
-    implementation 'com.google.guava:guava:27.1-jre'
-    implementation 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-web:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-logging:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
+    compile 'com.google.guava:guava:27.1-jre'
+    compile 'org.springframework.boot:spring-boot-dependencies:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-jdbc:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-logging:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
     compile group: 'org.apache.solr', name: 'solr-solrj', version: '8.2.0'
     compile group: 'com.panforge', name: 'robots', version: '1.4.2'
-    implementation 'mysql:mysql-connector-java:8.0.13'
-    compile("net.sourceforge.htmlunit:htmlunit:2.33")
+    compile 'mysql:mysql-connector-java:8.0.13'
+    compile 'net.sourceforge.htmlunit:htmlunit:2.33'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.12'
+    compile group: 'com.panforge', name: 'robots', version: '1.4.2'
 
 
     implementation 'org.flywaydb:flyway-core:5.1.4'
@@ -149,7 +154,6 @@ jacocoTestReport {
     }
 }
 
-
 bootRun {
     // with Parameters
     if (project.hasProperty('args')) {
@@ -159,4 +163,20 @@ bootRun {
     if ( project.hasProperty('jvmArgs') ) {
         jvmArgs project.jvmArgs.split(',')
     }
+}
+
+bootRepackage {
+    mainClass = 'com.topcoder.productsearch.Application'
+}
+
+def jarPath = jar.archivePath
+
+docker {
+  dependsOn build
+  name "tc3/productsearch-service-${profile ? profile : 'default'}:${version}"
+  files jar.archivePath
+  buildArgs([
+    'PROFILE': profile,
+    'JAR_FILE': jar.archiveName
+  ])
 }

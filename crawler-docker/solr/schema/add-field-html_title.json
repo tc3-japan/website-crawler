@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "html_title",
+    "type": "text_ja",
+    "required": false,
+    "indexed": true,
+    "stored": true
+  }
+}

@@ -1,0 +1,37 @@
+version: "3"
+services:
+  search:
+    image: tc3/productsearch-solr:1.0
+    build:
+      context: ./solr/
+    volumes:
+      - search-store:/var/solr/data
+    ports:
+      - 8983:8983
+  
+  db:
+    image: mysql:8.0.17
+    volumes:
+      - db-store:/var/lib/mysql
+      - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      #- MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - TZ=${TZ}
+    ports:
+      - ${DB_PORT}:3306
+    
+  api:
+    image: tc3/productsearch-service-${PROFILE}:${API_VER}
+    ports:
+      - ${API_PORT}:8090
+    command: "--rest"
+
+volumes:
+  search-store:
+    driver: local
+  db-store:
+    driver: local
