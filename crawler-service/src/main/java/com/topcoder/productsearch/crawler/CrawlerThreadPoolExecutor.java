@@ -1,5 +1,6 @@
 package com.topcoder.productsearch.crawler;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -20,6 +21,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
+
+  /**
+   * the app start time
+   */
+  private Date startedTime = null;
 
   /**
    * completed callback handler
@@ -73,6 +79,10 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
     super(corePoolSize);
     this.taskInterval = taskInterval;
     this.crawlerThreads = new ConcurrentHashMap<>();
+
+    if (startedTime == null) {
+      startedTime = new Date();
+    }
   }
 
   @Override
@@ -128,16 +138,11 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
   }
 
   /**
-   * get all cost time for site
-   *
-   * @param siteId the site id
-   * @return the cost time
+   * is the Crawler total run time is reached time limit or not
+   * @param timeLimit the website timeLimit
+   * @return the result
    */
-  public long getAllCostTime(Integer siteId) {
-    return crawlerThreads.values().stream()
-        .filter(t -> t.getCrawlerTask().getSite().getId().equals(siteId) && t.getCrawlerTask().getStartTime() > 0)
-        .mapToLong(t -> (System.currentTimeMillis() - t.getCrawlerTask().getStartTime()))
-        .sum();
+  public boolean isReachedTimeLimit(int timeLimit) {
+    return new Date().getTime() - startedTime.getTime() >= timeLimit * 1000;
   }
-
 }

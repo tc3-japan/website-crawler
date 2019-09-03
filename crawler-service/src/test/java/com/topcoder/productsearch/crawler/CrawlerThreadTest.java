@@ -16,6 +16,7 @@ import com.topcoder.productsearch.common.repository.PageRepository;
 
 import com.topcoder.productsearch.common.repository.SourceURLRepository;
 import com.topcoder.productsearch.common.util.DomHelper;
+import com.topcoder.productsearch.crawler.service.CrawlerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -102,6 +104,8 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.init();
     crawlerThread.setWebClient(webClient);
     crawlerThread.setDomHelper(domHelper);
+    crawlerThread.setCrawlerService(new CrawlerService(10,1000));
+    crawlerThread.getCrawlerService().getThreadPoolExecutor().setStartedTime(new Date());
   }
 
   @Test
