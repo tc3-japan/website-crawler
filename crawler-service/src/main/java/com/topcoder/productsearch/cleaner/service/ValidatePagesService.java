@@ -1,6 +1,7 @@
 package com.topcoder.productsearch.cleaner.service;
 
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.converter.service.SolrService;
@@ -54,7 +55,8 @@ public class ValidatePagesService {
    * @throws InterruptedException when thread interrupted
    */
   public void validate(Integer webSiteId) throws InterruptedException {
-    Common.readAndProcessPage(webSiteId, parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
+    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, false),
+        parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
         threadPoolExecutor.submit(() -> {
           this.process(cPage);
         }));
