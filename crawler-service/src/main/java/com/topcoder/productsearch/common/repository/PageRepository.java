@@ -23,14 +23,4 @@ public interface PageRepository extends CrudRepository<CPage, Integer>, JpaSpeci
    * @return the page entity
    */
   CPage findByUrl(String url);
-
-  /**
-   * find all with pageable
-   *
-   * @param specification the page specification
-   * @param pageable      the page request
-   * @return the list of pages
-   */
-  Page<CPage> findAll(PageSpecification specification, Pageable pageable);
-
 }
