@@ -67,6 +67,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-logging:1.5.7.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-security:1.5.7.RELEASE'
     compile group: 'org.apache.solr', name: 'solr-solrj', version: '8.2.0'
     compile group: 'com.panforge', name: 'robots', version: '1.4.2'
     compile 'mysql:mysql-connector-java:8.0.13'
@@ -149,7 +150,7 @@ jacocoTestReport {
     }
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: ['com/**/Application**', 'com/panforge/robotstxt/**'])
+            fileTree(dir: it, exclude: ['com/**/Application**', 'com/**/securities/**', 'com/panforge/robotstxt/**'])
         }))
     }
 }

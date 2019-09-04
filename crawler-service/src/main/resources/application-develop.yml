@@ -24,6 +24,12 @@ management:
       path-mapping:
         health: healthcheck
 
+authentication:
+  enabled: true
+  credentials:
+    username: admin
+    password: adminpass
+
 server:
   port: 8090
   servlet-path: /api
