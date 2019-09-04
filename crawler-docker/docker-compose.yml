@@ -1,6 +1,7 @@
 version: "3"
 services:
-  search:
+
+  solr:
     image: tc3/productsearch-solr:1.0
     build:
       context: ./solr/
@@ -9,7 +10,7 @@ services:
     ports:
       - 8983:8983
   
-  db:
+  mysql:
     image: mysql:8.0.17
     volumes:
       - db-store:/var/lib/mysql
@@ -23,12 +24,23 @@ services:
       - TZ=${TZ}
     ports:
       - ${DB_PORT}:3306
-    
+
   api:
     image: tc3/productsearch-service-${PROFILE}:${API_VER}
+    depends_on:
+      - mysql
+      - solr
     ports:
       - ${API_PORT}:8090
     command: "--rest"
+
+  crawler:
+    image: tc3/productsearch-service-${PROFILE}:${API_VER}
+    depends_on:
+      - mysql
+      - solr
+    entrypoint: "bash"
+    tty: true
 
 volumes:
   search-store:
