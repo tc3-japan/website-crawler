@@ -3,6 +3,7 @@ package com.topcoder.productsearch.cleaner.service;
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.specifications.PageSpecification;
 import com.topcoder.productsearch.converter.service.SolrService;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.Test;
@@ -41,20 +42,16 @@ public class CleanerServiceTest extends AbstractUnitTest {
   @InjectMocks
   CleanerService cleanerService;
 
+  @Mock
+  Page<CPage> pages;
 
   @Test
   public void testClean() throws InterruptedException {
-
     cleanerService.setParallelSize(4);
-    List<CPage> pages = new LinkedList<>();
-    CPage page = new CPage();
-    page.setId(1);
-    pages.add(page);
-
-    Pageable pageable = new PageRequest(0, 4);
-    when(pageRepository.findAllBySiteId(1, pageable)).thenReturn(pages);
+    when(pages.getContent()).thenReturn(new LinkedList<>());
+    when(pageRepository.findAll(any(PageSpecification.class), any(Pageable.class))).thenReturn(pages);
     cleanerService.clean(1);
-    verify(pageRepository, times(2)).findAllBySiteId(any(Integer.class), any(Pageable.class));
+    verify(pageRepository, times(1)).findAll(any(PageSpecification.class), any(Pageable.class));
   }
 
   @Test
