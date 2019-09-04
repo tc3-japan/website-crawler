@@ -2,7 +2,7 @@ version: "3"
 services:
 
   solr:
-    image: tc3/productsearch-solr:1.0
+    image: tc3jp/productsearch-solr:8.1.1
     build:
       context: ./solr/
     volumes:
@@ -26,7 +26,7 @@ services:
       - ${DB_PORT}:3306
 
   api:
-    image: tc3/productsearch-service-${PROFILE}:${API_VER}
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
     depends_on:
       - mysql
       - solr
@@ -35,7 +35,7 @@ services:
     command: "--rest"
 
   crawler:
-    image: tc3/productsearch-service-${PROFILE}:${API_VER}
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
     depends_on:
       - mysql
       - solr
