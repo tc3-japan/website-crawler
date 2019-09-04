@@ -146,6 +146,7 @@ public class ProcessLauncher implements ApplicationRunner {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=validate-pages");
     }
   }
 }
