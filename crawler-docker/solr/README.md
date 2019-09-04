@@ -4,10 +4,10 @@
 
 1. Build image
    ```bash
-   docker build -t tc3/productsearch-solr:1.0 .
+   docker build -t tc3jp/productsearch-solr:1.0 .
    ```
 
 1. Run image
    ```bash
-   docker run -t --name solr -p 8983:8983 tc3/productsearch-solr:1.0
+   docker run -t --name solr -p 8983:8983 tc3jp/productsearch-solr:1.0
    ```
