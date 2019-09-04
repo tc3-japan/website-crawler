@@ -15,4 +15,10 @@ cors:
   allowed-origins: "*"
   allowed-methods: HEAD,GET,PUT,POST,DELETE
 
+authentication:
+  enabled: true
+  credentials:
+    username: admin
+    password: adminpass
+
 crawler-settings:
