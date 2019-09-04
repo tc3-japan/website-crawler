@@ -173,7 +173,7 @@ def jarPath = jar.archivePath
 
 docker {
   dependsOn build
-  name "tc3/productsearch-service-${profile ? profile : 'default'}:${version}"
+  name "tc3jp/productsearch-service:${profile ? profile : 'default'}-${version}"
   files jar.archivePath
   buildArgs([
     'PROFILE': profile,
