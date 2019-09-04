@@ -144,7 +144,7 @@ public class Common {
     try {
       HttpURLConnection http = (HttpURLConnection) new URL(url).openConnection();
       int statusCode = http.getResponseCode();
-      return statusCode == 404; // the page is broken if code == 404
+      return statusCode == 404 || statusCode == 410; // the page is broken if code == 404
     } catch (MalformedURLException e) {
       // page is broken if url is invalid
       return true;
