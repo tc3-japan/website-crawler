@@ -6,6 +6,7 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,9 @@ public class ProcessLauncherTest {
   @Mock
   CleanerService cleanerService;
 
+  @Mock
+  ValidatePagesService validatePagesService;
+
   @InjectMocks
   ProcessLauncher processLauncher;
 
@@ -64,6 +68,7 @@ public class ProcessLauncherTest {
     doNothing().when(converterService).convert(null);
     doNothing().when(cleanerService).clean(any(Integer.class));
     doNothing().when(cleanerService).clean(null);
+    doNothing().when(validatePagesService).validate(anyInt());
 
 
     try {
@@ -116,6 +121,15 @@ public class ProcessLauncherTest {
     args5 = new DefaultApplicationArguments(new String[]{"--proc=converter", "--only-data-cleanup"});
     processLauncher.run(args5);
     verify(cleanerService, times(1)).clean(null);
+
+    args5 = new DefaultApplicationArguments(new String[]{"--proc=converter"});
+    processLauncher.run(args5);
+    verify(converterService, times(1)).convert(anyInt());
+
+
+    args5 = new DefaultApplicationArguments(new String[]{"--proc=validate-pages", "--site_id=1"});
+    processLauncher.run(args5);
+    verify(validatePagesService, times(1)).validate(anyInt());
 
   }
 

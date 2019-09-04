@@ -12,20 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Date;
-
 /**
- * the cleaner service
+ * the validate pages service
  */
 @Service
 @Setter
-public class CleanerService {
+public class ValidatePagesService {
 
   /**
    * the logger instance
    */
-  private static final Logger logger = LoggerFactory.getLogger(CleanerService.class);
+  private static final Logger logger = LoggerFactory.getLogger(ValidatePagesService.class);
 
   /**
    * the page expired period time, unit is day
@@ -57,44 +54,25 @@ public class CleanerService {
    * @param webSiteId the website id, it can be null
    * @throws InterruptedException when thread interrupted
    */
-  public void clean(Integer webSiteId) throws InterruptedException {
-    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, null),
+  public void validate(Integer webSiteId) throws InterruptedException {
+    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, false),
         parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
         threadPoolExecutor.submit(() -> {
-          logger.info("cleaner process for url " + cPage.getUrl());
-          cleanPage(cPage);
+          this.process(cPage);
         }));
   }
 
   /**
-   * clean page
+   * process page
    *
-   * @param cPage the page entity
+   * @param cPage the db page
    */
-  public void cleanPage(CPage cPage) {
-
-
-    /*
-     Expired pages will be deleted.  If the page has not been updated since a specified time,
-     Field last_modified_at in the pages table will be used to determine the time of last update.
-     */
-    Date expiresDate = java.sql.Date.valueOf(LocalDate.now().minusDays(pageExpiredPeriod));
-    boolean needClean = false;
-    if (cPage.getLastModifiedAt().before(expiresDate)) {
-      needClean = true;
-    }
-
-    // if need clean or crawler marked as deleted
-    if (needClean || cPage.getDeleted()) {
-      logger.info("clean page for " + cPage.getUrl());
-      try {
-        solrService.deleteByURL(cPage.getUrl()); // remove from solr
-        cPage.setDeleted(true); // set deleted flag
-        pageRepository.save(cPage); // save cPage
-      } catch (Exception e) {
-        logger.error("delete from solr failed");
-        e.printStackTrace();
-      }
+  public void process(CPage cPage) {
+    logger.info("validate url " + cPage.getUrl());
+    if (Common.isUrlBroken(cPage.getUrl())) {
+      cPage.setDeleted(true);
+      pageRepository.save(cPage);
+      logger.info("mark " + cPage.getUrl() + " deleted=true");
     }
   }
 }
