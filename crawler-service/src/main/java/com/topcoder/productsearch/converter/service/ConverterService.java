@@ -1,6 +1,7 @@
 package com.topcoder.productsearch.converter.service;
 
 import com.topcoder.productsearch.cleaner.service.CleanerService;
+import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.converter.ConvertThread;
@@ -49,7 +50,8 @@ public class ConverterService {
    * @throws InterruptedException when thread interrupted
    */
   public void convert(Integer webSiteId) throws InterruptedException {
-    Common.readAndProcessPage(webSiteId, parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
-        threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService)));
+    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, null),
+        parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
+            threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService)));
   }
 }
