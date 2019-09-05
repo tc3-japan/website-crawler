@@ -34,7 +34,7 @@ services:
       - ${API_PORT}:8090
     command: "--rest"
 
-  crawler:
+  job:
     image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
     depends_on:
       - mysql
