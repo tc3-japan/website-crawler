@@ -1,0 +1,24 @@
+version: "3"
+services:
+
+  #
+  # $docker-compose -f docker-compose-jobs.yml up crawler|converter|cleanervalidator
+  #
+  # This needs MySQL and Solr. 
+
+  crawler:
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
+    command: "--proc=crawler --site=1"
+  
+  converter:
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
+    command: "--proc=converter --site=1"
+
+  cleaner:
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
+    command: "--proc=converter --only-data-cleanup --site=1"
+
+  validator:
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
+    command: "--proc=validate-pages --site=1"
+
