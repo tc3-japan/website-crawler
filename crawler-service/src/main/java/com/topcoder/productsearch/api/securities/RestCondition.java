@@ -11,10 +11,13 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  */
 public class RestCondition implements Condition {
 
-  public static boolean isRest = false;
+  private static boolean rest = false;
 
   @Override
   public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-    return isRest;
+    return rest;
+  }
+  public static void setRest(boolean rest){
+    RestCondition.rest = rest;
   }
 }

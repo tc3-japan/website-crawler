@@ -29,7 +29,7 @@ public class Application {
       if ("--rest".equalsIgnoreCase(arg)) {
         isRestMode = true;
       }
-      RestCondition.isRest = isRestMode;
+      RestCondition.setRest(isRestMode);
     }
     new SpringApplicationBuilder(Application.class).web(isRestMode).run(args);
   }
