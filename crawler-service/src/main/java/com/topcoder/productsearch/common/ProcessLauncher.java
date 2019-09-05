@@ -67,7 +67,9 @@ public class ProcessLauncher implements ApplicationRunner {
       Integer websiteId = Integer.parseInt(sites.get(0));
       WebSite website = webSiteRepository.findOne(websiteId);
       if (website == null) {
-        throw new Exception("can not find website where id = " + websiteId);
+        //throw new Exception("can not find website where id = " + websiteId);
+        logger.info("Cannot find website where id = " + websiteId);
+        System.out.println("************************************* Cannot find website where id = "+ websiteId +" ****************************");
       }
       return website;
     }
@@ -120,10 +122,9 @@ public class ProcessLauncher implements ApplicationRunner {
     List<String> procs = args.getOptionValues("proc");
     if (procs == null || procs.isEmpty()
         || isConverter(procs)
-        || isValidatePages(procs)
-    ) {
-      WebSite site = getSite(args);
-      Integer webSiteId = site == null ? null : site.getId();
+        || isValidatePages(procs)) {
+      WebSite website = getSite(args);
+      Integer webSiteId = website == null ? null : website.getId();
       if (isOnlyClean(args)) {
         logger.info("run clean up process ...");
         cleanerService.clean(webSiteId);
@@ -137,7 +138,10 @@ public class ProcessLauncher implements ApplicationRunner {
     } else if ("crawler".equalsIgnoreCase(procs.get(0))) {
       WebSite website = getSite(args);
       if (website == null) {
-        throw new IllegalArgumentException("Missing parameter '--site=<site-id>'");
+        // logger.info("Missing parameter '--site=<site-id>'");
+        logger.info("Exiting...");
+        System.out.println("************************************* Exiting *****************");
+        return;
       }
       logger.info(">>> Start crawling on : " + website.getName());
       crawlerService.crawler(website);
