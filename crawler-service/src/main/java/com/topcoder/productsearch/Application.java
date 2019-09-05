@@ -1,5 +1,6 @@
 package com.topcoder.productsearch;
 
+import com.topcoder.productsearch.api.securities.RestCondition;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
@@ -28,8 +29,8 @@ public class Application {
       if ("--rest".equalsIgnoreCase(arg)) {
         isRestMode = true;
       }
+      RestCondition.isRest = isRestMode;
     }
-
     new SpringApplicationBuilder(Application.class).web(isRestMode).run(args);
   }
 }
