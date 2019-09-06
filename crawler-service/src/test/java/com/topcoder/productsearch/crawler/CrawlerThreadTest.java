@@ -222,6 +222,16 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   }
 
   @Test
+  public void test501() {
+    crawlerThread.getExpandUrl().clear();
+    when(htmlPage.getTitleText()).thenReturn("title");
+    when(webResponse.getStatusCode()).thenReturn(501);
+    crawlerThread.setRetryTimes(1);
+    crawlerThread.download(rootURL);
+    assertEquals(crawlerThread.getExpandUrl().size(),0);
+  }
+
+  @Test
   public void testTimeout() {
     crawlerThread.getCrawlerTask().setStartTime(0L);
     crawlerThread.download(rootURL);
