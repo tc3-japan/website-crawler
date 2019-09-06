@@ -1,8 +1,13 @@
 debug: false
-logging.level:
+logging:
+  file: website_crawler.log
+  # crawler process must have write permission for the given path
+  # path: /var/log
+  level:
     root: INFO
-    jp.go.meti: DEBUG
-    org.springframework.jdbc.core: INFO
+    org.springframework.jdbc.core: DEBUG
+    com.gargoylesoftware.htmlunit: ERROR
+
 
 spring:
   datasource:
