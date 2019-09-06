@@ -318,7 +318,9 @@ public class CrawlerThread implements Runnable {
         logger.error("unexpected status code = " + code);
         logger.error(page.getTitleText());
       } else if (code >= 500) {
-        throw new Exception(url + " got 500 error");
+        logger.warn("Received Internal Server Error: "+code+" from target Website Url: "+url);
+        logger.info("Retrying url: "+url);
+        this.retry(request);
       }
     } catch (Exception e) {
       e.printStackTrace();
