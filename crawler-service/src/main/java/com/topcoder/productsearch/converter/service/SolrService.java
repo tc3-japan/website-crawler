@@ -57,7 +57,7 @@ public class SolrService {
    *
    * @param serverURI the solr server uri
    */
-  public SolrService(@Value("${crawler-settings.solr-uri}") String serverURI) {
+  public SolrService(@Value("${solr.uri}") String serverURI) {
     httpSolrClient = new HttpSolrClient.Builder(serverURI).build();
     httpSolrClient.setParser(new XMLResponseParser());
   }
