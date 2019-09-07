@@ -31,11 +31,11 @@
     
     
 
-    you can update solr-uri if you need
+    you can update solr.uri if you need
     
     ```
-    crawler-settings:
-      solr-uri: http://localhost:8983/solr/manufacturer_product
+    solr:
+        uri: http://localhost:8983/solr/manufacturer_product
     ```
  
     NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
