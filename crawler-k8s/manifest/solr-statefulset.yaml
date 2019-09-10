@@ -20,7 +20,7 @@ spec:
       terminationGracePeriodSeconds: 10
       restartPolicy: Always
       containers:
-      - image: tc3jp/productsearch-solr:test3
+      - image: tc3jp/productsearch-solr:8.1.1
         name: solr
         readinessProbe:
           tcpSocket:
@@ -70,11 +70,21 @@ spec:
           name: solr-store
 
       - name: init-solr-xml
-        image: solr:8.1.1
+        image: tc3jp/productsearch-solr:8.1.1
         command: 
         - "/bin/sh"
         - "-c"
-        - "if [ ! -f /var/solr/data/solr.xml ] ; then cp /opt/solr/server/solr/solr.xml /var/solr/data/solr.xml; else true; fi "
+        - "if [ ! -f /var/solr/data/solr.xml ] ; then cp /opt/solr/solr.xml /var/solr/data/solr.xml; else true; fi "
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-store
+
+      - name: init-solr-secirutyjson
+        image: tc3jp/productsearch-solr:8.1.1
+        command: 
+        - "/bin/sh"
+        - "-c"
+        - "if [ ! -f /var/solr/data/security.json ] ; then cp /opt/solr/security.json /var/solr/data/security.json; else true; fi "
         volumeMounts:
         - mountPath: /var/solr
           name: solr-store
