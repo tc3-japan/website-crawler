@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: validator-cronjob
+spec:
+  schedule: "0 4 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: validator-cronjob
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - args:
+            - --proc=validate-pages
+            - --site=1
+            image: tc3jp/productsearch-service:develop-1.0
+            name: crawler
+            env:
+            - name: SPRING_JDBC_URL
+              value: jdbc:mysql://mysql:3306/website_crawler?useSSL=false&nullNamePatternMatchesAll=true&allowPublicKeyRetrieval=true
+            - name: SOLR_URL
+              value: http://solr:8983/solr/manufacturer_product

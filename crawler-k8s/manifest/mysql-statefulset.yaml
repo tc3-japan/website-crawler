@@ -1,0 +1,46 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.18.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mysql
+  name: mysql
+spec:
+  serviceName: mysql
+  replicas: 1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: mysql
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_DATABASE
+          value: website_crawler
+        - name: MYSQL_PASSWORD
+          value: mypassword
+        - name: MYSQL_ROOT_PASSWORD
+          value: mypassword
+        - name: TZ
+          value: Asia/Tokyo
+        image: tc3jp/productsearch-mysql:8.0.17
+        name: mysql
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysql-store
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-store
+    spec:
+      storageClassName: gp2
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
