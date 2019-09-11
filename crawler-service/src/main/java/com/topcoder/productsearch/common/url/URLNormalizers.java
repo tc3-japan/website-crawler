@@ -1,5 +1,6 @@
 package com.topcoder.productsearch.common.url;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,15 +12,15 @@ public class URLNormalizers {
         normalizers.add(urlNormalizer);
     }
 
-    public String execute(String url) {
-        StringBuffer result = new StringBuffer();
-        for (URLNormalizer urlNormalizer: normalizers) {
-            result.append(urlNormalizer.normalize(url));
+    public String execute(String url) throws MalformedURLException {
+
+        if (url == null) {
+            return null;
         }
-        return result.toString();
-
+        for (URLNormalizer urlNormalizer: normalizers) {
+            url = urlNormalizer.normalize(url);
+        }
+        return url;
     }
-
-    
 
 }
