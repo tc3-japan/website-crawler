@@ -67,3 +67,17 @@ crawler-settings:
   #Time lapse period for Expired pages in number of Days.
   page-expired-period: 30
   
+  #URL normalizer properties
+  #WIP: Order in which normalizers will run. If any of these isn't
+  #activated it will be silently skipped. If other normalizers not on the
+  #list are activated, they will run in random order after the ones
+  #specified here are run.
+  urlnormalizer.order: org.apache.nutch.net.urlnormalizer.basic.BasicURLNormalizer org.apache.nutch.net.urlnormalizer.regex.RegexURLNormalizer
+
+  #Name of the config file used by the RegexUrlNormalizer class.
+  urlnormalizer.regex.file: regex-normalize.json
+
+  #Optionally loop through normalizers several times, to make
+  #sure that all transformations have been performed.
+  urlnormalizer.loop.count: 1
+  
