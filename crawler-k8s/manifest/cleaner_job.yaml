@@ -1,17 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: crawler-job
+  name: cleaner-job
 spec:
   template:
     metadata:
       labels:
-        app: crawler-job
+        app: cleaner-job
     spec:
       restartPolicy: Never
       containers:
       - args:
-        - --proc=crawler
+        - --proc=converter
+        - --only-data-cleanup
         - --site=1
         image: tc3jp/productsearch-service:develop-1.0.2
         name: crawler
