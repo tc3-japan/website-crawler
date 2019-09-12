@@ -34,6 +34,10 @@ public class BasicURLNormalizer implements URLNormalizer {
   private final Rule currentPathRule;
   private final Rule adjacentSlashRule;
 
+    /**
+     * Initialize the Rules in the Constructor
+     * 
+     */
     public BasicURLNormalizer() {
         try {
             // this pattern tries to find spots like "/xx/../" in the url, which
@@ -70,6 +74,10 @@ public class BasicURLNormalizer implements URLNormalizer {
 
     }
 
+    /**
+     * Normalize the URL by applying different basic rules. 
+     * 
+     */
     public String normalize(String urlString) throws MalformedURLException {
         if ("".equals(urlString)) // permit empty
         return urlString;
@@ -129,6 +137,12 @@ public class BasicURLNormalizer implements URLNormalizer {
       return urlString;
     }
   
+    /**
+     * Apply the Rules to Normalize the paths defined in the Rules.
+     * 
+     * @param file
+     * @return
+     */
     private String substituteUnnecessaryRelativePaths(String file) {
       String fileWorkCopy = file;
       int oldLen = file.length();

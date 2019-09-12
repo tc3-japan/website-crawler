@@ -75,7 +75,7 @@ crawler-settings:
   urlnormalizer.order: org.apache.nutch.net.urlnormalizer.basic.BasicURLNormalizer org.apache.nutch.net.urlnormalizer.regex.RegexURLNormalizer
 
   #Name of the config file used by the RegexUrlNormalizer class.
-  urlnormalizer.regex.file: regex-normalize.json
+  urlnormalizer-regex-file: regex-normalize-default.xml
 
   #Optionally loop through normalizers several times, to make
   #sure that all transformations have been performed.

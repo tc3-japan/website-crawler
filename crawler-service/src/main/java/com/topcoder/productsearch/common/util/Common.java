@@ -7,6 +7,10 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
 import com.topcoder.productsearch.common.specifications.PageSpecification;
+import com.topcoder.productsearch.common.url.URLNormalizeManager;
+import com.topcoder.productsearch.common.url.normalizers.BasicURLNormalizer;
+import com.topcoder.productsearch.common.url.normalizers.RegexURLNormalizer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -107,8 +111,20 @@ public class Common {
    */
   public static String normalize(String url) {
     // TODO: The site-specific code
-    String[] parts = url.split("&");
-    return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
+    // String[] parts = url.split("&");
+    // return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
+    URLNormalizeManager normalizeManager = new URLNormalizeManager();
+    normalizeManager.setURLNormalizer(new BasicURLNormalizer());
+    
+    String normalizedURL = null;
+    try {
+      normalizeManager.setURLNormalizer(new RegexURLNormalizer());
+      normalizedURL = normalizeManager.normalizeURL(url);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return url;
+    }
+    return normalizedURL;
   }
 
   /**

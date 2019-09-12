@@ -22,3 +22,5 @@ authentication:
     password: adminpass
 
 crawler-settings:
+#Name of the config file used by the RegexUrlNormalizer class.
+  urlnormalizer-regex-file: regex-normalize-default.xml
