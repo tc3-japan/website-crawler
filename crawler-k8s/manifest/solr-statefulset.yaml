@@ -1,0 +1,101 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.18.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: solr
+  name: solr
+spec:
+  serviceName: solr
+  replicas: 1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: solr
+    spec:
+      terminationGracePeriodSeconds: 10
+      restartPolicy: Always
+      containers:
+      - image: tc3jp/productsearch-solr:8.1.1
+        name: solr
+        readinessProbe:
+          tcpSocket:
+            port: 8983
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8983
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        ports:
+        - containerPort: 8983
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-store
+
+      initContainers:
+      - name: init-solr-data
+        image: busybox
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "if [ ! -d /var/solr/data ] ; then mkdir -p /var/solr/data && chown -R 8983:8983 /var/solr ;\ else true; fi"
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-store
+
+      - name: init-solr-logs
+        image: busybox
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "if [ ! -d /var/solr/logs ] ; then mkdir -p /var/solr/logs && chown -R 8983:8983 /var/solr ;\ else true; fi"
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-store
+
+      - name: init-solr-log4jxml
+        image: solr:8.1.1
+        command: 
+        - "/bin/sh"
+        - "-c"
+        - "if [ ! -f /var/solr/log4j2.xml ] ; then cp /opt/solr/server/resources/log4j2.xml /var/solr/log4j2.xml ; else true; fi "
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-store
+
+      - name: init-solr-xml
+        image: tc3jp/productsearch-solr:8.1.1
+        command: 
+        - "/bin/sh"
+        - "-c"
+        - "if [ ! -f /var/solr/data/solr.xml ] ; then cp /opt/solr/solr.xml /var/solr/data/solr.xml; else true; fi "
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-store
+
+      - name: init-solr-secirutyjson
+        image: tc3jp/productsearch-solr:8.1.1
+        command: 
+        - "/bin/sh"
+        - "-c"
+        - "if [ ! -f /var/solr/data/security.json ] ; then cp /opt/solr/security.json /var/solr/data/security.json; else true; fi "
+        volumeMounts:
+        - mountPath: /var/solr
+          name: solr-store
+
+  volumeClaimTemplates:
+  - metadata:
+      name: solr-store
+    spec:
+      storageClassName: gp2
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
