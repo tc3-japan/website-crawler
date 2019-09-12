@@ -58,10 +58,10 @@ public class ConvertThread implements Runnable {
        * as referenced by the same URL (pages.url -> manufacturer_product.product_url)
        * in the Solr Index will be deleted if it exists.
        */
-      logger.info("converter process for url " + cPage.getUrl());
+      logger.info("converter process for page#" + cPage.getId() + ", " + cPage.getUrl());
       if (cPage.getDeleted()) {
         solrService.deleteByURL(cPage.getUrl());
-        logger.info("delete from solr url = " + cPage.getUrl());
+        logger.info("delete from solr index. page#" + cPage.getId() + ", " + cPage.getUrl());
       } else if (cPage.getLastProcessedAt() == null || cPage.getLastModifiedAt().after(cPage.getLastProcessedAt())) {
 
         // For each record Data clean up process will also be executed.  See details under “Data Clean Up Process”
@@ -69,11 +69,13 @@ public class ConvertThread implements Runnable {
 
         // create or update to avoid creating duplicate records
         solrService.createOrUpdate(cPage);
-        logger.info("createOrUpdate to solr url = " + cPage.getUrl());
+        logger.info("write to solr index. page#" + cPage.getId() + ", " + cPage.getUrl());
 
         // After processing this record the last_processed_at date-time will be time stamped.
         cPage.setLastProcessedAt(Date.from(Instant.now()));
         pageRepository.save(cPage);
+      } else {
+        logger.info("converter: page not updated. page#" + cPage.getId());
       }
     } catch (Exception e) {
       logger.error("solr operation failed !");
