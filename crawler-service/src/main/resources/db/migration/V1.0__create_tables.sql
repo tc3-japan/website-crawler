@@ -19,7 +19,7 @@ CREATE TABLE `pages`  (
   `title`             varchar(1024) NULL,
   `body`              longtext NULL,
   `etag`              varchar(256) NULL,
-  `last_modified`     varchar(256) NULL DEFAULT 'CURRENT_TIMESTAMP',
+  `last_modified`     varchar(256) NULL,
   `created_at`        datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified_at`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_processed_at` datetime NULL,
@@ -62,12 +62,14 @@ COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `destination_urls`
   ADD CONSTRAINT `fk_destination_urls_pageid`
   FOREIGN KEY(`page_id`)
-  REFERENCES `pages`(`id`);
+  REFERENCES `pages`(`id`)
+  ON DELETE CASCADE;
 
 ALTER TABLE `source_urls`
   ADD CONSTRAINT `fk_source_urls_pageid`
   FOREIGN KEY(`page_id`)
-  REFERENCES `pages`(`id`);
+  REFERENCES `pages`(`id`)
+  ON DELETE CASCADE;
 
 ALTER TABLE `pages`
   ADD CONSTRAINT `fk_pages_siteid`
