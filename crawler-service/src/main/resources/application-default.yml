@@ -37,10 +37,10 @@ server:
     min-response-size: 1024
 
 authentication:
-  enabled: true
+  enabled: false
   credentials:
-    username: admin
-    password: adminpass
+    username: na
+    password: na
 
 cors:
   allowed-origins: "*"

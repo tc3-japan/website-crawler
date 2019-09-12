@@ -8,7 +8,6 @@ logging:
     org.springframework.jdbc.core: DEBUG
     com.gargoylesoftware.htmlunit: ERROR
 
-
 spring:
   datasource:
     url: jdbc:mysql://mysql:3306/website_crawler?useSSL=false&nullNamePatternMatchesAll=true&allowPublicKeyRetrieval=true
@@ -28,12 +27,6 @@ management:
       base-path: /
       path-mapping:
         health: healthcheck
-
-authentication:
-  enabled: true
-  credentials:
-    username: admin
-    password: adminpass
 
 server:
   port: 8090

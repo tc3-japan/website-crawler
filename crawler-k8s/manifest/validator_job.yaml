@@ -1,17 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: crawler-job
+  name: validator-job
 spec:
   template:
     metadata:
       labels:
-        app: crawler-job
+        app: validator-job
     spec:
       restartPolicy: Never
       containers:
       - args:
-        - --proc=crawler
+        - --proc=validate-pages
         - --site=1
         image: tc3jp/productsearch-service:develop-1.0.2
         name: crawler

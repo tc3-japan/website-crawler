@@ -24,7 +24,8 @@ else
   /opt/solr/bin/solr create -c "$CORE"
   echo "Created $CORE"
 
-  SCHEMA_URL=http://localhost:8983/solr/manufacturer_product/schema
+  CORE_URL=http://localhost:8983/solr/manufacturer_product
+  SCHEMA_URL="$CORE_URL/schema"
   echo "Update schema on $SCHEMA_URL"
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/add-field-manufacturer_name.json $SCHEMA_URL
@@ -41,6 +42,12 @@ else
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/replace-field-type-text_ja.json $SCHEMA_URL
   
+  curl -X POST -H 'Content-type:application/json' \
+    -d'{
+      "set-property" : {"requestDispatcher.requestParsers.enableRemoteStreaming":true},
+      "set-property" : {"requestDispatcher.requestParsers.enableStreamBody":true}
+    }' "$CORE_URL/config"
+
   stop-local-solr
 
     # check the core_dir exists; otherwise the detecting above will fail after stop/start
