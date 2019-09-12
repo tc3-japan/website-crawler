@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: solr-lb
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8983
+  selector:
+    io.kompose.service: solr

@@ -1,0 +1,26 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cleaner-cronjob
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cleaner-cronjob
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - args:
+            - --proc=converter
+            - --only-data-cleanup
+            - --site=1
+            image: tc3jp/productsearch-service:develop-1.0
+            name: crawler
+            env:
+            - name: SPRING_JDBC_URL
+              value: jdbc:mysql://mysql:3306/website_crawler?useSSL=false&nullNamePatternMatchesAll=true&allowPublicKeyRetrieval=true
+            - name: SOLR_URL
+              value: http://solr:8983/solr/manufacturer_product
