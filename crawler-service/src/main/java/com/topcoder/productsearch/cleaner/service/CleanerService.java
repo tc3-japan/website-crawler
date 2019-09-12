@@ -89,8 +89,10 @@ public class CleanerService {
       logger.info("clean page for " + cPage.getUrl());
       try {
         solrService.deleteByURL(cPage.getUrl()); // remove from solr
-        cPage.setDeleted(true); // set deleted flag
-        pageRepository.save(cPage); // save cPage
+        if (!cPage.getDeleted()) {
+          cPage.setDeleted(true); // set deleted flag
+          pageRepository.save(cPage); // save cPage
+        }
       } catch (Exception e) {
         logger.error("delete from solr failed");
         e.printStackTrace();
