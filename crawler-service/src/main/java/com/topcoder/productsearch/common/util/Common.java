@@ -122,7 +122,7 @@ public class Common {
       normalizedURL = normalizeManager.normalizeURL(url);
     } catch (IOException e) {
       e.printStackTrace();
-      return url;
+
     }
     return normalizedURL;
   }

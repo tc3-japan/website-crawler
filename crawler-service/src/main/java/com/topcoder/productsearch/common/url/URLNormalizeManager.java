@@ -1,6 +1,7 @@
 package com.topcoder.productsearch.common.url;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
+
 
 public class URLNormalizeManager {
 
@@ -14,7 +15,7 @@ public class URLNormalizeManager {
         urlNormalizers.addURLNormalizer(urlNormalizer);
     }
 
-    public String normalizeURL(String url) throws MalformedURLException {
+    public String normalizeURL(String url) throws IOException {
         return urlNormalizers.execute(url);
     }
 

@@ -1,9 +1,9 @@
 package com.topcoder.productsearch.common.url;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 
 public interface URLNormalizer {
 
-    public String normalize(String url) throws MalformedURLException;
+    public String normalize(String url) throws  IOException;
 
 }

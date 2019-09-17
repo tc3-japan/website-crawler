@@ -108,6 +108,9 @@ if (project.hasProperty('develop')) {
 if (project.hasProperty('production')) {
     profile = 'production'
 }
+if (project.hasProperty('test')) {
+    profile = 'test'
+}
 
 def applicationConfig = new org.yaml.snakeyaml.Yaml().load(("crawler-service/src/main/resources/application-${profile ? profile : 'default'}.yml" as File).text)
 

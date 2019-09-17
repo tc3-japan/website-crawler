@@ -17,12 +17,10 @@
 
 package com.topcoder.productsearch.common.url.normalizers;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -38,8 +36,6 @@ import com.topcoder.productsearch.common.url.URLNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.util.ResourceUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -72,6 +68,7 @@ public class RegexURLNormalizer implements URLNormalizer {
   private String urlNormalizerRegexFile;
 
 
+
   private static final Logger LOG = LoggerFactory
       .getLogger(RegexURLNormalizer.class);
 
@@ -89,15 +86,7 @@ public class RegexURLNormalizer implements URLNormalizer {
 
   private static final List<Rule> EMPTY_RULES = Collections.emptyList();
   
-  /**
-   * The default constructor which is called from UrlNormalizerFactory
-   * (normalizerClass.newInstance()) in method: getNormalizer()
-   * 
-   * @throws IOException*
-   */
-  // public RegexURLNormalizer() throws IOException {
-  //   rules = readRegexConfigurationFile();
-  // }
+
 
 
 
@@ -117,8 +106,10 @@ public class RegexURLNormalizer implements URLNormalizer {
   }
 
   public String normalize(String urlString)
-      throws MalformedURLException {
-        
+      throws IOException {
+    if (rules == null) {
+      rules = readRegexConfigurationFile();
+    }
     return regexNormalize(urlString);
   }
 
