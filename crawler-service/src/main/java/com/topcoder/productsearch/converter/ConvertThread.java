@@ -47,6 +47,11 @@ public class ConvertThread implements Runnable {
   CleanerService cleanerService;
 
   /**
+   * Expiry Period
+   */
+  Long pageExpiredPeriod;
+
+  /**
    * the logger instance
    */
   private static final Logger logger = LoggerFactory.getLogger(ConvertThread.class);
@@ -81,6 +86,9 @@ public class ConvertThread implements Runnable {
       } else {
         logger.info("converter: page not updated. page#" + cPage.getId());
       }
+    } catch (RuntimeException re ) {
+      logger.error("RuntimeException during solr operation: "+ re.getMessage());
+      re.printStackTrace();
     } catch (Exception e) {
       logger.error("solr operation failed !");
       e.printStackTrace();

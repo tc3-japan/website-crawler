@@ -31,6 +31,12 @@ public class ConverterService {
   private int parallelSize;
 
   /**
+   * the page expired period time, unit is day
+   */
+  @Value("${crawler-settings.page-expired-period}")
+  private Long pageExpiredPeriod;
+
+  /**
    * the solr service
    */
   @Autowired
@@ -52,6 +58,6 @@ public class ConverterService {
   public void convert(Integer webSiteId) throws InterruptedException {
     Common.readAndProcessPage(new PageSearchCriteria(webSiteId, null),
         parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
-            threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService)));
+            threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService, pageExpiredPeriod)));
   }
 }
