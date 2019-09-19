@@ -75,7 +75,7 @@ public class CleanerService {
 
 
     /*
-     Expired pages will be deleted.  If the page has not been updated since a specified time,
+     Expired pages will be deleted from Solr.  If the page has not been updated since a specified time,
      Field last_modified_at in the pages table will be used to determine the time of last update.
      */
     Date expiresDate = java.sql.Date.valueOf(LocalDate.now().minusDays(pageExpiredPeriod));
@@ -89,9 +89,6 @@ public class CleanerService {
       logger.info("clean page for " + cPage.getUrl());
       try {
         solrService.deleteByURL(cPage.getUrl()); // remove from solr
-        if (!cPage.getDeleted()) {
-          cPage.setDeleted(true); // set deleted flag
-          pageRepository.save(cPage); // save cPage
         }
       } catch (Exception e) {
         logger.error("delete from solr failed");
