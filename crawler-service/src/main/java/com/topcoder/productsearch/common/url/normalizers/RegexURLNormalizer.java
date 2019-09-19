@@ -36,6 +36,7 @@ import com.topcoder.productsearch.common.url.URLNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -59,6 +60,7 @@ import org.xml.sax.InputSource;
  * 
  * @author 
  */
+@Component
 public class RegexURLNormalizer implements URLNormalizer {
 
   /**
