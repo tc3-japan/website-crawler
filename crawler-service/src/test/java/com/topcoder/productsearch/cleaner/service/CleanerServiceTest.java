@@ -66,6 +66,12 @@ public class CleanerServiceTest extends AbstractUnitTest {
     cleanerService.setPageExpiredPeriod(10L);
     cPage.setLastModifiedAt(Date.from(Instant.now()));
     cleanerService.cleanPage(cPage);
+    verify(solrService, times(1)).deleteByURL(any(String.class));
+
+    cleanerService.setPageExpiredPeriod(10L);
+    cPage.setLastModifiedAt(Date.from(Instant.now()));
+    cPage.setDeleted(true);
+    cleanerService.cleanPage(cPage);
     verify(solrService, times(2)).deleteByURL(any(String.class));
 
     cleanerService.setSolrService(null);
