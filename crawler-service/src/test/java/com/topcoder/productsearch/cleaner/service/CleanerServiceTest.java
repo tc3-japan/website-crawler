@@ -74,12 +74,6 @@ public class CleanerServiceTest extends AbstractUnitTest {
     cleanerService.cleanPage(cPage);
     verify(solrService, times(2)).deleteByURL(any(String.class));
 
-    cleanerService.setSolrService(null);
-    try {
-      cleanerService.cleanPage(cPage);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
 
   }
 }
