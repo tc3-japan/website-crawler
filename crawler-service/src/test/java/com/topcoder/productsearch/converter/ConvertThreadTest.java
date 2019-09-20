@@ -39,20 +39,21 @@ public class ConvertThreadTest {
   @Test
   public void testRun() throws IOException, SolrServerException {
     CPage page = new CPage();
+    Long pageExpiredPeriod = 10L;
 
     page.setLastProcessedAt(null);
-    new ConvertThread(page, solrService, pageRepository, cleanerService).run();
-    verify(cleanerService, times(1)).cleanPage(any(CPage.class));
+    new ConvertThread(page, solrService, pageRepository, cleanerService, pageExpiredPeriod).run();
+    verify(solrService, times(1)).createOrUpdate(any(CPage.class));
 
     page.setDeleted(true);
-    new ConvertThread(page, solrService, pageRepository, cleanerService).run();
+    new ConvertThread(page, solrService, pageRepository, cleanerService, pageExpiredPeriod).run();
     verify(solrService, times(1)).deleteByURL(any(String.class));
 
     page.setDeleted(false);
-    new ConvertThread(page, solrService, pageRepository, null).run();
+    new ConvertThread(page, solrService, pageRepository, null, pageExpiredPeriod).run();
 
     page.setLastProcessedAt(Date.from(Instant.ofEpochMilli(System.currentTimeMillis() - 1000)));
     page.setLastModifiedAt(Date.from(Instant.ofEpochMilli(System.currentTimeMillis() + 1000)));
-    new ConvertThread(page, solrService, pageRepository, cleanerService).run();
+    new ConvertThread(page, solrService, pageRepository, cleanerService, pageExpiredPeriod).run();
   }
 }
