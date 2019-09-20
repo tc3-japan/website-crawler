@@ -10,8 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -44,14 +47,20 @@ public class ConvertThread implements Runnable {
   CleanerService cleanerService;
 
   /**
+   * Expiry Period
+   */
+  Long pageExpiredPeriod;
+
+  /**
    * the logger instance
    */
   private static final Logger logger = LoggerFactory.getLogger(ConvertThread.class);
 
 
+
   @Override
   public void run() {
-
+    Date expireDate = java.sql.Date.valueOf(LocalDate.now().minusDays(pageExpiredPeriod));
     try {
       /*
        * If the deleted field for a record in the pages table is set to true then the corresponding record,
@@ -61,11 +70,11 @@ public class ConvertThread implements Runnable {
       logger.info("converter process for page#" + cPage.getId() + ", " + cPage.getUrl());
       if (cPage.getDeleted()) {
         solrService.deleteByURL(cPage.getUrl());
-        logger.info("delete from solr index. page#" + cPage.getId() + ", " + cPage.getUrl());
+        logger.info("URL was marked deleted in database so deleting from solr index. page#" + cPage.getId() + ", " + cPage.getUrl());
+      } else if (cPage.getLastModifiedAt() != null && (cPage.getLastModifiedAt().before(expireDate)))  {
+        solrService.deleteByURL(cPage.getUrl());
+        logger.info("URL has not been modified for greater than expiry period, deleting from solr index. page#"+ cPage.getId() + ", " + cPage.getUrl());
       } else if (cPage.getLastProcessedAt() == null || cPage.getLastModifiedAt().after(cPage.getLastProcessedAt())) {
-
-        // For each record Data clean up process will also be executed.  See details under “Data Clean Up Process”
-        cleanerService.cleanPage(cPage);
 
         // create or update to avoid creating duplicate records
         solrService.createOrUpdate(cPage);
@@ -77,6 +86,9 @@ public class ConvertThread implements Runnable {
       } else {
         logger.info("converter: page not updated. page#" + cPage.getId());
       }
+    } catch (RuntimeException re ) {
+      logger.error("RuntimeException during solr operation: "+ re.getMessage());
+      re.printStackTrace();
     } catch (Exception e) {
       logger.error("solr operation failed !");
       e.printStackTrace();
