@@ -20,8 +20,8 @@ public class ProductSearchRequest {
   /**
    * the start
    */
-  @Min(1)
-  private Integer start = 1;
+  @Min(0)
+  private Integer start = 0;
 
   /**
    * the rows
