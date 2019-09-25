@@ -57,4 +57,20 @@ public class WebSite {
 
   @Column(name = "crawl_time_limit")
   private Integer crawlTimeLimit;
+
+  @Column(name = "crawl_interval")
+  private Integer crawlInterval;
+
+  @Column(name = "parallel_size")
+  private Integer parallelSize;
+
+  @Column(name = "timeout_page_download")
+  private Integer timeoutPageDownload;
+
+  @Column(name = "retry_times")
+  private Integer retryTimes;
+
+  @Column(name = "page_expired_period")
+  private Integer pageExpiredPeriod;
+  
 }

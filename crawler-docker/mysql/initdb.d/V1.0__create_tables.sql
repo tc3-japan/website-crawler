@@ -51,8 +51,13 @@ CREATE TABLE `web_sites`  (
   `created_at`            datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified_at`      datetime NULL,
   `supports_robots_txt` 	tinyint(1) UNSIGNED NULL DEFAULT 1,
-  `crawl_max_depth` SMALLINT(5) UNSIGNED NULL DEFAULT 0,
-  `crawl_time_limit`  MEDIUMINT(8) UNSIGNED NULL DEFAULT 0,
+  `crawl_max_depth`       SMALLINT(5) UNSIGNED NULL DEFAULT 0,
+  `crawl_time_limit`      MEDIUMINT(8) UNSIGNED NULL DEFAULT 0,
+  `crawl_interval`        MEDIUMINT(8) UNISIGNED NULL DEFAULT 1000,
+  `parallel_size`         tinyint(1) UNSIGNED NULL DEFAULT 12,
+  `timeout_page_download` tinyint(1) UNSIGNED NULL DEFAULT 2,
+  `retry_times`           tinyint(1) UNSIGNED NULL DEFAULT 2,
+  `page_expired_period`   SMALLINT(5) UNSIGNED NULL DEFAULT 30,
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
