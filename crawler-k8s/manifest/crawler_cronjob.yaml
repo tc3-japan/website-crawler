@@ -16,7 +16,7 @@ spec:
           - args:
             - --proc=crawler
             - --site=1
-            image: tc3jp/productsearch-service:develop-1.0.2
+            image: tc3jp/productsearch-service:develop-1.0.3
             name: crawler
             env:
             - name: SPRING_JDBC_URL
