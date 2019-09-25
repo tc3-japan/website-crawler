@@ -31,9 +31,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     logger.info("auth enabled = " + (authEnabled ? "true" : "false"));
+    http.csrf().disable();
     if (authEnabled) {
       http
-          .csrf().disable()
           .authorizeRequests().anyRequest().authenticated()
           .and()
           .httpBasic();
