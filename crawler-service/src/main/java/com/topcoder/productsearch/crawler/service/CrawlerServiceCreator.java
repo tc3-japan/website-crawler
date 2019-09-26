@@ -35,7 +35,7 @@ public class CrawlerServiceCreator {
   private static final Logger logger = LoggerFactory.getLogger(CrawlerServiceCreator.class);
 
   /**
-   * The thread pool executor used to generate audio.
+   * The thread pool executor
    */
   private CrawlerThreadPoolExecutor threadPoolExecutor;
 
