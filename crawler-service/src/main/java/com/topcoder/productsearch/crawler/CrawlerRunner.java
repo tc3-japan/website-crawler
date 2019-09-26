@@ -3,6 +3,8 @@ package com.topcoder.productsearch.crawler;
 import java.util.List;
 
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,7 @@ public class CrawlerRunner implements ApplicationRunner {
    * the crawler service
    */
   @Autowired
-  CrawlerService crawlerService;
+  CrawlerServiceCreator crawlerServiceCreator;
 
   /**
    * run cli app
@@ -51,13 +53,14 @@ public class CrawlerRunner implements ApplicationRunner {
     }
     int siteId = Integer.parseInt(sites.get(0));
 
-    WebSite website = webSiteRepository.findOne(siteId);
+    // WebSite website = webSiteRepository.findOne(siteId);
+    CrawlerService crawlerService = crawlerServiceCreator.getCrawlerService(siteId);
 
-    if (website == null) {
-      throw new Exception("can not find website where id = " + siteId);
+    if (crawlerService == null) {
+      throw new Exception("Could not create CrawlerService where website id = " + siteId);
     } else {
-      logger.info(">>> Start crawling on : " + website.getName());
-      crawlerService.crawler(website);
+      logger.info(">>> Start crawling on : " + crawlerService.getWebSite().getName());
+      crawlerService.crawler(crawlerService.getWebSite().getName());
     }
   }
 

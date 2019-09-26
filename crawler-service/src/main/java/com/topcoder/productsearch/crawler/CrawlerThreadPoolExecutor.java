@@ -142,7 +142,7 @@ public class CrawlerThreadPoolExecutor extends ScheduledThreadPoolExecutor {
    * @param timeLimit the website timeLimit
    * @return the result
    */
-  public boolean isReachedTimeLimit(int timeLimit) {
+  public boolean hasReachedTimeLimit(int timeLimit) {
     return new Date().getTime() - startedTime.getTime() >= timeLimit * 1000;
   }
 }
