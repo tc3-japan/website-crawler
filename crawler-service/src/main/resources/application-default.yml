@@ -50,8 +50,6 @@ solr:
   uri: http://127.0.0.1:8983/solr/manufacturer_product
 
 crawler-settings:
-  #Interval between each subsequent request (milliseconds)
-  interval: 1000
 
   #task parallel size
   parallel-size: 12
