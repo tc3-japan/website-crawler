@@ -34,16 +34,13 @@ public class CrawlerServiceCreator {
    */
   private static final Logger logger = LoggerFactory.getLogger(CrawlerServiceCreator.class);
 
-  /**
-   * The thread pool executor
-   */
-  private CrawlerThreadPoolExecutor threadPoolExecutor;
+
 
   /**
    * the website database repository
    */
   @Autowired
-  WebSiteRepository webSiteRepository;
+  private WebSiteRepository webSiteRepository;
   
   /**
    * Interval between each subsequent request (milliseconds)
@@ -63,38 +60,43 @@ public class CrawlerServiceCreator {
   @Value("${crawler-settings.retry-times}")
   private Integer maxRetryTimes;
 
-  /**
-   * pending task queue
-   */
-  private LinkedBlockingQueue<CrawlerTask> queueTasks;
 
-  /**
-   * should visit hash map, avoid put duplicate url into pending queue
-   */
-  private Map<String, Boolean> shouldVisit;
 
   @Value("${crawler-settings.parallel-size}")
   private int parallelSize;
 
-  /**
-   * Create a new instance.
-   *
-   * @param parallelSize task parallel size
-   */
+  
   @Autowired
   public CrawlerService getCrawlerService(int siteId) {
-    
-    return new CrawlerServiceImpl(siteId);
+    WebSite webSite = webSiteRepository.findOne(siteId);
+    if (webSite == null) {
+      return null;
+    }
+    return new CrawlerServiceImpl(webSite);
 
   }
 
+  @Getter
   private class CrawlerServiceImpl implements CrawlerService {
 
-    WebSite webSite = null;
+    /**
+     * The thread pool executor
+     */
+    private CrawlerThreadPoolExecutor threadPoolExecutor;
+    /**
+     * should visit hash map, avoid put duplicate url into pending queue
+     */
+    private Map<String, Boolean> shouldVisit;
+    /**
+     * pending task queue
+     */
+    private LinkedBlockingQueue<CrawlerTask> queueTasks;
 
-    public CrawlerServiceImpl(int siteId)  {
+    WebSite webSite;
 
-      webSite = webSiteRepository.findOne(siteId);
+    public CrawlerServiceImpl(WebSite webSite)  {
+
+      this.webSite = webSite;
       threadPoolExecutor = new CrawlerThreadPoolExecutor(parallelSize, webSite.getCrawlInterval());
       // set task completed callback
       threadPoolExecutor.setExecutedHandler(runnable -> {
@@ -120,7 +122,6 @@ public class CrawlerServiceCreator {
     /**
      * crawler entry method
      *
-     * @param webSite the website
      */
     public void crawler() {
       // set timeout for each thread
@@ -169,7 +170,7 @@ public class CrawlerServiceCreator {
         CrawlerThread thread = new CrawlerThread();
 
         thread.setCrawlerTask(task);
-        thread.setTaskInterval(taskInterval);
+        thread.setTaskInterval(webSite.getCrawlInterval());
         thread.setTimeout((int) (timeout * 60 * 1000));
         thread.setRetryTimes(maxRetryTimes);
         thread.setMaxDepth(task.getSite().getCrawlMaxDepth());
@@ -178,7 +179,7 @@ public class CrawlerServiceCreator {
 
         shouldVisit.put(Common.normalize(thread.getCrawlerTask().getUrl()), Boolean.TRUE);
         // schedule execute task after taskInterval
-        threadPoolExecutor.schedule(thread, taskInterval, TimeUnit.MILLISECONDS);
+        threadPoolExecutor.schedule(thread, webSite.getCrawlInterval(), TimeUnit.MILLISECONDS);
         logger.info("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
             + ", total running time(ms) = " + (new Date().getTime() - threadPoolExecutor.getStartedTime().getTime()));
       }
@@ -187,6 +188,10 @@ public class CrawlerServiceCreator {
       if (taskSize <= 0) {
         threadPoolExecutor.shutdown();
       }
+    }
+
+    public CrawlerThreadPoolExecutor getThreadPoolExecutor() {
+      return threadPoolExecutor;
     }
 
   }

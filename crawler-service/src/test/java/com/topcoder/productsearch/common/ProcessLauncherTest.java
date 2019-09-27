@@ -1,11 +1,11 @@
 package com.topcoder.productsearch.common;
 
-
 import com.topcoder.productsearch.cleaner.service.CleanerService;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
 import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +37,9 @@ public class ProcessLauncherTest {
   CrawlerService crawlerService;
 
   @Mock
+  CrawlerServiceCreator crawlerServiceCreator;
+
+  @Mock
   CleanerService cleanerService;
 
   @Mock
@@ -62,7 +65,7 @@ public class ProcessLauncherTest {
 
     when(webSiteRepository.findOne(siteId)).thenReturn(webSite);
     when(webSiteRepository.findOne(2)).thenReturn(null);
-    doNothing().when(crawlerService).crawler(webSite);
+    doNothing().when(crawlerService).crawler();
     doNothing().when(converterService).convert(1);
     doNothing().when(converterService).convert(2);
     doNothing().when(converterService).convert(null);
@@ -76,8 +79,8 @@ public class ProcessLauncherTest {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    verify(webSiteRepository, times(1)).findOne(any(Integer.class));
-
+    
+    verify(crawlerServiceCreator, times(1)).getCrawlerService(any(Integer.class));
 
     DefaultApplicationArguments args = new DefaultApplicationArguments(new String[]{"--proc=crawler"});
     try {
@@ -104,7 +107,7 @@ public class ProcessLauncherTest {
     try {
       processLauncher.run(args3);
     } catch (Exception e) {
-      assertEquals("can not find website where id = 2", e.getMessage());
+      assertEquals("Could not create CrawlerService where website id = 2", e.getMessage());
     }
 
     DefaultApplicationArguments args4 = new DefaultApplicationArguments(new String[]

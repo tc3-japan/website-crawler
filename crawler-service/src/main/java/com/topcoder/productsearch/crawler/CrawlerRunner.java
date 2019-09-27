@@ -58,10 +58,11 @@ public class CrawlerRunner implements ApplicationRunner {
 
     if (crawlerService == null) {
       throw new Exception("Could not create CrawlerService where website id = " + siteId);
-    } else {
-      logger.info(">>> Start crawling on : " + crawlerService.getWebSite().getName());
-      crawlerService.crawler(crawlerService.getWebSite().getName());
     }
+
+      logger.info(">>> Start crawling on : " + crawlerService.getWebSite().getName());
+      crawlerService.crawler();
+    
   }
 
 }

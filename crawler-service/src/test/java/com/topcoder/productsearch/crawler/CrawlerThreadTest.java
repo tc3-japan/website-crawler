@@ -1,6 +1,5 @@
 package com.topcoder.productsearch.crawler;
 
-
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -13,10 +12,11 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
 
-
 import com.topcoder.productsearch.common.repository.SourceURLRepository;
 import com.topcoder.productsearch.common.util.DomHelper;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +68,12 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   @Mock
   DomHelper domHelper;
 
+  @Mock
+  CrawlerService crawlerService;
+
+  @Mock
+  CrawlerThreadPoolExecutor threadPoolExecutor;
+
   @InjectMocks
   CrawlerThread crawlerThread;
 
@@ -78,6 +84,9 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   private WebRequest matchedUrl = new WebRequest(new URL("https://www.uniqlo.com/us/en/boys-jersey-easy-" +
       "shorts-416524.html?dwvar_416524_color=COL57&cgid=boys-pants-shorts"));
   private WebRequest rootURL = new WebRequest(new URL(webSite.getUrl()));
+ 
+  
+ 
 
 
   public CrawlerThreadTest() throws MalformedURLException {
@@ -94,6 +103,8 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(htmlPage.getWebResponse()).thenReturn(webResponse);
     when(webClient.getPage(rootURL)).thenReturn(htmlPage);
     when(webClient.getPage(matchedUrl)).thenReturn(htmlPage);
+    when(crawlerService.getThreadPoolExecutor()).thenReturn(threadPoolExecutor);
+    when(threadPoolExecutor.hasReachedTimeLimit(anyInt())).thenReturn(false);
 
     crawlerThread.setTaskInterval(0);
     crawlerThread.setMaxDepth(2);
@@ -104,7 +115,8 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.init();
     crawlerThread.setWebClient(webClient);
     crawlerThread.setDomHelper(domHelper);
-    crawlerThread.setCrawlerService(new CrawlerService(10,1000));
+
+    // crawlerThread.setCrawlerService(new CrawlerService(10,1000));
     crawlerThread.getCrawlerService().getThreadPoolExecutor().setStartedTime(new Date());
   }
 

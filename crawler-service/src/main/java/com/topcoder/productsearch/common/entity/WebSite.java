@@ -72,5 +72,5 @@ public class WebSite {
 
   @Column(name = "page_expired_period")
   private Integer pageExpiredPeriod;
-  
+
 }
