@@ -66,7 +66,7 @@ public class CrawlerServiceCreator {
   private int parallelSize;
 
   
-  @Autowired
+  
   public CrawlerService getCrawlerService(int siteId) {
     WebSite webSite = webSiteRepository.findOne(siteId);
     if (webSite == null) {
