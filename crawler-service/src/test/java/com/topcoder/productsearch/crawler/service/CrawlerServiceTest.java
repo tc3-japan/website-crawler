@@ -47,10 +47,10 @@ public class CrawlerServiceTest extends AbstractUnitTest {
     site.setCrawlInterval(1000);
     site.setCrawlTimeLimit(1);
     site.setParallelSize(1);
+    site.setTimeoutPageDownload(1);
     when(webSiteRepository.findOne(anyInt())).thenReturn(site);
 
     creator.setMaxRetryTimes(2);
-    creator.setTimeout(1.2f);
     crawlerService = creator.getCrawlerService(site.getId());
 
 
