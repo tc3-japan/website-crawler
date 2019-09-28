@@ -43,15 +43,6 @@ public class CrawlerServiceCreator {
   private WebSiteRepository webSiteRepository;
   
   
-  /**
-   * Max number of times to retry a single page.
-   */
-  @Value("${crawler-settings.retry-times}")
-  private Integer maxRetryTimes;
-
-
-
-  
   public CrawlerService getCrawlerService(int siteId) {
     WebSite webSite = webSiteRepository.findOne(siteId);
     if (webSite == null) {
@@ -157,7 +148,7 @@ public class CrawlerServiceCreator {
         thread.setCrawlerTask(task);
         thread.setTaskInterval(webSite.getCrawlInterval());
         thread.setTimeout((int) (webSite.getTimeoutPageDownload() * 60 * 1000));
-        thread.setRetryTimes(maxRetryTimes);
+        thread.setRetryTimes(webSite.getRetryTimes());
         thread.setMaxDepth(task.getSite().getCrawlMaxDepth());
         thread.setCrawlerService(this);
         thread.init();
