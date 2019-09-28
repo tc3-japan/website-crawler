@@ -1,8 +1,10 @@
 package com.topcoder.productsearch.cleaner.service;
 
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.converter.service.SolrService;
 import lombok.Setter;
@@ -24,17 +26,19 @@ public class ValidatePagesService {
    */
   private static final Logger logger = LoggerFactory.getLogger(ValidatePagesService.class);
 
-  /**
-   * the page expired period time, unit is day
-   */
-  @Value("${crawler-settings.page-expired-period}")
-  private Long pageExpiredPeriod;
-
+ 
   /**
    * the page repository
    */
   @Autowired
   PageRepository pageRepository;
+
+
+  /**
+   * WebSite repository 
+   */
+  @Autowired
+  WebSiteRepository webSiteRepository;
 
   /**
    * the solr service
@@ -42,12 +46,7 @@ public class ValidatePagesService {
   @Autowired
   SolrService solrService;
 
-  /**
-   * parallel run/page size
-   */
-  @Value("${crawler-settings.parallel-size}")
-  private int parallelSize;
-
+ 
   /**
    * Data Clean Up Process:
    *
@@ -55,8 +54,11 @@ public class ValidatePagesService {
    * @throws InterruptedException when thread interrupted
    */
   public void validate(Integer webSiteId) throws InterruptedException {
+
+    WebSite webSite = webSiteRepository.findOne(webSiteId);
+    
     Common.readAndProcessPage(new PageSearchCriteria(webSiteId, false),
-        parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
+        webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
         threadPoolExecutor.submit(() -> {
           this.process(cPage);
         }));
