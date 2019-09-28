@@ -51,7 +51,3 @@ solr:
 
 crawler-settings:
 
-
-
-  #Time lapse period for Expired pages in number of Days.
-  page-expired-period: 30
