@@ -51,11 +51,6 @@ solr:
 
 crawler-settings:
 
-  #task parallel size
-  parallel-size: 12
-
-  #Timeout for downloading a page (minutes)
-  timeout-download: 2
 
   #Max number of times to retry a single page.
   retry-times: 2
