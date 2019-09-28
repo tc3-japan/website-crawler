@@ -44,12 +44,6 @@ public class CrawlerServiceCreator {
   
   
   /**
-   * Timeout for downloading a page (minutes)
-   */
-  @Value("${crawler-settings.timeout-download}")
-  private Float timeout;
-
-  /**
    * Max number of times to retry a single page.
    */
   @Value("${crawler-settings.retry-times}")
@@ -57,10 +51,6 @@ public class CrawlerServiceCreator {
 
 
 
-  // @Value("${crawler-settings.parallel-size}")
-  // private int parallelSize;
-
-  
   
   public CrawlerService getCrawlerService(int siteId) {
     WebSite webSite = webSiteRepository.findOne(siteId);
@@ -120,7 +110,7 @@ public class CrawlerServiceCreator {
      */
     public void crawler() {
       // set timeout for each thread
-      threadPoolExecutor.setKeepAliveTime((long) (timeout * 60 * 1000), TimeUnit.MILLISECONDS);
+      threadPoolExecutor.setKeepAliveTime((long) (webSite.getTimeoutPageDownload() * 60 * 1000L), TimeUnit.MILLISECONDS);
 
       CrawlerTask crawlerTask = new CrawlerTask(webSite.getUrl(), webSite, null); // root page
       pushTask(crawlerTask);
@@ -166,7 +156,7 @@ public class CrawlerServiceCreator {
 
         thread.setCrawlerTask(task);
         thread.setTaskInterval(webSite.getCrawlInterval());
-        thread.setTimeout((int) (timeout * 60 * 1000));
+        thread.setTimeout((int) (webSite.getTimeoutPageDownload() * 60 * 1000));
         thread.setRetryTimes(maxRetryTimes);
         thread.setMaxDepth(task.getSite().getCrawlMaxDepth());
         thread.setCrawlerService(this);
