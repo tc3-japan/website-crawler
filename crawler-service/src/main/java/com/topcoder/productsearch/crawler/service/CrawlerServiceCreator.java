@@ -42,12 +42,7 @@ public class CrawlerServiceCreator {
   @Autowired
   private WebSiteRepository webSiteRepository;
   
-  /**
-   * Interval between each subsequent request (milliseconds)
-   */
-  // @Value("${crawler-settings.interval}")
-  // private Integer taskInterval;
-
+  
   /**
    * Timeout for downloading a page (minutes)
    */
@@ -62,8 +57,8 @@ public class CrawlerServiceCreator {
 
 
 
-  @Value("${crawler-settings.parallel-size}")
-  private int parallelSize;
+  // @Value("${crawler-settings.parallel-size}")
+  // private int parallelSize;
 
   
   
@@ -97,7 +92,7 @@ public class CrawlerServiceCreator {
     public CrawlerServiceImpl(WebSite webSite)  {
 
       this.webSite = webSite;
-      threadPoolExecutor = new CrawlerThreadPoolExecutor(parallelSize, webSite.getCrawlInterval());
+      threadPoolExecutor = new CrawlerThreadPoolExecutor(webSite.getParallelSize(), webSite.getCrawlInterval());
       // set task completed callback
       threadPoolExecutor.setExecutedHandler(runnable -> {
         CrawlerThread thread = (CrawlerThread) runnable;
