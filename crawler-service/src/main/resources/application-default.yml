@@ -52,8 +52,6 @@ solr:
 crawler-settings:
 
 
-  #Max number of times to retry a single page.
-  retry-times: 2
 
   #Time lapse period for Expired pages in number of Days.
   page-expired-period: 30
