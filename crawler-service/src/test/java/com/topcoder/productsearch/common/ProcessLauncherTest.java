@@ -64,14 +64,15 @@ public class ProcessLauncherTest {
     webSite.setId(siteId);
 
     when(webSiteRepository.findOne(siteId)).thenReturn(webSite);
+    when(webSiteRepository.findOne(Integer.valueOf(1))).thenReturn(webSite);
     when(webSiteRepository.findOne(2)).thenReturn(null);
     doNothing().when(crawlerService).crawler();
-    doNothing().when(converterService).convert(1);
-    doNothing().when(converterService).convert(2);
+    doNothing().when(converterService).convert(webSite);
+    doNothing().when(converterService).convert(webSite);
     doNothing().when(converterService).convert(null);
-    doNothing().when(cleanerService).clean(any(Integer.class));
-    doNothing().when(cleanerService).clean(null);
-    doNothing().when(validatePagesService).validate(anyInt());
+    doNothing().when(cleanerService).clean(webSite);
+    // doNothing().when(cleanerService).clean(null);
+    doNothing().when(validatePagesService).validate(webSite);
 
 
     try {
@@ -123,16 +124,16 @@ public class ProcessLauncherTest {
 
     args5 = new DefaultApplicationArguments(new String[]{"--proc=converter", "--only-data-cleanup"});
     processLauncher.run(args5);
-    verify(cleanerService, times(1)).clean(null);
+    // verify(cleanerService, times(1)).clean(null);
 
     args5 = new DefaultApplicationArguments(new String[]{"--proc=converter"});
     processLauncher.run(args5);
-    // verify(converterService, times(1)).convert(anyInt());
+    verify(converterService, times(0)).convert(webSite);
 
-
-    args5 = new DefaultApplicationArguments(new String[]{"--proc=validate-pages", "--site_id=1"});
+ 
+    args5 = new DefaultApplicationArguments(new String[]{"--proc=validate-pages", "--site=1"});
     processLauncher.run(args5);
-    verify(validatePagesService, times(1)).validate(anyInt());
+    verify(validatePagesService, times(1)).validate(webSite);
 
   }
 

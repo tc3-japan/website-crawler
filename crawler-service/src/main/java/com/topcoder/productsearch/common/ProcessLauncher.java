@@ -124,17 +124,17 @@ public class ProcessLauncher implements ApplicationRunner {
     if (procs == null || procs.isEmpty()
         || isConverter(procs)
         || isValidatePages(procs)) {
-      WebSite website = getSite(args);
-      Integer webSiteId = website == null ? null : website.getId();
+      WebSite webSite = getSite(args);
+      // Integer webSiteId = webSite == null ? null : webSite.getId();
       if (isOnlyClean(args)) {
         logger.info("run clean up process ...");
-        cleanerService.clean(webSiteId);
+        cleanerService.clean(webSite);
       } else if (isConverter(procs)) {
         logger.info("running converter process ...");
-        converterService.convert(webSiteId);
+        converterService.convert(webSite);
       } else if (isValidatePages(procs)) {
         logger.info("running validate pages service process ...");
-        validatePagesService.validate(webSiteId);
+        validatePagesService.validate(webSite);
       }
     } else if ("crawler".equalsIgnoreCase(procs.get(0))) {
       List<String> sites = args.getOptionValues("site");

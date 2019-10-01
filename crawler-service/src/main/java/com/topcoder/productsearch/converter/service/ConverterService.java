@@ -29,7 +29,7 @@ public class ConverterService {
   /**
    * WebSite repository
    */
-  private WebSiteRepository WebSiteRepository;
+  private WebSiteRepository webSiteRepository;
 
   /**
    * the solr service
@@ -50,9 +50,12 @@ public class ConverterService {
    * @param webSiteId the website id
    * @throws InterruptedException when thread interrupted
    */
-  public void convert(Integer webSiteId) throws InterruptedException {
-    WebSite webSite = WebSiteRepository.findOne(webSiteId);
-    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, null),
+  public void convert(WebSite webSite) throws InterruptedException {
+    // WebSite webSite = webSiteRepository.findOne(webSiteId);
+    // if (webSite == null) {
+    //   throw new InterruptedException("can not find website where id = "+webSiteId);
+    // }
+    Common.readAndProcessPage(new PageSearchCriteria(webSite.getId(), null),
         webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
             threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService,
              webSite.getPageExpiredPeriod().longValue())));
