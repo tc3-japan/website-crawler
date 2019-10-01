@@ -53,11 +53,11 @@ public class CleanerService {
    * @param webSiteId the website id, it can be null
    * @throws InterruptedException when thread interrupted
    */
-  public void clean(Integer webSiteId) throws InterruptedException {
+  public void clean(WebSite webSite) throws InterruptedException {
     
-    WebSite webSite = webSiteRepository.findOne(webSiteId);
+    // WebSite webSite = webSiteRepository.findOne(webSiteId);
 
-    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, null),
+    Common.readAndProcessPage(new PageSearchCriteria(webSite.getId(), null),
         webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
         threadPoolExecutor.submit(() -> {
           logger.info("cleaner process for url " + cPage.getUrl());

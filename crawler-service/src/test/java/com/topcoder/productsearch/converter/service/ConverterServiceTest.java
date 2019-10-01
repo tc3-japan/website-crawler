@@ -47,6 +47,7 @@ public class ConverterServiceTest extends AbstractUnitTest {
 
   @Before
   public void init() {
+    webSite.setId(Integer.valueOf(1));
     webSite.setParallelSize(4);
     webSite.setPageExpiredPeriod(10);
     when(webSiteRepository.findOne(anyInt())).thenReturn(webSite);
@@ -59,7 +60,7 @@ public class ConverterServiceTest extends AbstractUnitTest {
     List<CPage> pages = new LinkedList<>();
     when(page.getContent()).thenReturn(pages);
     when(pageRepository.findAll(any(PageSpecification.class), any(Pageable.class))).thenReturn(page);
-    converterService.convert(1);
+    converterService.convert(webSite);
     assertEquals(page.getContent().size(), 0);
     verify(pageRepository, times(1)).findAll(any(PageSpecification.class), any(Pageable.class));
   }

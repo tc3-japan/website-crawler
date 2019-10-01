@@ -48,6 +48,7 @@ public class ValidatePagesServiceTest extends AbstractUnitTest {
 
   @Before
   public void init() {
+    webSite.setId(Integer.valueOf(1));
     webSite.setParallelSize(4);
     webSite.setPageExpiredPeriod(10);
     when(webSiteRepository.findOne(anyInt())).thenReturn(webSite);
@@ -59,7 +60,7 @@ public class ValidatePagesServiceTest extends AbstractUnitTest {
     when(pages.getContent()).thenReturn(new LinkedList<>());
     when(pageRepository.findAll(any(PageSpecification.class), any(Pageable.class))).thenReturn(pages);
 
-    validatePagesService.validate(1);
+    validatePagesService.validate(webSite);
     verify(pageRepository, times(1)).findAll(any(PageSpecification.class), any(Pageable.class));
 
     CPage cPage = new CPage();

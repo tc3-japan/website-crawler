@@ -11,7 +11,6 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -53,11 +52,11 @@ public class ValidatePagesService {
    * @param webSiteId the website id, it can be null
    * @throws InterruptedException when thread interrupted
    */
-  public void validate(Integer webSiteId) throws InterruptedException {
+  public void validate(WebSite webSite) throws InterruptedException {
 
-    WebSite webSite = webSiteRepository.findOne(webSiteId);
+    // WebSite webSite = webSiteRepository.findOne(webSiteId);
     
-    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, false),
+    Common.readAndProcessPage(new PageSearchCriteria(webSite.getId(), false),
         webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
         threadPoolExecutor.submit(() -> {
           this.process(cPage);
