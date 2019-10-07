@@ -51,18 +51,25 @@ CREATE TABLE `web_sites`  (
   `created_at`            datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified_at`      datetime NULL,
   `supports_robots_txt` 	tinyint(1) UNSIGNED NULL DEFAULT 1,
-  `crawl_max_depth`       SMALLINT(5) UNSIGNED NULL DEFAULT 0,
-  `crawl_time_limit`      MEDIUMINT(8) UNSIGNED NULL DEFAULT 0,
-  `crawl_interval`        MEDIUMINT(8) UNISIGNED NULL DEFAULT 1000,
-  `parallel_size`         tinyint(1) UNSIGNED NULL DEFAULT 12,
-  `timeout_page_download` tinyint(1) UNSIGNED NULL DEFAULT 2,
-  `retry_times`           tinyint(1) UNSIGNED NULL DEFAULT 2,
-  `page_expired_period`   SMALLINT(5) UNSIGNED NULL DEFAULT 30,
+  `crawl_max_depth` SMALLINT(5) UNSIGNED NULL DEFAULT 0,
+  `crawl_time_limit`  MEDIUMINT(8) UNSIGNED NULL DEFAULT 0,
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
+
+CREATE TABLE `url_normalizers` (
+  `id`                    int(11) NOT NULL,
+  `website_id` int(10) unsigned NOT NULL,
+  `regex_pattern` varchar(45) DEFAULT NULL,
+  `substitution` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) 
+ENGINE = InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+
 
 ALTER TABLE `destination_urls`
   ADD CONSTRAINT `fk_destination_urls_pageid`
@@ -82,6 +89,12 @@ ALTER TABLE `pages`
   REFERENCES `web_sites`(`id`)
   ON DELETE NO ACTION ;
 
+ALTER TABLE `url_normalizers`
+  ADD CONSTRAINT `fk_url_normalizers_websiteid`
+  FOREIGN KEY(`website_id`)
+  REFERENCES `web_sites`(`id`)
+  ON DELETE NO ACTION;
+
 CREATE INDEX `idx_destination_urls_pageid` USING BTREE 
   ON `destination_urls`(`page_id`);
 
@@ -97,4 +110,5 @@ CREATE INDEX `idx_source_urls_pageid` USING BTREE
 CREATE INDEX `idx_web_sites_name` USING BTREE 
   ON `web_sites`(`name`);
 
-
+CREATE INDEX `idx_url_normalizers_websiteid` USING BTREE
+  ON `url_normalizers`(`website_id`);
