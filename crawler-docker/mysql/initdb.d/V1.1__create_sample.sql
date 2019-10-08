@@ -18,5 +18,10 @@ INSERT INTO `web_sites`
 3600
 );
 
+INSERT INTO `website_crawler`.`url_normalizers` 
+(`id`, `website_id`, `regex_pattern`, `substitution`) 
+VALUES ('1', '1', '\\&cgid=(?:(?!\\\\&).)*', '');
+
+
 
 
