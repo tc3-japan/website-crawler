@@ -1,6 +1,8 @@
 package com.topcoder.productsearch.crawler.service;
 
+import com.topcoder.productsearch.common.entity.URLNormalizers;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.URLNormalizersRepository;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.crawler.CrawlerTask;
@@ -20,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * the Crawler Service Creator
@@ -41,6 +45,13 @@ public class CrawlerServiceCreator {
    */
   @Autowired
   private WebSiteRepository webSiteRepository;
+
+ 
+  /**
+   * url_normalizers table repository
+   */
+  @Autowired
+  private URLNormalizersRepository urlNormalizersRepository;
   
   
   public CrawlerService getCrawlerService(int siteId) {
@@ -73,13 +84,15 @@ public class CrawlerServiceCreator {
     public CrawlerServiceImpl(WebSite webSite)  {
 
       this.webSite = webSite;
+      URLNormalizers urlNormalizers = urlNormalizersRepository.findByWebsiteId(webSite.getId());
+      final Pattern pattern = Pattern.compile(urlNormalizers.getRegexPattern());
       threadPoolExecutor = new CrawlerThreadPoolExecutor(webSite.getParallelSize(), webSite.getCrawlInterval());
       // set task completed callback
       threadPoolExecutor.setExecutedHandler(runnable -> {
         CrawlerThread thread = (CrawlerThread) runnable;
         if (thread.getExpandUrl() != null && thread.getExpandUrl().size() > 0) {
           thread.getExpandUrl().forEach(url -> {
-            if (shouldVisit.getOrDefault(Common.normalize(url), Boolean.FALSE).equals(Boolean.TRUE)) {
+            if (shouldVisit.getOrDefault(Common.normalize(url,pattern,urlNormalizers.getSubstitution()), Boolean.FALSE).equals(Boolean.TRUE)) {
               return;
             }
             CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite(), thread.getCrawlerTask().getUrl());

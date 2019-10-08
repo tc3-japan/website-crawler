@@ -3,6 +3,7 @@ package com.topcoder.productsearch.common.util;
 import com.panforge.robotstxt.CustomRobotsTxtReader;
 import com.panforge.robotstxt.RobotsTxt;
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.URLNormalizers;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -109,6 +111,17 @@ public class Common {
     // TODO: The site-specific code
     String[] parts = url.split("&");
     return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
+  }
+
+  /**
+   * Site specific URL Normalization 
+   * @param url
+   * @param urlNormalpatterizers
+   * @return normalized URL String
+   */
+  public static String normalize(String url, Pattern pattern, String substitute) {
+    final Matcher matcher = pattern.matcher(url);
+    return matcher.replaceAll(substitute);
   }
 
   /**

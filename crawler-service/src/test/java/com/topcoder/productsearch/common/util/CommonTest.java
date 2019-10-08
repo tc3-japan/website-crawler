@@ -1,6 +1,5 @@
 package com.topcoder.productsearch.common.util;
 
-
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
@@ -18,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import javax.sound.midi.Track;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -60,9 +60,13 @@ public class CommonTest {
   public void testNormalize() {
     String url = "https://www.uniqlo.com/us/en/women-airism-slip-alexander" +
         "-wang-418189.html?dwvar_418189_color=COL09&cgid=women-airism-collection";
+    final String regex = "\\&cgid=(?:(?!\\&).)*";
+    final String substitute = "";
+    Pattern pattern = Pattern.compile(regex);
+    
     assertEquals("https://www.uniqlo.com/us/en/women-airism-" +
-        "slip-alexander-wang-418189.html?dwvar_418189_color=COL09", Common.normalize(url));
-    assertEquals("http://test.com?a=b", Common.normalize("http://test.com?a=b"));
+        "slip-alexander-wang-418189.html?dwvar_418189_color=COL09", Common.normalize(url, pattern, substitute));
+    assertEquals("http://test.com?a=b", Common.normalize("http://test.com?a=b", pattern, substitute));
   }
 
   @Test

@@ -1,7 +1,9 @@
 package com.topcoder.productsearch.crawler.service;
 
 import com.topcoder.productsearch.AbstractUnitTest;
+import com.topcoder.productsearch.common.entity.URLNormalizers;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.URLNormalizersRepository;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
@@ -34,11 +36,15 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Mock
   WebSiteRepository webSiteRepository;
+
+  @Mock
+  URLNormalizersRepository urlNormalizersRepository;
   
   @InjectMocks
   CrawlerServiceCreator creator;
 
   WebSite site = createWebSite();
+  URLNormalizers urlNormalizers = new URLNormalizers();
   
   CrawlerService crawlerService;
 
@@ -50,6 +56,11 @@ public class CrawlerServiceTest extends AbstractUnitTest {
     site.setTimeoutPageDownload(1);
     site.setRetryTimes(2);
     when(webSiteRepository.findOne(anyInt())).thenReturn(site);
+    String regexPattern = "\\&cgid=(?:(?!\\&).)*";
+    urlNormalizers.setRegexPattern(regexPattern);
+    String substitution = "";
+    urlNormalizers.setSubstitution(substitution);
+    when(urlNormalizersRepository.findByWebsiteId(anyInt())).thenReturn(urlNormalizers);
 
     crawlerService = creator.getCrawlerService(site.getId());
 
