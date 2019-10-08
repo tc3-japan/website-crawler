@@ -80,12 +80,14 @@ public class CrawlerServiceCreator {
     private LinkedBlockingQueue<CrawlerTask> queueTasks;
 
     WebSite webSite;
+    URLNormalizers urlNormalizers;
+    final Pattern pattern ;
 
     public CrawlerServiceImpl(WebSite webSite)  {
 
       this.webSite = webSite;
-      URLNormalizers urlNormalizers = urlNormalizersRepository.findByWebsiteId(webSite.getId());
-      final Pattern pattern = Pattern.compile(urlNormalizers.getRegexPattern());
+      urlNormalizers = urlNormalizersRepository.findByWebsiteId(webSite.getId());
+      pattern = Pattern.compile(urlNormalizers.getRegexPattern());
       threadPoolExecutor = new CrawlerThreadPoolExecutor(webSite.getParallelSize(), webSite.getCrawlInterval());
       // set task completed callback
       threadPoolExecutor.setExecutedHandler(runnable -> {
@@ -127,7 +129,7 @@ public class CrawlerServiceCreator {
      * @param task the task
      */
     private void pushTask(CrawlerTask task) {
-      shouldVisit.put(Common.normalize(task.getUrl()), Boolean.TRUE);
+      shouldVisit.put(Common.normalize(task.getUrl(), pattern, urlNormalizers.getSubstitution() ), Boolean.TRUE);
       logger.debug("add new task url = " + task.getUrl() + ", depth = " + task.getDepth());
       queueTasks.add(task);
     }
@@ -166,7 +168,7 @@ public class CrawlerServiceCreator {
         thread.setCrawlerService(this);
         thread.init();
 
-        shouldVisit.put(Common.normalize(thread.getCrawlerTask().getUrl()), Boolean.TRUE);
+        shouldVisit.put(Common.normalize(thread.getCrawlerTask().getUrl(),pattern,urlNormalizers.getSubstitution()), Boolean.TRUE);
         // schedule execute task after taskInterval
         threadPoolExecutor.schedule(thread, webSite.getCrawlInterval(), TimeUnit.MILLISECONDS);
         logger.info("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
