@@ -81,20 +81,29 @@ public class CrawlerServiceCreator {
 
     WebSite webSite;
     URLNormalizers urlNormalizers;
-    final Pattern pattern ;
-
+    final Pattern pattern;
     public CrawlerServiceImpl(WebSite webSite)  {
 
       this.webSite = webSite;
       urlNormalizers = urlNormalizersRepository.findByWebsiteId(webSite.getId());
-      pattern = Pattern.compile(urlNormalizers.getRegexPattern());
+      String regex;
+      if (urlNormalizers != null) {
+        regex = urlNormalizers.getRegexPattern();
+      } else {
+        regex = "";
+        logger.warn("Unable to find URL Normalization entry in url_normalizers table for this website id: " +
+            webSite.getId() + " name: " + webSite.getName());
+        logger.warn("Normalization will not be performed");  
+      }
+      pattern = Pattern.compile(regex);
       threadPoolExecutor = new CrawlerThreadPoolExecutor(webSite.getParallelSize(), webSite.getCrawlInterval());
       // set task completed callback
       threadPoolExecutor.setExecutedHandler(runnable -> {
         CrawlerThread thread = (CrawlerThread) runnable;
         if (thread.getExpandUrl() != null && thread.getExpandUrl().size() > 0) {
           thread.getExpandUrl().forEach(url -> {
-            if (shouldVisit.getOrDefault(Common.normalize(url,pattern,urlNormalizers.getSubstitution()), Boolean.FALSE).equals(Boolean.TRUE)) {
+            String normalizedUrl = urlNormalizers == null ? url : Common.normalize(url, pattern, urlNormalizers.getSubstitution());
+            if (shouldVisit.getOrDefault(normalizedUrl, Boolean.FALSE).equals(Boolean.TRUE)) {
               return;
             }
             CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite(), thread.getCrawlerTask().getUrl());
@@ -129,7 +138,8 @@ public class CrawlerServiceCreator {
      * @param task the task
      */
     private void pushTask(CrawlerTask task) {
-      shouldVisit.put(Common.normalize(task.getUrl(), pattern, urlNormalizers.getSubstitution() ), Boolean.TRUE);
+      String normalizedUrl = urlNormalizers == null ? task.getUrl() : Common.normalize(task.getUrl(), pattern, urlNormalizers.getSubstitution());
+      shouldVisit.put(normalizedUrl, Boolean.TRUE);
       logger.debug("add new task url = " + task.getUrl() + ", depth = " + task.getDepth());
       queueTasks.add(task);
     }
@@ -168,7 +178,8 @@ public class CrawlerServiceCreator {
         thread.setCrawlerService(this);
         thread.init();
 
-        shouldVisit.put(Common.normalize(thread.getCrawlerTask().getUrl(),pattern,urlNormalizers.getSubstitution()), Boolean.TRUE);
+        String normalizedUrl = urlNormalizers == null ? task.getUrl() : Common.normalize(task.getUrl(), pattern, urlNormalizers.getSubstitution());
+        shouldVisit.put(normalizedUrl, Boolean.TRUE);
         // schedule execute task after taskInterval
         threadPoolExecutor.schedule(thread, webSite.getCrawlInterval(), TimeUnit.MILLISECONDS);
         logger.info("schedule a new task, current running count = " + threadPoolExecutor.getRunningCount()
