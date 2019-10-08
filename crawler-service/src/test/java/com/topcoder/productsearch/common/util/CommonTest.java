@@ -67,6 +67,9 @@ public class CommonTest {
     assertEquals("https://www.uniqlo.com/us/en/women-airism-" +
         "slip-alexander-wang-418189.html?dwvar_418189_color=COL09", Common.normalize(url, pattern, substitute));
     assertEquals("http://test.com?a=b", Common.normalize("http://test.com?a=b", pattern, substitute));
+
+    assertEquals("https://www.ikea.com/jp/en/catalog/categories/departments/living_room/10661/", 
+      Common.normalize("https://www.ikea.com/jp/en/catalog/categories/departments/living_room/10661/", pattern, substitute));
   }
 
   @Test
