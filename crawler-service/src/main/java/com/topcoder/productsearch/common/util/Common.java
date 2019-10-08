@@ -101,17 +101,6 @@ public class Common {
     return url.matches(webSite.getContentUrlPatterns());
   }
 
-  /**
-   * normalize to remove cgid params from url, so that we can check two url is same url or not
-   *
-   * @param url the url
-   * @return the updated url
-   */
-  public static String normalize(String url) {
-    // TODO: The site-specific code
-    String[] parts = url.split("&");
-    return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
-  }
 
   /**
    * Site specific URL Normalization 
