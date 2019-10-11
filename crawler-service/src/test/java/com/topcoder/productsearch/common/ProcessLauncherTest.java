@@ -1,11 +1,11 @@
 package com.topcoder.productsearch.common;
 
-
 import com.topcoder.productsearch.cleaner.service.CleanerService;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
 import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +37,9 @@ public class ProcessLauncherTest {
   CrawlerService crawlerService;
 
   @Mock
+  CrawlerServiceCreator crawlerServiceCreator;
+
+  @Mock
   CleanerService cleanerService;
 
   @Mock
@@ -61,14 +64,15 @@ public class ProcessLauncherTest {
     webSite.setId(siteId);
 
     when(webSiteRepository.findOne(siteId)).thenReturn(webSite);
+    when(webSiteRepository.findOne(Integer.valueOf(1))).thenReturn(webSite);
     when(webSiteRepository.findOne(2)).thenReturn(null);
-    doNothing().when(crawlerService).crawler(webSite);
-    doNothing().when(converterService).convert(1);
-    doNothing().when(converterService).convert(2);
+    doNothing().when(crawlerService).crawler();
+    doNothing().when(converterService).convert(webSite);
+    doNothing().when(converterService).convert(webSite);
     doNothing().when(converterService).convert(null);
-    doNothing().when(cleanerService).clean(any(Integer.class));
-    doNothing().when(cleanerService).clean(null);
-    doNothing().when(validatePagesService).validate(anyInt());
+    doNothing().when(cleanerService).clean(webSite);
+    // doNothing().when(cleanerService).clean(null);
+    doNothing().when(validatePagesService).validate(webSite);
 
 
     try {
@@ -76,8 +80,8 @@ public class ProcessLauncherTest {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    verify(webSiteRepository, times(1)).findOne(any(Integer.class));
-
+    
+    verify(crawlerServiceCreator, times(1)).getCrawlerService(any(Integer.class));
 
     DefaultApplicationArguments args = new DefaultApplicationArguments(new String[]{"--proc=crawler"});
     try {
@@ -104,7 +108,7 @@ public class ProcessLauncherTest {
     try {
       processLauncher.run(args3);
     } catch (Exception e) {
-      assertEquals("can not find website where id = 2", e.getMessage());
+      assertEquals("Could not create CrawlerService where website id = 2", e.getMessage());
     }
 
     DefaultApplicationArguments args4 = new DefaultApplicationArguments(new String[]
@@ -120,16 +124,16 @@ public class ProcessLauncherTest {
 
     args5 = new DefaultApplicationArguments(new String[]{"--proc=converter", "--only-data-cleanup"});
     processLauncher.run(args5);
-    verify(cleanerService, times(1)).clean(null);
+    // verify(cleanerService, times(1)).clean(null);
 
     args5 = new DefaultApplicationArguments(new String[]{"--proc=converter"});
     processLauncher.run(args5);
-    // verify(converterService, times(1)).convert(anyInt());
+    verify(converterService, times(0)).convert(webSite);
 
-
-    args5 = new DefaultApplicationArguments(new String[]{"--proc=validate-pages", "--site_id=1"});
+ 
+    args5 = new DefaultApplicationArguments(new String[]{"--proc=validate-pages", "--site=1"});
     processLauncher.run(args5);
-    verify(validatePagesService, times(1)).validate(anyInt());
+    verify(validatePagesService, times(1)).validate(webSite);
 
   }
 

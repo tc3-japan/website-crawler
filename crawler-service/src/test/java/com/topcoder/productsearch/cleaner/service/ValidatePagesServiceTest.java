@@ -1,8 +1,13 @@
 package com.topcoder.productsearch.cleaner.service;
 
+import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.common.specifications.PageSpecification;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,11 +30,13 @@ import static org.mockito.Mockito.*;
  */
 @ActiveProfiles("test")
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ValidatePagesServiceTest {
+public class ValidatePagesServiceTest extends AbstractUnitTest {
 
   @Mock
   PageRepository pageRepository;
 
+  @Mock
+  WebSiteRepository webSiteRepository;
 
   @InjectMocks
   ValidatePagesService validatePagesService;
@@ -37,13 +44,23 @@ public class ValidatePagesServiceTest {
   @Mock
   Page<CPage> pages;
 
+  WebSite webSite = createWebSite();
+
+  @Before
+  public void init() {
+    webSite.setId(Integer.valueOf(1));
+    webSite.setParallelSize(4);
+    webSite.setPageExpiredPeriod(10);
+    when(webSiteRepository.findOne(anyInt())).thenReturn(webSite);
+  }
+
+
   @Test
   public void testValidatePages() throws InterruptedException {
-
-    validatePagesService.setParallelSize(4);
     when(pages.getContent()).thenReturn(new LinkedList<>());
     when(pageRepository.findAll(any(PageSpecification.class), any(Pageable.class))).thenReturn(pages);
-    validatePagesService.validate(1);
+
+    validatePagesService.validate(webSite);
     verify(pageRepository, times(1)).findAll(any(PageSpecification.class), any(Pageable.class));
 
     CPage cPage = new CPage();

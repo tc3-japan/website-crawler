@@ -5,6 +5,7 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
 import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class ProcessLauncher implements ApplicationRunner {
    * the crawler service
    */
   @Autowired
-  CrawlerService crawlerService;
+  CrawlerServiceCreator crawlerServiceCreator;
 
   /**
    * the converter service
@@ -123,28 +124,36 @@ public class ProcessLauncher implements ApplicationRunner {
     if (procs == null || procs.isEmpty()
         || isConverter(procs)
         || isValidatePages(procs)) {
-      WebSite website = getSite(args);
-      Integer webSiteId = website == null ? null : website.getId();
+      WebSite webSite = getSite(args);
+      // Integer webSiteId = webSite == null ? null : webSite.getId();
       if (isOnlyClean(args)) {
         logger.info("run clean up process ...");
-        cleanerService.clean(webSiteId);
+        cleanerService.clean(webSite);
       } else if (isConverter(procs)) {
         logger.info("running converter process ...");
-        converterService.convert(webSiteId);
+        converterService.convert(webSite);
       } else if (isValidatePages(procs)) {
         logger.info("running validate pages service process ...");
-        validatePagesService.validate(webSiteId);
+        validatePagesService.validate(webSite);
       }
     } else if ("crawler".equalsIgnoreCase(procs.get(0))) {
-      WebSite website = getSite(args);
-      if (website == null) {
-        // logger.info("Missing parameter '--site=<site-id>'");
+      List<String> sites = args.getOptionValues("site");
+      if (sites == null || sites.isEmpty()) {
+        logger.info("Missing parameter '--site=<site-id>'");
+        logger.info("Exiting...");
+        return;
+      }
+      int siteId = Integer.parseInt(sites.get(0));
+      CrawlerService crawlerService = crawlerServiceCreator.getCrawlerService(siteId);
+
+      if (crawlerService == null) {
+        logger.info("Could not create CrawlerService where website id = " + siteId);
         logger.info("Exiting...");
         System.out.println("************************************* Exiting *****************");
         return;
       }
-      logger.info(">>> Start crawling on : " + website.getName());
-      crawlerService.crawler(website);
+      logger.info(">>> Start crawling on : " + crawlerService.getWebSite().getName());
+      crawlerService.crawler();
     } else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");

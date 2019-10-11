@@ -20,6 +20,7 @@ public abstract class AbstractUnitTest {
     webSite.setSupportsRobotsTxt(true);
     webSite.setCrawlMaxDepth(3);
     webSite.setCrawlTimeLimit(300);
+    webSite.setCrawlInterval(1000);
     return webSite;
   }
 

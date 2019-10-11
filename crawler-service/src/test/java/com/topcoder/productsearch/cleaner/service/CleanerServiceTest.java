@@ -2,16 +2,18 @@ package com.topcoder.productsearch.cleaner.service;
 
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.common.specifications.PageSpecification;
 import com.topcoder.productsearch.converter.service.SolrService;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -21,7 +23,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
+
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -37,6 +39,9 @@ public class CleanerServiceTest extends AbstractUnitTest {
   PageRepository pageRepository;
 
   @Mock
+  WebSiteRepository webSiteRepository;
+
+  @Mock
   SolrService solrService;
 
   @InjectMocks
@@ -45,12 +50,24 @@ public class CleanerServiceTest extends AbstractUnitTest {
   @Mock
   Page<CPage> pages;
 
+  WebSite webSite = createWebSite();
+
+  @Before
+  public void init() {
+    webSite.setId(Integer.valueOf(1));
+    webSite.setParallelSize(4);
+    webSite.setPageExpiredPeriod(10);
+    when(webSiteRepository.findOne(anyInt())).thenReturn(webSite);
+  }
+
+
   @Test
   public void testClean() throws InterruptedException {
-    cleanerService.setParallelSize(4);
+
     when(pages.getContent()).thenReturn(new LinkedList<>());
     when(pageRepository.findAll(any(PageSpecification.class), any(Pageable.class))).thenReturn(pages);
-    cleanerService.clean(1);
+
+    cleanerService.clean(webSite);
     verify(pageRepository, times(1)).findAll(any(PageSpecification.class), any(Pageable.class));
   }
 
@@ -58,20 +75,21 @@ public class CleanerServiceTest extends AbstractUnitTest {
   public void testCleanPage() throws IOException, SolrServerException {
     CPage cPage = new CPage();
     cPage.setUrl("http://google.com/a/a/a/a/b.html");
-    cleanerService.setPageExpiredPeriod(10L);
+     // cleanerService.setPageExpiredPeriod(10L);
     cPage.setLastModifiedAt(java.sql.Date.valueOf(LocalDate.now().minusDays(12L)));
-    cleanerService.cleanPage(cPage);
+
+    cleanerService.cleanPage(cPage,webSite.getPageExpiredPeriod());
     verify(solrService, times(1)).deleteByURL(any(String.class));
 
-    cleanerService.setPageExpiredPeriod(10L);
+
     cPage.setLastModifiedAt(Date.from(Instant.now()));
-    cleanerService.cleanPage(cPage);
+    cleanerService.cleanPage(cPage,webSite.getPageExpiredPeriod());
     verify(solrService, times(1)).deleteByURL(any(String.class));
 
-    cleanerService.setPageExpiredPeriod(10L);
+  
     cPage.setLastModifiedAt(Date.from(Instant.now()));
     cPage.setDeleted(true);
-    cleanerService.cleanPage(cPage);
+    cleanerService.cleanPage(cPage, webSite.getPageExpiredPeriod());
     verify(solrService, times(2)).deleteByURL(any(String.class));
 
 
