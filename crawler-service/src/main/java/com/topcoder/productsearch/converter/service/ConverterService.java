@@ -1,8 +1,10 @@
 package com.topcoder.productsearch.converter.service;
 
 import com.topcoder.productsearch.cleaner.service.CleanerService;
+import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.converter.ConvertThread;
 import lombok.Setter;
@@ -25,16 +27,9 @@ public class ConverterService {
   private PageRepository pageRepository;
 
   /**
-   * the parallel/page size
+   * WebSite repository
    */
-  @Value("${crawler-settings.parallel-size}")
-  private int parallelSize;
-
-  /**
-   * the page expired period time, unit is day
-   */
-  @Value("${crawler-settings.page-expired-period}")
-  private Long pageExpiredPeriod;
+  private WebSiteRepository webSiteRepository;
 
   /**
    * the solr service
@@ -55,9 +50,14 @@ public class ConverterService {
    * @param webSiteId the website id
    * @throws InterruptedException when thread interrupted
    */
-  public void convert(Integer webSiteId) throws InterruptedException {
-    Common.readAndProcessPage(new PageSearchCriteria(webSiteId, null),
-        parallelSize, pageRepository, (threadPoolExecutor, cPage) ->
-            threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService, pageExpiredPeriod)));
+  public void convert(WebSite webSite) throws InterruptedException {
+    // WebSite webSite = webSiteRepository.findOne(webSiteId);
+    // if (webSite == null) {
+    //   throw new InterruptedException("can not find website where id = "+webSiteId);
+    // }
+    Common.readAndProcessPage(new PageSearchCriteria(webSite.getId(), null),
+        webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
+            threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService,
+             webSite.getPageExpiredPeriod().longValue())));
   }
 }

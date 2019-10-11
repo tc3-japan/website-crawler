@@ -1,9 +1,10 @@
 package com.topcoder.productsearch.crawler;
 
-
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -27,12 +28,15 @@ public class CrawlerRunnerTest {
   @Mock
   WebSiteRepository webSiteRepository;
 
-
   @Mock
   CrawlerService crawlerService;
 
+  @Mock
+  CrawlerServiceCreator crawlerServiceCreator;
+
   @InjectMocks
   CrawlerRunner crawlerRunner;
+
 
   @Test
   public void testRunner() {
@@ -50,7 +54,7 @@ public class CrawlerRunnerTest {
 
     when(webSiteRepository.findOne(siteId)).thenReturn(webSite);
     when(webSiteRepository.findOne(2)).thenReturn(null);
-    doNothing().when(crawlerService).crawler(webSite);
+    doNothing().when(crawlerService).crawler();
 
 
     try {
@@ -58,7 +62,7 @@ public class CrawlerRunnerTest {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    verify(webSiteRepository, times(1)).findOne(any(Integer.class));
+    verify(crawlerServiceCreator, times(1)).getCrawlerService(any(Integer.class));
 
 
     DefaultApplicationArguments args = new DefaultApplicationArguments(new String[]{});
@@ -79,7 +83,7 @@ public class CrawlerRunnerTest {
     try {
       crawlerRunner.run(args3);
     } catch (Exception e) {
-      assertEquals("can not find website where id = 2", e.getMessage());
+      assertEquals("Could not create CrawlerService where website id = 2", e.getMessage());
     }
   }
 

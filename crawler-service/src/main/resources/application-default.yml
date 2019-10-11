@@ -50,17 +50,4 @@ solr:
   uri: http://127.0.0.1:8983/solr/manufacturer_product
 
 crawler-settings:
-  #Interval between each subsequent request (milliseconds)
-  interval: 1000
 
-  #task parallel size
-  parallel-size: 12
-
-  #Timeout for downloading a page (minutes)
-  timeout-download: 2
-
-  #Max number of times to retry a single page.
-  retry-times: 2
-
-  #Time lapse period for Expired pages in number of Days.
-  page-expired-period: 30

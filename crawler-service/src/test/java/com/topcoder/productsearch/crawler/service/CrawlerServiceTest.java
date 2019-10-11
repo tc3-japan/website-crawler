@@ -1,14 +1,19 @@
 package com.topcoder.productsearch.crawler.service;
 
-
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
-import com.topcoder.productsearch.crawler.CrawlerThreadPoolExecutor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.when;
+
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -18,6 +23,8 @@ import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 
+
+
 /**
  * Unit test for  CrawlerService
  */
@@ -25,22 +32,33 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CrawlerServiceTest extends AbstractUnitTest {
 
+  @Mock
+  WebSiteRepository webSiteRepository;
+  
+  @InjectMocks
+  CrawlerServiceCreator creator;
 
-  private WebSite site = createWebSite();
-  private CrawlerService crawlerService;
+  WebSite site = createWebSite();
+  
+  CrawlerService crawlerService;
 
   @Before
   public void init() {
-    crawlerService = new CrawlerService(1, 10);
-    crawlerService.setMaxRetryTimes(2);
+    site.setCrawlInterval(1000);
     site.setCrawlTimeLimit(1);
-    crawlerService.setTaskInterval(1000);
-    crawlerService.setTimeout(1.2f);
+    site.setParallelSize(1);
+    site.setTimeoutPageDownload(1);
+    site.setRetryTimes(2);
+    when(webSiteRepository.findOne(anyInt())).thenReturn(site);
+
+    crawlerService = creator.getCrawlerService(site.getId());
+
+
   }
 
   @Test
   public void testService() {
-    crawlerService.crawler(site);
+    crawlerService.crawler();
     assertEquals(crawlerService.getShouldVisit().getOrDefault(site.getUrl(), Boolean.FALSE), Boolean.TRUE);
     assertEquals(crawlerService.getQueueTasks().size(), 0);
 
@@ -55,7 +73,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
   @Test
   public void testServiceTimeLimit() {
     site.setCrawlTimeLimit(-1);
-    crawlerService.crawler(site);
+    crawlerService.crawler();
     assertEquals(crawlerService.getQueueTasks().size(), 0);
   }
 
@@ -65,7 +83,7 @@ public class CrawlerServiceTest extends AbstractUnitTest {
     crawlerService.getThreadPoolExecutor().setRunningCount(1);
     crawlerService.getThreadPoolExecutor().setCorePoolSize(1);
     crawlerService.getQueueTasks().add(new CrawlerTask(site.getUrl(), site, null));
-    crawlerService.crawler(site);
+    crawlerService.crawler();
     assertEquals(crawlerService.getQueueTasks().size(), 1);
   }
 
