@@ -91,9 +91,9 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   private WebSite webSite = createWebSite();
   private CPage cPage = createPage();
   private CrawlerTask task = createTask();
-  private WebRequest matchedUrl = new WebRequest(new URL("https://www.uniqlo.com/us/en/boys-jersey-easy-" +
+  private WebRequest matchedUrlWebRequest = new WebRequest(new URL("https://www.uniqlo.com/us/en/boys-jersey-easy-" +
       "shorts-416524.html?dwvar_416524_color=COL57&cgid=boys-pants-shorts"));
-  private WebRequest rootURL = new WebRequest(new URL(webSite.getUrl()));
+  private WebRequest rootURLWebRequest = new WebRequest(new URL(webSite.getUrl()));
  
   
  
@@ -111,8 +111,8 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(htmlPage.getBody()).thenReturn(htmlElement);
     when(htmlElement.asXml()).thenReturn("");
     when(htmlPage.getWebResponse()).thenReturn(webResponse);
-    when(webClient.getPage(rootURL)).thenReturn(htmlPage);
-    when(webClient.getPage(matchedUrl)).thenReturn(htmlPage);
+    when(webClient.getPage(rootURLWebRequest)).thenReturn(htmlPage);
+    when(webClient.getPage(matchedUrlWebRequest)).thenReturn(htmlPage);
     when(crawlerService.getThreadPoolExecutor()).thenReturn(threadPoolExecutor);
     when(threadPoolExecutor.hasReachedTimeLimit(anyInt())).thenReturn(false);
     PowerMockito.spy(Common.class);
@@ -136,25 +136,25 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   @Test
   public void testThread() {
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("#"));
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
 
 
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("https://google.com"));
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
 
 
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()+"/test.html"));
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 1);
 
     // ToDo: following needs to be replaced by a URL with static number of URLs cannot rely on live website URLs not changing.
-    // when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections
-    //     .singletonList(webSite.getUrl() + "/us/en/men-u-crew-neck-short-sleeve-t-shirt-414351.html?" +
-    //         "dwvar_414351_color=COL46&cgid=men-wear-to-work"));
-    // crawlerThread.download(rootURL);
-    // assertEquals(crawlerThread.getExpandUrl().size(), 2);
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections
+        .singletonList(webSite.getUrl() + "/us/en/men-u-crew-neck-short-sleeve-t-shirt-414351.html?" +
+            "dwvar_414351_color=COL46&cgid=men-wear-to-work"));
+    crawlerThread.download(rootURLWebRequest);
+    assertEquals(crawlerThread.getExpandUrl().size(), 2);
 
     // when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList("/us/en/orders"));
     // crawlerThread.download(rootURL);
@@ -166,9 +166,9 @@ public class CrawlerThreadTest extends AbstractUnitTest {
 
     // when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
     // crawlerThread.getExpandUrl().clear();
-    task.setUrl(matchedUrl.getUrl().toString());
+    task.setUrl(matchedUrlWebRequest.getUrl().toString());
     task.setSourceUrl("http://test.com");
-    when(pageRepository.findByUrl(matchedUrl.getUrl().toString())).thenReturn(cPage);
+    when(pageRepository.findByUrl(matchedUrlWebRequest.getUrl().toString())).thenReturn(cPage);
     when(destinationURLRepository.findByUrlAndPageId(webSite.getUrl(), 1)).thenReturn(createDestinationURL());
     when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(new SourceURL());
     when(sourceURLRepository.save(any(SourceURL.class))).thenReturn(new SourceURL());
@@ -181,18 +181,18 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl() + "/test"));
     crawlerThread.getExpandUrl().clear();
     when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(null);
-    task.setUrl(matchedUrl.getUrl().toString());
+    task.setUrl(matchedUrlWebRequest.getUrl().toString());
     task.setSourceUrl("http://test.com");
-    crawlerThread.download(matchedUrl);
+    crawlerThread.download(matchedUrlWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 1);
     verify(sourceURLRepository, times(2)).findByUrlAndPageId(any(String.class), any(Integer.class));
     verify(sourceURLRepository, times(2)).save(any(SourceURL.class));
 
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
     crawlerThread.getExpandUrl().clear();
-    task.setUrl(matchedUrl.getUrl().toString());
-    when(pageRepository.findByUrl(matchedUrl.getUrl().toString())).thenReturn(null);
-    crawlerThread.download(matchedUrl);
+    task.setUrl(matchedUrlWebRequest.getUrl().toString());
+    when(pageRepository.findByUrl(matchedUrlWebRequest.getUrl().toString())).thenReturn(null);
+    crawlerThread.download(matchedUrlWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 1);
   }
 
@@ -202,7 +202,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.setMaxDepth(1);
     crawlerThread.getExpandUrl().clear();
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
   }
 
@@ -210,7 +210,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   public void testThreadTimeout() {
     crawlerThread.setTimeout(1);
     try {
-      crawlerThread.download(rootURL);
+      crawlerThread.download(rootURLWebRequest);
     } catch (Exception e) {
       assertEquals("timeout exception for url " + task.getUrl(), e.getMessage());
     }
@@ -221,7 +221,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   public void test304() {
     when(webResponse.getStatusCode()).thenReturn(304);
     crawlerThread.getExpandUrl().clear();
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
   }
 
@@ -231,7 +231,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(webResponse.getResponseHeaderValue("Location")).thenReturn("http://test.com");
     crawlerThread.getExpandUrl().clear();
     crawlerThread.getCrawlerTask().setStartTime(System.currentTimeMillis());
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 1);
   }
 
@@ -241,11 +241,11 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(htmlPage.getTitleText()).thenReturn("title");
     when(webResponse.getStatusCode()).thenReturn(400);
     crawlerThread.setRetryTimes(1);
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
 
     when(webResponse.getStatusCode()).thenReturn(500);
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(), 0);
   }
 
@@ -255,13 +255,13 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(htmlPage.getTitleText()).thenReturn("title");
     when(webResponse.getStatusCode()).thenReturn(501);
     crawlerThread.setRetryTimes(1);
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
     assertEquals(crawlerThread.getExpandUrl().size(),0);
   }
 
   @Test
   public void testTimeout() {
     crawlerThread.getCrawlerTask().setStartTime(0L);
-    crawlerThread.download(rootURL);
+    crawlerThread.download(rootURLWebRequest);
   }
 }
