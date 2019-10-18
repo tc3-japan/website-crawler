@@ -55,7 +55,7 @@ public class Common {
    * @param url the url
    * @return processed url
    */
-  public static String removeHashFromURL(String url) {
+  public static String removeHashSymbolFromURL(String url) {
     int lastHash = url.lastIndexOf('#');
     if (lastHash > 0) {
       return url.substring(0, lastHash);

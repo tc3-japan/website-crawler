@@ -206,7 +206,7 @@ public class CrawlerThread implements Runnable {
         String[] part2s = part1s[1].split("/");
         url = part1s[0] + "//" + part2s[0] + url;
       }
-      url = Common.removeHashFromURL(url);
+      url = Common.removeHashSymbolFromURL(url);
 
       if (Common.isUnnecessary(url)) {
         return;

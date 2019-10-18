@@ -22,8 +22,8 @@ public class CommonTest {
 
   @Test
   public void testRemoveHash() {
-    assertEquals("http://test.com?a=b", Common.removeHashFromURL("http://test.com?a=b#ccc"));
-    assertEquals("http://test.com?a=b", Common.removeHashFromURL("http://test.com?a=b"));
+    assertEquals("http://test.com?a=b", Common.removeHashSymbolFromURL("http://test.com?a=b#ccc"));
+    assertEquals("http://test.com?a=b", Common.removeHashSymbolFromURL("http://test.com?a=b"));
   }
 
   @Test
