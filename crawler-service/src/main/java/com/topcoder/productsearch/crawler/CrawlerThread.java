@@ -189,32 +189,32 @@ public class CrawlerThread implements Runnable {
     // find all links
     Integer finalPageId = pageId;
     List<String> urls = domHelper.findAllUrls(page);
-    urls.forEach(url -> {
+    urls.forEach(urlLink -> {
       String homeUrl = crawlerTask.getSite().getUrl();
 
-      if (url.startsWith("http") && !url.contains(crawlerTask.getSite().getUrl())) {
+      if (urlLink.startsWith("http") && !urlLink.contains(crawlerTask.getSite().getUrl())) {
         // Filter out external URLs
         return;
       }
 
-      if (!url.startsWith("/") && !url.contains(crawlerTask.getSite().getUrl())) {
+      if (!urlLink.startsWith("/") && !urlLink.contains(crawlerTask.getSite().getUrl())) {
         return;
       }
 
-      if (url.startsWith("/")) { // relative url
+      if (urlLink.startsWith("/")) { // relative url
         String[] part1s = homeUrl.split("//");
         String[] part2s = part1s[1].split("/");
-        url = part1s[0] + "//" + part2s[0] + url;
+        urlLink = part1s[0] + "//" + part2s[0] + urlLink;
       }
-      url = Common.removeHashSymbolFromURL(url);
+      urlLink = Common.removeHashSymbolFromURL(urlLink);
 
-      if (Common.isUnnecessary(url)) {
+      if (Common.isUnnecessary(urlLink)) {
         return;
       }
 
-      if (!Common.isMatch(crawlerTask.getSite(), url)) {
+      if (!Common.isMatch(crawlerTask.getSite(), urlLink)) {
 
-        if (!Common.endsWithHTML(url)) {
+        if (!Common.endsWithHTML(urlLink)) {
           return;
         }
       }
@@ -236,19 +236,19 @@ public class CrawlerThread implements Runnable {
       }
 
       if (finalPageId != null) {
-        DestinationURL destinationURL = destinationURLRepository.findByUrlAndPageId(url, finalPageId);
+        DestinationURL destinationURL = destinationURLRepository.findByUrlAndPageId(urlLink, finalPageId);
         // page already have been processed from a previous thread during the execution and should be skipped.
         // only process not exist destinationURL
         if (destinationURL == null) {
           destinationURL = new DestinationURL();
           destinationURL.setCreatedAt(Date.from(Instant.now()));
-          destinationURL.setUrl(url);
+          destinationURL.setUrl(urlLink);
           destinationURL.setPageId(finalPageId);
           destinationURLRepository.save(destinationURL);
-          enqueue(url);
+          enqueue(urlLink);
         }
       } else {
-        enqueue(url);
+        enqueue(urlLink);
       }
     });
   }
