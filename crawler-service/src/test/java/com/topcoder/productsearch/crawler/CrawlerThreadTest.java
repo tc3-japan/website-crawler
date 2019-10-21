@@ -145,13 +145,12 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     assertEquals(0, crawlerThread.getExpandUrl().size());
 
 
-    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()+"/test.html"));
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()+"test.html"));
     crawlerThread.download(rootURLWebRequest);
     assertEquals(1, crawlerThread.getExpandUrl().size());
 
-    // ToDo: following needs to be replaced by a URL with static number of URLs cannot rely on live website URLs not changing.
     when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections
-        .singletonList(webSite.getUrl() + "/us/en/men-u-crew-neck-short-sleeve-t-shirt-414351.html?" +
+        .singletonList(webSite.getUrl() + "men-u-crew-neck-short-sleeve-t-shirt-414351.html?" +
             "dwvar_414351_color=COL46&cgid=men-wear-to-work"));
     crawlerThread.download(rootURLWebRequest);
     assertEquals(2, crawlerThread.getExpandUrl().size());
@@ -164,7 +163,8 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.download(rootURLWebRequest);
     assertEquals(2, crawlerThread.getExpandUrl().size());
 
-    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()+ "boys-jersey-easy-" +
+      "shorts-416524.html?dwvar_416524_color=COL57&cgid=boys-pants-shorts"));
     crawlerThread.getExpandUrl().clear();
     task.setUrl(matchedUrlWebRequest.getUrl().toString());
     task.setSourceUrl("http://test.com");
@@ -173,27 +173,26 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(new SourceURL());
     when(sourceURLRepository.save(any(SourceURL.class))).thenReturn(new SourceURL());
     crawlerThread.download(matchedUrlWebRequest);
-    assertEquals(crawlerThread.getExpandUrl().size(), 0);
+    assertEquals(1, crawlerThread.getExpandUrl().size());
     verify(sourceURLRepository, times(1)).findByUrlAndPageId(any(String.class), any(Integer.class));
     verify(sourceURLRepository, times(1)).save(any(SourceURL.class));
 
 
-    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl() + "/test"));
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl() + "/test.html"));
     crawlerThread.getExpandUrl().clear();
     when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(null);
     task.setUrl(matchedUrlWebRequest.getUrl().toString());
-    task.setSourceUrl("http://test.com");
     crawlerThread.download(matchedUrlWebRequest);
-    assertEquals(crawlerThread.getExpandUrl().size(), 1);
+    assertEquals( 1, crawlerThread.getExpandUrl().size());
     verify(sourceURLRepository, times(2)).findByUrlAndPageId(any(String.class), any(Integer.class));
     verify(sourceURLRepository, times(2)).save(any(SourceURL.class));
 
-    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()));
+    when(domHelper.findAllUrls(htmlPage)).thenReturn(Collections.singletonList(webSite.getUrl()+"/test.html"));
     crawlerThread.getExpandUrl().clear();
     task.setUrl(matchedUrlWebRequest.getUrl().toString());
     when(pageRepository.findByUrl(matchedUrlWebRequest.getUrl().toString())).thenReturn(null);
     crawlerThread.download(matchedUrlWebRequest);
-    assertEquals(crawlerThread.getExpandUrl().size(), 1);
+    assertEquals( 1, crawlerThread.getExpandUrl().size());
   }
 
 

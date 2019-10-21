@@ -232,4 +232,9 @@ public class Common {
     logger.info("fetch pages searchCriteria = " + searchCriteria.toString());
     return pages.getContent();
   }
+
+  public static boolean endsWithHTML(String url) {
+   
+    return url.matches(".*html");
+  }
 }

@@ -212,6 +212,15 @@ public class CrawlerThread implements Runnable {
         return;
       }
 
+      if (!Common.isMatch(crawlerTask.getSite(), url)) {
+
+        if (!Common.endsWithHTML(url)) {
+          return;
+        }
+      }
+
+
+
       // Create records in the source_urls table with following data
       if (crawlerTask.getSourceUrl() != null && finalPageId != null) {
         SourceURL sourceURL = sourceURLRepository.findByUrlAndPageId(crawlerTask.getSourceUrl(), finalPageId);
@@ -263,6 +272,7 @@ public class CrawlerThread implements Runnable {
       logger.info("skip " + url + " , because of robots.txt disallow this");
       return;
     }
+    
     expandUrl.add(url);
   }
 

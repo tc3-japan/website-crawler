@@ -102,13 +102,13 @@ public class CommonTest {
     });
   }
 
-  @Test
-  public void testHasAccess() {
-    WebSite site = new WebSite();
-    site.setUrl("https://www.uniqlo.com/us/en");
-    assertEquals(false, Common.hasAccess(site, "https://www.uniqlo.com/us/en/search"));
-    assertEquals(true, Common.hasAccess(site, "https://www.uniqlo.com/us/en/test.html"));
-  }
+  // @Test
+  // public void testHasAccess() {
+  //   WebSite site = new WebSite();
+  //   site.setUrl("https://www.uniqlo.com/us/en");
+  //   assertEquals(false, Common.hasAccess(site, "https://www.uniqlo.com/us/en/search"));
+  //   assertEquals(true, Common.hasAccess(site, "https://www.uniqlo.com/us/en/test.html"));
+  // }
   
   @Test
   public void testIsUnnecessary() {
@@ -116,5 +116,13 @@ public class CommonTest {
     assertEquals(true, Common.isUnnecessary(null));
     assertEquals(false, Common.isUnnecessary("/women/plants"));
     assertEquals(false, Common.isUnnecessary("http://test.com/a.html"));
+  }
+
+  @Test
+  public void testEndsWithHTML() {
+    assertEquals(true, Common.endsWithHTML("http://hello.html"));
+    assertEquals(false, Common.endsWithHTML(".html.not"));
+    assertEquals(false, Common.endsWithHTML("/us/en/men-u-crew-neck-short-sleeve-t-shirt-414351.html?" +
+    "dwvar_414351_color=COL46&cgid=men-wear-to-work"));
   }
 }
