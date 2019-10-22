@@ -192,12 +192,12 @@ public class CrawlerThread implements Runnable {
     urls.forEach(urlLink -> {
       String homeUrl = crawlerTask.getSite().getUrl();
 
-      if (urlLink.startsWith("http") && !urlLink.contains(crawlerTask.getSite().getUrl())) {
+      if (urlLink.startsWith("http") && !urlLink.contains(homeUrl)) {
         // Filter out external URLs
         return;
       }
 
-      if (!urlLink.startsWith("/") && !urlLink.contains(crawlerTask.getSite().getUrl())) {
+      if (!urlLink.startsWith("/") && !urlLink.contains(homeUrl)) {
         return;
       }
 
@@ -212,13 +212,9 @@ public class CrawlerThread implements Runnable {
         return;
       }
 
-      if (!Common.isMatch(crawlerTask.getSite(), urlLink)) {
-
-        if (!Common.endsWithHTML(urlLink)) {
-          return;
-        }
+      if (urlLink.endsWith("/orders") || urlLink.endsWith(".pdf")) {
+        return;
       }
-
 
 
       // Create records in the source_urls table with following data
