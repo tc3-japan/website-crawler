@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.sound.midi.Track;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,8 +40,8 @@ public class CommonTest {
 
   @Test
   public void testRemoveHash() {
-    assertEquals("http://test.com?a=b", Common.removeHashFromURL("http://test.com?a=b#ccc"));
-    assertEquals("http://test.com?a=b", Common.removeHashFromURL("http://test.com?a=b"));
+    assertEquals("http://test.com?a=b", Common.removeHashSymbolFromURL("http://test.com?a=b#ccc"));
+    assertEquals("http://test.com?a=b", Common.removeHashSymbolFromURL("http://test.com?a=b"));
   }
 
   @Test
@@ -103,13 +102,13 @@ public class CommonTest {
     });
   }
 
-  @Test
-  public void testHasAccess() {
-    WebSite site = new WebSite();
-    site.setUrl("https://www.uniqlo.com/us/en");
-    assertEquals(false, Common.hasAccess(site, "https://www.uniqlo.com/us/en/search"));
-    assertEquals(true, Common.hasAccess(site, "https://www.uniqlo.com/us/en/test.html"));
-  }
+  // @Test
+  // public void testHasAccess() {
+  //   WebSite site = new WebSite();
+  //   site.setUrl("https://www.uniqlo.com/us/en");
+  //   assertEquals(false, Common.hasAccess(site, "https://www.uniqlo.com/us/en/search"));
+  //   assertEquals(true, Common.hasAccess(site, "https://www.uniqlo.com/us/en/test.html"));
+  // }
   
   @Test
   public void testIsUnnecessary() {
@@ -117,5 +116,13 @@ public class CommonTest {
     assertEquals(true, Common.isUnnecessary(null));
     assertEquals(false, Common.isUnnecessary("/women/plants"));
     assertEquals(false, Common.isUnnecessary("http://test.com/a.html"));
+  }
+
+  @Test
+  public void testEndsWithHTML() {
+    assertEquals(true, Common.endsWithHTML("http://hello.html"));
+    assertEquals(false, Common.endsWithHTML(".html.not"));
+    assertEquals(false, Common.endsWithHTML("/us/en/men-u-crew-neck-short-sleeve-t-shirt-414351.html?" +
+    "dwvar_414351_color=COL46&cgid=men-wear-to-work"));
   }
 }

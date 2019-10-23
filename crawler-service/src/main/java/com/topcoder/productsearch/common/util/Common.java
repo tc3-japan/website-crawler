@@ -55,7 +55,7 @@ public class Common {
    * @param url the url
    * @return processed url
    */
-  public static String removeHashFromURL(String url) {
+  public static String removeHashSymbolFromURL(String url) {
     int lastHash = url.lastIndexOf('#');
     if (lastHash > 0) {
       return url.substring(0, lastHash);
@@ -231,5 +231,10 @@ public class Common {
     Page<CPage> pages = pageRepository.findAll(new PageSpecification(searchCriteria), pageable);
     logger.info("fetch pages searchCriteria = " + searchCriteria.toString());
     return pages.getContent();
+  }
+
+  public static boolean endsWithHTML(String url) {
+   
+    return url.matches(".*html");
   }
 }
