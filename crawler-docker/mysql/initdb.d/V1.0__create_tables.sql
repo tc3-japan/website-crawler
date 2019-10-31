@@ -18,6 +18,8 @@ CREATE TABLE `pages`  (
   `type`              varchar(20) NOT NULL,
   `title`             varchar(1024) NULL,
   `body`              longtext NULL,
+  `content`           longtext,
+  `category`          varchar(256) NULL,
   `etag`              varchar(256) NULL,
   `last_modified`     varchar(256) NULL,
   `created_at`        datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
