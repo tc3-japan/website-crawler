@@ -61,7 +61,7 @@ CREATE TABLE `web_sites`  (
   `retry_times`           tinyint(1) UNSIGNED NULL DEFAULT 2,
   `page_expired_period`   SMALLINT(5) UNSIGNED NULL DEFAULT 30,
   `category_extraction_pattern` varchar(2048) NULL,
-  `content_selector`      varchar(200) NULL,
+  `content_selector`      varchar(2048) NULL,
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
