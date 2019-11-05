@@ -7,6 +7,7 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
 import com.topcoder.productsearch.common.specifications.PageSpecification;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -236,5 +238,25 @@ public class Common {
   public static boolean endsWithHTML(String url) {
    
     return url.matches(".*html");
+  }
+
+  /**
+   * get first n of string
+   *
+   * @param content the string content
+   * @param length  the n
+   * @return the split content
+   */
+  public static String firstNOfString(String content, Integer length) {
+    String[] parts = content.split(" ");
+    int index = 0;
+    for (int i = 0; i < parts.length; i++) {
+      int newIndex = index + parts[i].length() + (i > 0 ? 1 : 0);
+      if (newIndex > length) {
+        break;
+      }
+      index = newIndex;
+    }
+    return content.substring(0, Math.min(content.length(), index)) + (content.length() > index ? " ..." : "");
   }
 }
