@@ -13,7 +13,9 @@ INSERT INTO `web_sites`
 `parallel_size`,
 `timeout_page_download`,
 `retry_times`,
-`page_expired_period`
+`page_expired_period`,
+`category_extraction_pattern`,
+`content_selector`
 ) VALUES (
 1,
 'UNIQLO',
@@ -27,7 +29,9 @@ INSERT INTO `web_sites`
 12,
 2,
 2,
-30
+30,
+'<a itemprop=\"item\" itemscope=\"\" itemtype=\"[\\w-:/.]+\" class=\"breadcrumb-element\" href=\"[\\w-:/.]+\" title=\"[-\\p{Blank}\\w]+\">([\\w-:/\\t\\n\\r\\p{Blank}]+)</a>',
+'product-name,product-price,product-info'
 );
 
 
