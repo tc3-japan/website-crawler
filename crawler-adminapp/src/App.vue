@@ -1,17 +1,19 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <component :is="layout">
+    <router-view class="view"></router-view>
+  </component>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
+const defaultLayout = "sidebar";
 
 export default {
   name: 'app',
-  components: {
-    HelloWorld
+  computed: {
+    layout() {
+      return (this.$route.meta.layout || defaultLayout) + '-layout';
+    }
   }
 }
 </script>
