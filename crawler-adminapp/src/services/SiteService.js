@@ -1,10 +1,10 @@
 import Api from './api';
 
-function getSites() {
+function fetchSites() {
     return Api.get('/manufacturers/sites');
 };
 
-function getSiteDetails(id) {
+function fetchSiteDetails(id) {
     return Api.get(`/manufacturers/sites/${id}`);
 };
 
@@ -12,16 +12,18 @@ function createNewSite(body) {
     return Api.post(`/manufacturers/sites`);
 };
 
-function createNewSite(id, body) {
+function editSite(id, body) {
     return Api.put(`/manufacturers/sites/${id}`, body);
 };
 
-function createNewSite(id) {
+function deleteSite(id) {
     return Api.delete(`/manufacturers/sites/${id}`);
 };
 
 export default {
-    getSites,
-    getSiteDetails,
-    createNewSite
+    fetchSites,
+    fetchSiteDetails,
+    createNewSite,
+    editSite,
+    deleteSite
 };
