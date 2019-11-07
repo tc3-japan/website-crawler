@@ -4,6 +4,9 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter);
 
 let router = new VueRouter({
+    scrollBehavior() {
+        return window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
     routes : [
         { 
             path: '/', 

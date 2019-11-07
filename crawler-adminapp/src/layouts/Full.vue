@@ -1,6 +1,5 @@
 <template>
-    <div>
-        FULL LAYOUT
-        <slot />
-    </div>
+  <div class="app-container app-theme-white">
+    <slot></slot>
+  </div>
 </template>
