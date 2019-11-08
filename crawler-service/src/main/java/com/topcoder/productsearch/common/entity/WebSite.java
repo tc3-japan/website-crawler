@@ -79,4 +79,6 @@ public class WebSite {
   @Column(name = "content_selector")
   private String contentSelector;
 
+  @Column(name = "deleted")
+  private Boolean deleted = Boolean.FALSE;
 }
