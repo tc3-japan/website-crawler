@@ -28,4 +28,10 @@ public class ProductSearchRequest {
    */
   @Min(1)
   private Integer rows = 10;
+
+  /**
+   * first n characters of content
+   */
+  @Min(120)
+  private Integer firstNOfContent = 120;
 }

@@ -178,6 +178,10 @@ public class CrawlerThread implements Runnable {
       dbPage.setType("product");
       dbPage.setTitle(page.getTitleText());
       dbPage.setBody(page.getBody().asXml());
+      dbPage.setContent(domHelper.getContentsByCssSelectors(page,
+              crawlerTask.getSite().getContentSelector()));
+      dbPage.setCategory(domHelper.getCategoryByPattern(page.getBody().asXml(),
+              crawlerTask.getSite().getCategoryExtractionPattern()));
       dbPage.setEtag(page.getWebResponse().getResponseHeaderValue("ETag"));
       dbPage.setLastModified(page.getWebResponse().getResponseHeaderValue("Last-Modified"));
       pageRepository.save(dbPage);

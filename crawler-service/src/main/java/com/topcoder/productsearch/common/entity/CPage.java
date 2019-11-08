@@ -37,6 +37,12 @@ public class CPage {
   @Column(name = "body")
   private String body;
 
+  @Column(name = "content")
+  private String content;
+
+  @Column(name = "category")
+  private String category;
+
   @Column(name = "etag")
   private String etag;
 

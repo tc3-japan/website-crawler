@@ -73,4 +73,10 @@ public class WebSite {
   @Column(name = "page_expired_period")
   private Integer pageExpiredPeriod;
 
+  @Column(name = "category_extraction_pattern")
+  private String categoryExtractionPattern;
+
+  @Column(name = "content_selector")
+  private String contentSelector;
+
 }

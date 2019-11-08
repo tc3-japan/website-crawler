@@ -3,6 +3,7 @@ package com.topcoder.productsearch.common.util;
 
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 
@@ -15,6 +16,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -44,6 +47,12 @@ public class DomHelperTest {
   @Mock
   Node node;
 
+  @Mock
+  HtmlPage page;
+
+  @Mock
+  HtmlElement body;
+
   @InjectMocks
   DomHelper domHelper;
 
@@ -60,6 +69,28 @@ public class DomHelperTest {
     List<String> urls = domHelper.findAllUrls(htmlPage);
     assertEquals(urls.size(), 1);
     assertEquals(urls.get(0), "http://google.com");
+  }
+
+  @Test
+  public void testGetContentsByCssSelectors(){
+
+    when(page.getBody()).thenReturn(body);
+    when(body.asXml()).thenReturn("<body></body>");
+
+    assertEquals("<body></body>", domHelper.getContentsByCssSelectors(page, null));
+    assertEquals("<body></body>", domHelper.getContentsByCssSelectors(page, " "));
+
+    List<Object> domNodes = new LinkedList<>();
+    domNodes.add(domNode);
+    when(domNode.asXml()).thenReturn("<div>text</div>");
+    when(page.getByXPath(anyString())).thenReturn(domNodes);
+    assertEquals(true, domHelper.getContentsByCssSelectors(page, "product-info,test").startsWith("<content selector=\"product-info\">"));
+  }
+
+  @Test
+  public void testGetCategoryByPattern(){
+    assertEquals("name",domHelper.getCategoryByPattern("your name?","your (\\w++)?"));
+    assertEquals("",domHelper.getCategoryByPattern("your name?","your ([abc]++)?"));
   }
 
 
