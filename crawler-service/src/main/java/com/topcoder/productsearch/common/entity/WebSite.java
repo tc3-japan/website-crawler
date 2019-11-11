@@ -34,7 +34,6 @@ public class WebSite {
   private String name;
 
   @Column(name = "description")
-  @NotEmpty(message = "description is required")
   private String description;
 
   @Column(name = "url")
