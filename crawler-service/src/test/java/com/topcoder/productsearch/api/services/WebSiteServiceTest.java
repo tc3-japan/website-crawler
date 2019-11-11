@@ -77,7 +77,13 @@ public class WebSiteServiceTest {
     WebSite webSite = createWebSite();
     webSite.setName("un");
     when(webSiteRepository.save(webSite)).thenReturn(webSite);
+    try {
+      webSiteService.create(webSite);
+    } catch (Exception e) {
+      assertEquals("id should not in request body", e.getMessage());
+    }
 
+    webSite.setId(null);
     WebSite webSite1 = webSiteService.create(webSite);
     assertEquals(webSite.getId(), webSite1.getId());
     assertEquals("un", webSite1.getName());
@@ -87,6 +93,7 @@ public class WebSiteServiceTest {
   @Test
   public void testUpdate() {
     WebSite webSite = createWebSite();
+    webSite.setId(null);
     webSite.setName("un");
     when(webSiteRepository.save(webSite)).thenReturn(webSite);
     when(webSiteRepository.findByDeletedAndId(false, 1)).thenReturn(webSite);

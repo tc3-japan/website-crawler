@@ -58,46 +58,30 @@ public class WebSite {
   private Boolean supportsRobotsTxt;
 
   @Column(name = "crawl_max_depth")
-  @NotNull(message = "crawl_max_depth is required")
-  @Min(value = 1, message = "crawlMaxDepth must be greater than 1")
-  private Integer crawlMaxDepth;
+  private Integer crawlMaxDepth = 10;
 
   @Column(name = "crawl_time_limit")
-  @NotNull(message = "crawl_time_limit is required")
-  @Min(value = 1, message = "parallelSize must be greater than 1")
-  private Integer crawlTimeLimit;
+  private Integer crawlTimeLimit = 600;
 
   @Column(name = "crawl_interval")
-  @NotNull(message = "crawl_interval is required")
-  @Min(value = 0, message = "parallelSize must be greater than 0")
-  private Integer crawlInterval;
+  private Integer crawlInterval = 1000;
 
   @Column(name = "parallel_size")
-  @NotNull(message = "parallel_size is required")
-  @Min(value = 1, message = "parallelSize must be greater than 1")
-  private Integer parallelSize;
+  private Integer parallelSize = 12;
 
   @Column(name = "timeout_page_download")
-  @NotNull(message = "timeout_page_download is required")
-  @Min(value = 1, message = "timeoutPageDownload must be greater than 1")
-  private Integer timeoutPageDownload;
+  private Integer timeoutPageDownload = 2;
 
   @Column(name = "retry_times")
-  @NotNull(message = "retry_times is required")
-  @Min(value = 1, message = "retryTimes must be greater than 1")
-  private Integer retryTimes;
+  private Integer retryTimes = 2;
 
   @Column(name = "page_expired_period")
-  @NotNull(message = "page_expired_period is required")
-  @Min(value = 1, message = "pageExpiredPeriod must be greater than 1")
-  private Integer pageExpiredPeriod;
+  private Integer pageExpiredPeriod = 30;
 
   @Column(name = "category_extraction_pattern")
-  @NotNull(message = "category_extraction_pattern is required")
   private String categoryExtractionPattern;
 
   @Column(name = "content_selector")
-  @NotNull(message = "content_selector is required")
   private String contentSelector;
 
   @Column(name = "deleted")
