@@ -49,7 +49,6 @@ public class WebSiteController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public WebSite create(@RequestBody @Valid WebSite webSite) {
-    webSite.setId(null);
     return webSiteService.create(webSite);
   }
 
@@ -73,7 +72,6 @@ public class WebSiteController {
    */
   @PutMapping("{webSiteId}")
   public WebSite update(@PathVariable("webSiteId") @NotNull Integer webSiteId, @RequestBody WebSite entity) {
-    entity.setId(null);
     return webSiteService.update(webSiteId, entity);
   }
 

@@ -8,7 +8,6 @@ import com.topcoder.productsearch.api.models.WebSiteSearchRequest;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.common.util.Common;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +55,7 @@ public class WebSiteService {
    * @return the new website
    */
   public WebSite create(WebSite webSite) {
+    checkWebSiteEntity(webSite);
     webSite.setCreatedAt(Date.from(Instant.now()));
     webSiteRepository.save(webSite);
     return webSite;
@@ -69,6 +69,7 @@ public class WebSiteService {
    * @return the updated website
    */
   public WebSite update(Integer id, WebSite entity) {
+    checkWebSiteEntity(entity);
     WebSite webSite = get(id);
     BeanUtils.copyProperties(entity, webSite, Common.getNullPropertyNames(entity));
     webSiteRepository.save(webSite);
@@ -99,5 +100,16 @@ public class WebSiteService {
       return webSiteRepository.findByDeleted(Boolean.FALSE, pageable);
     }
     return webSiteRepository.findWebSitesWithQuery(Boolean.FALSE, request.getQuery(), pageable);
+  }
+
+  /**
+   * make sure id not in website
+   *
+   * @param site the website entity
+   */
+  private void checkWebSiteEntity(WebSite site) {
+    if (site.getId() != null) {
+      throw new BadRequestException("id should not in request body");
+    }
   }
 }
