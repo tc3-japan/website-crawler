@@ -62,6 +62,7 @@ CREATE TABLE `web_sites`  (
   `page_expired_period`   SMALLINT(5) UNSIGNED NULL DEFAULT 30,
   `category_extraction_pattern` varchar(2048) NULL,
   `content_selector`      varchar(2048) NULL,
+  `deleted`           tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
