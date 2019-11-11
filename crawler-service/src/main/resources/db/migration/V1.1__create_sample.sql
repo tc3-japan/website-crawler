@@ -31,7 +31,7 @@ INSERT INTO `web_sites`
 2,
 30,
 '<a itemprop=\"item\" itemscope=\"\" itemtype=\"[\\w-:/.]+\" class=\"breadcrumb-element\" href=\"[\\w-:/.]+\" title=\"[-\\p{Blank}\\w]+\">([\\w-:/\\t\\n\\r\\p{Blank}]+)</a>',
-'product-name,product-price,product-info'
+'.product-name,.product-price,.product-info'
 );
 
 
