@@ -50,12 +50,12 @@ public class DomHelper {
     String[] selectors = cssSelectors.split(",");
     List<String> contents = new LinkedList<>();
     for (String selector : selectors) {
-      // here you can found more example about xpath query https://howtodoinjava.com/xml/java-xpath-tutorial-example/
-      // for example : "//div[contains(@class,'product-info')]" , this mean found all div and class is contains "product-info"
-      // use @class="selector value" is more accurate
-      List<DomNode> domNodes = page.getByXPath("//*[@class='" + selector + "']");
-      domNodes.forEach(domNode -> contents.add(String.format("<content selector=\"%s\">%s</content>",
-              selector, domNode.asXml())));
+      // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
+      DomNodeList<DomNode> domNodes = page.querySelectorAll(selector);
+      for (int i = 0; i < domNodes.size(); i++) {
+        contents.add(String.format("<content selector=\"%s\">%s</content>",
+            selector, domNodes.get(i).asXml()));
+      }
     }
     return String.join("\n", contents);
   }
