@@ -25,5 +25,5 @@ public class WebSiteSearchRequest {
    * the rows
    */
   @Min(1)
-  private Integer rows = 10;
+  private Integer rows = 1000;
 }
