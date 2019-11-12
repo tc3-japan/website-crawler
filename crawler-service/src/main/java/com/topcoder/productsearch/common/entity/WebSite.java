@@ -1,19 +1,18 @@
 package com.topcoder.productsearch.common.entity;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * the website entity
@@ -23,6 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "web_sites")
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class WebSite {
 
   @Id
@@ -30,48 +30,53 @@ public class WebSite {
   private Integer id;
 
   @Column(name = "name")
+  @NotEmpty(message = "name is required")
   private String name;
 
   @Column(name = "description")
   private String description;
 
   @Column(name = "url")
+  @NotEmpty(message = "url is required")
   private String url;
 
   @Column(name = "content_url_patterns")
+  @NotEmpty(message = "content_url_patterns is required")
   private String contentUrlPatterns;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSSZ")
   @Column(name = "created_at")
   private Date createdAt;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "last_modified_at")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss.SSSZ")
   private Date lastModifiedAt;
 
   @Column(name = "supports_robots_txt")
   private Boolean supportsRobotsTxt;
 
   @Column(name = "crawl_max_depth")
-  private Integer crawlMaxDepth;
+  private Integer crawlMaxDepth = 10;
 
   @Column(name = "crawl_time_limit")
-  private Integer crawlTimeLimit;
+  private Integer crawlTimeLimit = 600;
 
   @Column(name = "crawl_interval")
-  private Integer crawlInterval;
+  private Integer crawlInterval = 1000;
 
   @Column(name = "parallel_size")
-  private Integer parallelSize;
+  private Integer parallelSize = 12;
 
   @Column(name = "timeout_page_download")
-  private Integer timeoutPageDownload;
+  private Integer timeoutPageDownload = 2;
 
   @Column(name = "retry_times")
-  private Integer retryTimes;
+  private Integer retryTimes = 2;
 
   @Column(name = "page_expired_period")
-  private Integer pageExpiredPeriod;
+  private Integer pageExpiredPeriod = 30;
 
   @Column(name = "category_extraction_pattern")
   private String categoryExtractionPattern;
@@ -80,5 +85,6 @@ public class WebSite {
   private String contentSelector;
 
   @Column(name = "deleted")
+  @JsonIgnore
   private Boolean deleted = Boolean.FALSE;
 }

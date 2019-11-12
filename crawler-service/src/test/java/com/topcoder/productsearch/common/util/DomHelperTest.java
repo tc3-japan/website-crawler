@@ -5,8 +5,6 @@ import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,8 +14,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -53,6 +49,9 @@ public class DomHelperTest {
   @Mock
   HtmlElement body;
 
+  @Mock
+  DomNodeList<DomNode> domNodes;
+
   @InjectMocks
   DomHelper domHelper;
 
@@ -80,10 +79,13 @@ public class DomHelperTest {
     assertEquals("<body></body>", domHelper.getContentsByCssSelectors(page, null));
     assertEquals("<body></body>", domHelper.getContentsByCssSelectors(page, " "));
 
-    List<Object> domNodes = new LinkedList<>();
-    domNodes.add(domNode);
+    when(domNodes.size()).thenReturn(1);
+    when(domNodes.get(anyInt())).thenReturn(domNode);
+
+
     when(domNode.asXml()).thenReturn("<div>text</div>");
-    when(page.getByXPath(anyString())).thenReturn(domNodes);
+    when(page.querySelectorAll(anyString())).thenReturn(domNodes);
+
     assertEquals(true, domHelper.getContentsByCssSelectors(page, "product-info,test").startsWith("<content selector=\"product-info\">"));
   }
 
