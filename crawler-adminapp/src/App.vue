@@ -17,7 +17,7 @@ export default {
       return (this.$route.meta.layout || defaultLayout) + '-layout';
     }
   }
-}
+};
 </script>
 
 <style lang="scss">

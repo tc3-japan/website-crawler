@@ -14,12 +14,9 @@
                 </div>
             </div>
             <div class="page-title-actions">
-                <button type="button" class="btn-shadow mr-3 btn btn-dark">
-                    <font-awesome-icon icon="star"/>
-                </button>
-                <button type="button" class="btn-shadow d-inline-flex align-items-center btn btn-success">
+                <button type="button" class="btn-shadow d-inline-flex align-items-center btn btn-success" @click="createNew()">
                     <font-awesome-icon class="mr-2" icon="plus"/>
-                    Create New
+                    {{createNewText}}
                 </button>
             </div>
         </div>
@@ -27,12 +24,12 @@
 </template>
 
 <script>
-    import {library} from '@fortawesome/fontawesome-svg-core'
+    import {library} from '@fortawesome/fontawesome-svg-core';
     import {
         faStar,
         faPlus
-    } from '@fortawesome/free-solid-svg-icons'
-    import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+    } from '@fortawesome/free-solid-svg-icons';
+    import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
     library.add(
         faStar,
@@ -47,7 +44,16 @@
             icon: String,
             heading: String,
             subheading: String,
-
+            createNewText: {
+                type: String,
+                required: false,
+                default: 'Create New'
+            }
+        },
+        methods: {
+            createNew() {
+                this.$emit('createNew');
+            }
         }
-    }
+    };
 </script>

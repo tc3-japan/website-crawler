@@ -3,11 +3,10 @@ import App from './App.vue';
 import router from './router';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Buefy from 'buefy';
-import 'buefy/dist/buefy.css';
-import BootstrapVue from 'bootstrap-vue'
+import BootstrapVue from 'bootstrap-vue';
+import ToggleButton from 'vue-js-toggle-button';
 
-
+// import 'vue-sidebar-menu/dist/vue-sidebar-menu.css';
 
 import SidebarLayout from './layouts/Sidebar.vue';
 import FullLayout from './layouts/Full.vue';
@@ -15,13 +14,13 @@ import FullLayout from './layouts/Full.vue';
 Vue.component('sidebar-layout', SidebarLayout);
 Vue.component('full-layout', FullLayout);
 
-Vue.use(Buefy);
 Vue.use(BootstrapVue);
+Vue.use(ToggleButton);
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 new Vue({
   router,
-  Buefy,
+ // Buefy,
   render: h => h(App),
-}).$mount('#app')
+}).$mount('#app');
