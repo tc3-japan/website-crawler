@@ -80,7 +80,7 @@ public class WebSiteServiceTest {
     try {
       webSiteService.create(webSite);
     } catch (Exception e) {
-      assertEquals("id should not in request body", e.getMessage());
+      assertEquals("id should not be present in request body", e.getMessage());
     }
 
     webSite.setId(null);
@@ -92,13 +92,20 @@ public class WebSiteServiceTest {
 
   @Test
   public void testUpdate() {
+    // given
     WebSite webSite = createWebSite();
     webSite.setId(null);
     webSite.setName("un");
+    webSite.setUrl("url");
+    webSite.setContentUrlPatterns("contentUrlPatterns");
+
+    // when
     when(webSiteRepository.save(webSite)).thenReturn(webSite);
     when(webSiteRepository.findByDeletedAndId(false, 1)).thenReturn(webSite);
 
     WebSite webSite1 = webSiteService.update(1, webSite);
+
+    // then
     assertEquals(webSite.getId(), webSite1.getId());
     assertEquals("un", webSite1.getName());
     verify(webSiteRepository, times(1)).save(any(WebSite.class));
