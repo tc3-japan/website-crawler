@@ -123,7 +123,9 @@ public class WebSiteService {
     if (site.getId() != null) {
       throw new BadRequestException("id should not be present in request body");
     }
-    if (site.getUrl().isEmpty() || site.getContentUrlPatterns().isEmpty() || site.getName().isEmpty()) {
+    if ((site.getUrl() != null && site.getUrl().isEmpty()) 
+        || (site.getContentUrlPatterns() != null && site.getContentUrlPatterns().isEmpty())
+         || (site.getName() != null && site.getName().isEmpty()) ) {
       throw new BadRequestException("Name, URL and / or Content URL Patterns cannot be blank ");
     }
   }
