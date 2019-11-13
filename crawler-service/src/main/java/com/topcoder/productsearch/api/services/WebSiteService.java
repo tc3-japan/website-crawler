@@ -69,7 +69,8 @@ public class WebSiteService {
    * @return the updated website
    */
   public WebSite update(Integer id, WebSite entity) {
-    checkWebSiteEntity(entity);
+    checkWebSiteEntityForUpdate(entity);
+    // checkWebSiteEntity(entity);
     WebSite webSite = get(id);
     BeanUtils.copyProperties(entity, webSite, Common.getNullPropertyNames(entity));
     webSiteRepository.save(webSite);
@@ -109,7 +110,24 @@ public class WebSiteService {
    */
   private void checkWebSiteEntity(WebSite site) {
     if (site.getId() != null) {
-      throw new BadRequestException("id should not in request body");
+      throw new BadRequestException("id should not be present in request body");
     }
   }
+
+    /**
+   * make sure id not in website
+   *
+   * @param site the website entity
+   */
+  private void checkWebSiteEntityForUpdate(WebSite site) {
+    if (site.getId() != null) {
+      throw new BadRequestException("id should not be present in request body");
+    }
+    if ((site.getUrl() != null && site.getUrl().isEmpty()) 
+        || (site.getContentUrlPatterns() != null && site.getContentUrlPatterns().isEmpty())
+         || (site.getName() != null && site.getName().isEmpty()) ) {
+      throw new BadRequestException("Name, URL and / or Content URL Patterns cannot be blank ");
+    }
+  }
+
 }
