@@ -10,9 +10,6 @@ Vue.use(VueI18n);
 
 let defaultLanguage = (config && config.client) ? config.client.defaultLanguage : 'en';
 
-console.log('defaultLanguage', defaultLanguage);
-console.log('messages', messages);
-
 export const i18n = new VueI18n({
   locale: defaultLanguage,
   fallbackLocale: defaultLanguage
@@ -38,13 +35,11 @@ export function loadLanguageAsync(lang) {
     if (lang !== store.state.language)
         store.commit('setLanguage', lang);
 
-    console.log('setting lang', lang);
   // If the same language or the language was already loaded
   if (loadedLanguages.includes(lang)) {
     return Promise.resolve(setI18nLanguage(lang));
   }
 
-  console.log('loading lang', lang);
   // If the language hasn't been loaded yet
   return import(/* webpackChunkName: "lang-[request]" */ `./lang/${lang}.js`).then(
     messages => {

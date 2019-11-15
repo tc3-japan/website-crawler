@@ -123,16 +123,12 @@ export default {
     async fetchSites() {
       try {
         let response = await SiteService.fetchSites();
-        console.log('response', response);
         this.sites = response.data;
       } catch (err) {
-        // TODO: display error
-        console.log('Could not fetch sites', err);
+        this.setStatus(this.$t('SITES_FETCH_FAILED'), 'danger');
       }
     },
     showDetails(site) {
-      console.log('Showing data for id ' + site);
-
       this.selectedSite = site;
       this.dialogAction = 'view';
       this.$bvModal.show('site-details');
@@ -143,7 +139,6 @@ export default {
       this.$bvModal.show('site-details');
     },
     sitesUpdated(data) {
-      console.log('data', data);
       this.setStatus(data.message, data.type);
       this.fetchSites();
     },

@@ -1,14 +1,20 @@
 <template>
     <div>
-        <div class="full-height bg-plum-plate bg-animation">
+        <div class="full-height bg-plum-plate  bg-animation">
             <div class="d-flex full-height justify-content-center align-items-center">
                 <b-col md="10" class="mx-auto app-login-box">
                     <div class="modal-dialog w-100 mx-auto">
                         <div class="modal-content w-100">
+                            <div class="modal-header login-header">
+                                <div class="m-auto">
+                                    <h4 class="mt-2 text-center">
+                                        {{ $t('LOGIN_TITLE') }}
+                                    </h4>
+                                </div>
+                            </div>
                             <div class="modal-body p-3">
-                                <div class="h5 modal-title text-center">
-                                    <h4 class="mt-2">
-                                        <div class="mb-3">{{ $t('LOGIN_TITLE') }}</div>
+                                <div class="text-center">
+                                    <h4 class="mt-1">
                                         <span>{{ $t('LOGIN_SUBTITLE') }}</span>
                                     </h4>
                                 </div>
@@ -25,8 +31,8 @@
                                 <b-form-group id="exampleInputGroup1"
                                               label-for="exampleInput1">
                                     <div class="position-relative row form-group">
-                                        <label class="col-sm-2 col-form-label">{{ $t('LOGIN_USER_ID') }}</label>
-                                        <div class="col-sm-10">
+                                        <label class="offset-sm-1 col-sm-3 col-form-label">{{ $t('LOGIN_USER_ID') }}</label>
+                                        <div class="col-sm-7">
                                             <b-form-input size="lg" id="exampleInput1"
                                                 v-model="username"
                                                 type="text"
@@ -40,8 +46,8 @@
                                 <b-form-group id="exampleInputGroup2"
                                               label-for="exampleInput2">
                                     <div class="position-relative row form-group">
-                                        <label class="col-sm-2 col-form-label">{{ $t('LOGIN_PASSWORD') }}</label>
-                                        <div class="col-sm-10">
+                                        <label class="offset-sm-1 col-sm-3 col-form-label">{{ $t('LOGIN_PASSWORD') }}</label>
+                                        <div class="col-sm-7">
                                             <b-form-input size="lg" id="exampleInput2"
                                                 v-model="password"
                                                 type="password"
@@ -55,7 +61,7 @@
                             </div>
                             <div class="modal-footer clearfix">
                                 <div class="mx-auto">
-                                    <b-button @click="logIn" variant="primary" size="lg">{{ $t('LOGIN_BUTTON') }}</b-button>
+                                    <b-button @click="logIn" variant="primary" >{{ $t('LOGIN_BUTTON') }}</b-button>
                                 </div>
                             </div>
                         </div>
@@ -95,14 +101,11 @@ export default {
             if (this.$v.$error)
                 return;
 
-            console.log('Logging in');
             AuthService.logIn(this.username, this.password)
             .then(response => {
-                console.log('response', response);
                 this.$router.push('/home');
             })
             .catch(err => {
-                console.log(err);
                 this.status = {
                     visible : true,
                     message : this.$t('LOGIN_FAILED_UNKNOWN'),

@@ -45,11 +45,10 @@ export default {
         logOut() {
             AuthService.logOut()
             .then((r) => {
-                console.log(r);
                 this.$router.push('/');
             })
             .catch(err => {
-                console.log(err);
+                this.$router.push('/');
             });
         }
     }
