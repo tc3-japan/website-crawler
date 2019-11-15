@@ -13,7 +13,7 @@
             <div class="app-header-right">
                 <b-button @click="logOut" class="btn-icon btn-icon-only" variant="primary" size="sm">
                     <div class="btn-icon-wrapper">
-                        Log Out
+                        {{ $t('LOGOUT_BUTTON') }}
                     </div>
                 </b-button>
             </div>
@@ -43,8 +43,8 @@ export default {
             }
         },
         logOut() {
-            AuthService.logOut().
-            then((r) => {
+            AuthService.logOut()
+            .then((r) => {
                 console.log(r);
                 this.$router.push('/');
             })

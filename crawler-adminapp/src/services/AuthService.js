@@ -1,11 +1,21 @@
-import Api from './api';
+import { api, setToken } from './api';
 
 function logIn(username, password) {
-    return Api().post('/oauth/token', { username, password });
+    return new Promise((resolve, reject) => {
+        api().post('/oauth/token', { username, password })
+        .then(response => {
+            setToken(response.data.token);
+            resolve(response);
+        })
+        .catch(err => {
+            reject(err);
+        });
+    });
 }
 
 function logOut() {
-    return Api().get('/oauth/logout');
+    setToken(null);
+    return api().get('/oauth/logout');
 }
 
 export default {
