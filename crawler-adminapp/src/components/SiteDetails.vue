@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="site-details" ref="modal" :title="title" size="xl" scrollable @show="show" @close="close" @cancel="close" @hidden="hidden">
+  <b-modal id="site-details" ref="modal" :title="title" size="xl" scrollable @show="show" @hide="close">
     <div class="card-body">
       <b-alert 
         :show="status.message"
@@ -219,12 +219,12 @@ export default {
       currentAction: this.action,
       status : {},
       dirty : false,
-      initialValue : false
+      initialValue : false,
+      hiding: false
     };
   },
   computed: {
     title() {
-      console.log('GENERATING TITLE ', this.currentAction);
       if (this.currentAction === 'add') return this.$t('SITE_DETAILS_ADD');
       else if (this.currentAction === 'edit') return this.$t('SITE_DETAILS_EDIT');
       else return this.siteDetails.name;
@@ -238,6 +238,11 @@ export default {
       this.currentAction = 'edit';
     },
     close(bvModalEvt) {
+      if (this.hiding) {
+        this.hiding = false;
+        return;
+      }
+
       if ((this.currentAction === 'edit' || this.currentAction === 'add') && this.dirty) {
         bvModalEvt.preventDefault();
         this.$bvModal.msgBoxConfirm(this.$t('SITE_CANCEL_UPDATE_CONFIRMATION'), 
@@ -249,7 +254,7 @@ export default {
         .then((confirmationResponse) => {
           if (confirmationResponse === true) {
             this.$emit('Close');
-            this.$refs.modal.hide();
+            this.hide();
             this.$v.$reset();
             this.dirty = false;
           }
@@ -260,14 +265,11 @@ export default {
         this.$v.$reset();
       }
     },
-    hidden() {
-      this.status = {};
+    hide() {
+      this.hiding = true;
+      this.$refs.modal.hide();
     },
     show() {
-      console.log('showing', this.siteDetails);
-      console.log('this.action', this.action);
-      // this.site = this.siteDetails;
-      // this.currentAction = this.action;
       this.siteDetails = JSON.parse(JSON.stringify(this.site));
       this.currentAction = this.action;
       this.dirty = false;
@@ -278,15 +280,18 @@ export default {
       if(this.$v.siteDetails.$error)
         return;
 
-      console.log('creating a new site:', this.siteDetails);
-      SiteService.createNewSite(this.siteDetails)
-      .then(respone => {
-          this.$emit('sites-updated', { message : this.$t('SITE_CREATE_SUCCESS'), type : 'success' });
-          this.$bvModal.hide('site-details');
-      })
-      .catch(err => {
-          console.log('failed to create');
-          this.displayErrorResponse(err);
+      this.cofirmSave().then(confirmationResponse => {
+        if (!confirmationResponse)
+          return;
+          
+        SiteService.createNewSite(this.siteDetails)
+        .then(respone => {
+            this.$emit('sites-updated', { message : this.$t('SITE_CREATE_SUCCESS'), type : 'success' });
+            this.hide();
+        })
+        .catch(err => {
+            this.displayErrorResponse(err);
+        });
       });
     },
     update() {
@@ -294,20 +299,21 @@ export default {
       if(this.$v.siteDetails.$error)
         return;
 
-      console.log('Updating existing site:', this.siteDetails);
-      SiteService.updateSite(this.siteDetails)
-      .then(respone => {
+      this.cofirmSave().then(confirmationResponse => {
+        if (!confirmationResponse)
+          return;
+
+        SiteService.updateSite(this.siteDetails)
+        .then(respone => {
           this.$emit('sites-updated', { message : this.$t('SITE_UPDATE_SUCCESS'), type : 'success' });
-          this.$bvModal.hide('site-details');
-      })
-      .catch(err => {
-        this.displayErrorResponse(err);
-        console.log('failed to update');
+          this.hide();
+        })
+        .catch(err => {
+          this.displayErrorResponse(err);
+        });
       });
     },
     deleteSite() {
-      console.log('Deleting site:', this.siteDetails.id);
-
       this.$bvModal.msgBoxConfirm(this.$t('SITE_DELETE_CONFIRMATION', { filename : this.siteDetails.name }), 
       { 
         title : this.$t('SITE_DELETE_CONFIRMATION_TITLE'),
@@ -322,20 +328,25 @@ export default {
         SiteService.deleteSite(this.siteDetails.id)
         .then(response => {
           this.$emit('sites-updated', { message : this.$t('SITE_DELETE_SUCCESS'), type : 'success' });
-          this.$bvModal.hide('site-details');
-          console.log('deleted');
+          this.hide();
         })
         .catch(err => {
-          console.log('failed to update');
           this.displayErrorResponse(err);
         });
+      });
+    },
+    cofirmSave() {
+      return this.$bvModal.msgBoxConfirm(this.$t('SITE_SAVE_CONFIRMATION'), 
+      { 
+        title : this.$t('SITE_SAVE_CONFIRMATION_TITLE'),
+        okTitle: this.$t('YES_BUTTON'),
+        cancelTitle: this.$t('NO_BUTTON'),
       });
     },
     setStatus(message, type) {
       this.status = { message : message, type : type, visible : true };
     },
     displayErrorResponse(error, fallbackMessageKey) {
-      console.log('error.response', error.response);
       let messageKey = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : fallbackMessageKey;
       let message = this.$t(messageKey || 'CRUD_GENERIC_FAILURE');
       this.setStatus(message, 'danger');

@@ -40,10 +40,8 @@ router.beforeEach((to, from, next) => {
     //     return next('/');
 
     if (store.state.language) {
-        console.log('already got language', store.state.language);
         loadLanguageAsync(store.state.language).then(() => next());
     } else if (navigator.languages && navigator.languages.length > 0) {
-        console.log('committing language', navigator.languages[0]);
         loadLanguageAsync(navigator.languages[0]).then(() => next());
     }
     else {

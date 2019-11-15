@@ -19,7 +19,6 @@ function createNewSite(body) {
 function updateSite(body) {
     let id = body.id;
     delete body.id;
-    console.log(body);
     return api().put(`/websites/${id}`, body);
 }
 
