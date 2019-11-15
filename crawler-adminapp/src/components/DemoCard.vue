@@ -11,7 +11,6 @@
 </template>
 
 <script>
-
     export default {
         components: {},
         props: ['heading', 'subheading'],

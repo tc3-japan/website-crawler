@@ -1,23 +1,30 @@
-import Api from './api';
+import { api } from './api';
 
 function fetchSites() {
-    return Api().get('/manufacturers/sites');
+    return api().get('/websites', {}, { 
+        auth: {
+          username: 'admin',
+          password: 'adminpass'
+        } });
 }
 
 function fetchSiteDetails(id) {
-    return Api().get(`/manufacturers/sites/${id}`);
+    return api().get(`/websites/${id}`);
 }
 
 function createNewSite(body) {
-    return Api().post(`/manufacturers/sites`, body);
+    return api().post(`/websites`, body);
 }
 
 function updateSite(body) {
-    return Api().put(`/manufacturers/sites/${body.id}`, body);
+    let id = body.id;
+    delete body.id;
+    console.log(body);
+    return api().put(`/websites/${id}`, body);
 }
 
 function deleteSite(id) {
-    return Api().delete(`/manufacturers/sites/${id}`);
+    return api().delete(`/websites/${id}`);
 }
 
 export default {
