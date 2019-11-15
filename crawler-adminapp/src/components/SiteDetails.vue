@@ -58,7 +58,7 @@
         <div class="position-relative row form-group">
           <label for="content_url_patterns" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_URL_PATTERN') }}</label>
           <div class="col-sm-10">
-            <input
+            <textarea
               :readonly="readOnly"
               name="content_url_patterns"
               id="content_url_patterns"
@@ -66,7 +66,7 @@
               :placeholder="$t('SITE_DETAILS_URL_PATTERN_PLACEHOLDER')"
               type="text"
               v-bind:class="{ 'form-control': true, 'is-invalid' : $v.siteDetails.content_url_patterns.$error}"
-            />
+            ></textarea>
             <div v-if="$v.siteDetails.$error">
               <div v-if="!$v.siteDetails.content_url_patterns.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_URL_PATTERNS_REQUIRED')}}</div>
             </div>
@@ -75,7 +75,7 @@
         <div class="position-relative row form-group">
           <label for="category_extraction_pattern" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_CATEGORY_PATTERN') }}</label>
           <div class="col-sm-10">
-            <input
+            <textarea
               :readonly="readOnly"
               name="category_extraction_pattern"
               id="category_extraction_pattern"
@@ -83,7 +83,7 @@
               :placeholder="$t('SITE_DETAILS_CATEGORY_PATTERN_PLACEHOLDER')"
               type="text"
               class="form-control"
-            />
+            ></textarea>
           </div>
         </div>
         <div class="position-relative row form-group">
