@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="site-details" ref="modal" :title="title" size="xl" scrollable @show="show" @hide="close">
+  <b-modal id="site-details" ref="modal" :title="title" size="xl" scrollable @shown="shown" @hide="close">
     <div class="card-body">
       <b-alert 
         :show="status.message"
@@ -183,6 +183,12 @@
 import SiteService from '@/services/SiteService';
 import { required } from 'vuelidate/lib/validators';
 
+const defaultValues = {
+  crawl_max_depth: 10,
+  crawl_time_limit: 600,
+  crawl_interval: 1000
+};
+
 export default {
   name: 'SiteDetails',
   props: {
@@ -269,9 +275,14 @@ export default {
       this.hiding = true;
       this.$refs.modal.hide();
     },
-    show() {
-      this.siteDetails = JSON.parse(JSON.stringify(this.site));
+    shown() {
       this.currentAction = this.action;
+      
+      if (this.currentAction === "add")
+        this.siteDetails = Object.assign({}, defaultValues);
+      else
+        this.siteDetails = JSON.parse(JSON.stringify(this.site));
+
       this.dirty = false;
       this.initialValue = true;
     },
