@@ -1,5 +1,10 @@
 import { api, setToken } from './api';
 
+/**
+ * Calls API login endpoint
+ * @param string username 
+ * @param string password 
+ */
 function logIn(username, password) {
     return new Promise((resolve, reject) => {
         api().post('/oauth/token', { username, password })
@@ -13,6 +18,9 @@ function logIn(username, password) {
     });
 }
 
+/**
+ * Calls API login endpoint
+ */
 function logOut() {
     setToken(null);
     return api().get('/oauth/logout');

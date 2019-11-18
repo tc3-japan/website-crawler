@@ -2,6 +2,11 @@ import axios from 'axios';
 import config from '../../config';
 import Store from '../store';
 
+/**
+ * Adds access token to axios headers and adds to store. 
+ * If token passed is null, header/store value is removed.
+ * @param string token - The access token to set
+ */
 export function setToken(token) {
     if (token == null) {
         delete axios.defaults.headers.common['Authorization'];
@@ -13,8 +18,11 @@ export function setToken(token) {
     }
 }
 
+/**
+ * Returns axios instance for accessing api
+ */
 export function api() {
-    // TODO: check whic 
+    // TODO: remove temporary authentication details
     return axios.create({
         baseURL: config.api.baseURL,
         withCredentials: true,
@@ -30,6 +38,7 @@ export function api() {
     });
 }
 
+// On start check if there is a token in store, and set headers
 if (Store.state.token) {
     setToken(Store.state.token);
 }
