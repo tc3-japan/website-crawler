@@ -103,9 +103,11 @@ export default {
 
             AuthService.logIn(this.username, this.password)
             .then(response => {
+                // On success redirect to the home page
                 this.$router.push('/home');
             })
             .catch(err => {
+                // An error occurred, display error message
                 this.status = {
                     visible : true,
                     message : this.$t('LOGIN_FAILED_UNKNOWN'),

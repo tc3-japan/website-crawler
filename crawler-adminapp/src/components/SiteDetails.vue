@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="site-details" ref="modal" :title="title" size="xl" scrollable @shown="shown" @hide="close">
+  <b-modal id="site-details" ref="modal" :title="title" size="xl" scrollable @shown="onShown" @hide="onHide">
     <div class="card-body">
       <b-alert 
         :show="status.message"
@@ -169,7 +169,6 @@
     </template>
 
     <template v-slot:modal-footer="{ ok, cancel }">
-      <!-- Emulate built in modal footer ok and cancel button actions -->
       <b-button v-show="currentAction==='add'" variant="success" @click="createNew()">{{ $t('CREATE_BUTTON') }}</b-button>
       <b-button v-show="currentAction==='edit'" variant="success" @click="update()">{{ $t('SAVE_BUTTON') }}</b-button>
       <b-button v-show="currentAction==='view'" variant="success" @click="edit()">{{ $t('EDIT_BUTTON') }}</b-button>
@@ -206,11 +205,14 @@ export default {
       this.currentAction = current;
     },
     site: function (current, previous) {
+      // Make a copy of the site object so that unsaved changes 
+      // do no affect the sites list
       this.siteDetails = JSON.parse(JSON.stringify(current));
     },
     siteDetails : {
       handler(current, previous)
       {
+        // Only set dirty for changes after the initial siteDetails has been set
         if (this.initialValue)
           this.initialValue = false;
         else 
@@ -231,9 +233,15 @@ export default {
   },
   computed: {
     title() {
-      if (this.currentAction === 'add') return this.$t('SITE_DETAILS_ADD');
-      else if (this.currentAction === 'edit') return this.$t('SITE_DETAILS_EDIT');
-      else return this.siteDetails.name;
+      // Determine title of the modal based on the action being performed: add, edit or view
+      switch(this.currentAction) {
+        case 'add':
+          return this.$t('SITE_DETAILS_ADD');
+        case 'edit': 
+          return this.$t('SITE_DETAILS_EDIT');
+        default:
+          return this.siteDetails.name;
+      }
     },
     readOnly() {
       return this.currentAction === 'view';
@@ -243,12 +251,16 @@ export default {
     edit() {
       this.currentAction = 'edit';
     },
-    close(bvModalEvt) {
-      if (this.hiding) {
-        this.hiding = false;
-        return;
-      }
+    hide() {
+      this.hiding = true;
+      this.$refs.modal.hide();
+    },
+    onHide(bvModalEvt) {
+      // Avoid the close event handler being triggered twice, in case of confirmation
+      if (this.hiding)
+        return this.hiding = false;
 
+      // If the user made changes to the site details, show a confirmation before closing
       if ((this.currentAction === 'edit' || this.currentAction === 'add') && this.dirty) {
         bvModalEvt.preventDefault();
         this.$bvModal.msgBoxConfirm(this.$t('SITE_CANCEL_UPDATE_CONFIRMATION'), 
@@ -271,11 +283,7 @@ export default {
         this.$v.$reset();
       }
     },
-    hide() {
-      this.hiding = true;
-      this.$refs.modal.hide();
-    },
-    shown() {
+    onShown() {
       this.currentAction = this.action;
       
       if (this.currentAction === "add")
@@ -287,14 +295,18 @@ export default {
       this.initialValue = true;
     },
     createNew() {
+      // Tell vuelidate to perform validation check
       this.$v.siteDetails.$touch();
+      // Cancel save if there are error values
       if(this.$v.siteDetails.$error)
         return;
 
+      // Display save confirmation dialog
       this.cofirmSave().then(confirmationResponse => {
         if (!confirmationResponse)
           return;
-          
+        
+        // Pass the site details to the api
         SiteService.createNewSite(this.siteDetails)
         .then(respone => {
             this.$emit('sites-updated', { message : this.$t('SITE_CREATE_SUCCESS'), type : 'success' });
@@ -306,7 +318,9 @@ export default {
       });
     },
     update() {
+      // Tell vuelidate to perform validation check
       this.$v.siteDetails.$touch();
+      // Cancel update if there are error values
       if(this.$v.siteDetails.$error)
         return;
 
@@ -314,6 +328,7 @@ export default {
         if (!confirmationResponse)
           return;
 
+        // Pass the updated site details to the api
         SiteService.updateSite(this.siteDetails)
         .then(respone => {
           this.$emit('sites-updated', { message : this.$t('SITE_UPDATE_SUCCESS'), type : 'success' });
@@ -325,6 +340,7 @@ export default {
       });
     },
     deleteSite() {
+      // Show confirmation dialog before saving
       this.$bvModal.msgBoxConfirm(this.$t('SITE_DELETE_CONFIRMATION', { filename : this.siteDetails.name }), 
       { 
         title : this.$t('SITE_DELETE_CONFIRMATION_TITLE'),
@@ -336,6 +352,7 @@ export default {
         if (confirmationResponse === false)
           return;
 
+        // Send delete request to api
         SiteService.deleteSite(this.siteDetails.id)
         .then(response => {
           this.$emit('sites-updated', { message : this.$t('SITE_DELETE_SUCCESS'), type : 'success' });

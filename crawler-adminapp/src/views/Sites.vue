@@ -51,7 +51,7 @@
         </template>
       </b-table>
     </b-card>
-    <site-details :v-if="detailsVisible" :site="selectedSite" :action="dialogAction" @sites-updated="sitesUpdated" />
+    <site-details :v-if="detailsVisible" :site="selectedSite" :action="dialogAction" @sites-updated="onSitesUpdated" />
   </div>
 </template>
 
@@ -117,6 +117,7 @@ export default {
     }
   },
   mounted() {
+    // Fetch sites on page load
     this.fetchSites();
   },
   methods: {
@@ -125,24 +126,29 @@ export default {
         let response = await SiteService.fetchSites();
         this.sites = response.data;
       } catch (err) {
+        // Couldn't get site list, display error
         this.setStatus(this.$t('SITES_FETCH_FAILED'), 'danger');
       }
     },
     showDetails(site) {
+      // Set up and display site details modal
       this.selectedSite = site;
       this.dialogAction = 'view';
       this.$bvModal.show('site-details');
     },
     createNew() {
+      // Set up and display create site modal
       this.selectedSite = {};
       this.dialogAction = 'add';
       this.$bvModal.show('site-details');
     },
-    sitesUpdated(data) {
+    onSitesUpdated(data) {
+      // Event handler for when sites are updated, show response message and reload site list
       this.setStatus(data.message, data.type);
       this.fetchSites();
     },
     setStatus(message, type) {
+      // Displays an alert message
       this.status = { message : message, type : type, visible : true };
     }
   }

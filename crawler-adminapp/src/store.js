@@ -4,6 +4,7 @@ import VuexPersistence from 'vuex-persist';
 
 Vue.use(Vuex);
 
+// Uses local storage to maintain state across sessions
 const vuexLocal = new VuexPersistence({
     storage: window.localStorage,
     reducer: (state) => ({
@@ -26,6 +27,7 @@ export default new Vuex.Store({
   },
   actions: {},
   getters: {
+    // Check if the user is authenticated based on the presence of access token
     isAuthenticated: state => state.token !== null
   },
   plugins: [vuexLocal.plugin]
