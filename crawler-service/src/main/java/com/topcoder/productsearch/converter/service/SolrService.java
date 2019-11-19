@@ -151,11 +151,17 @@ public class SolrService {
       solrProduct.setManufacturerName(document.get("manufacturer_name").toString());
       solrProduct.setScore(Float.valueOf(document.get("score").toString()));
       solrProduct.setUrl(document.get("product_url").toString());
-      solrProduct.setCategory(document.get("category").toString());
-      solrProduct.setDigest(Common.firstNOfString(document.get("content").toString(), request.getFirstNOfContent()));
-      solrProduct.setHighlighting(getHighlighting(response, solrProduct.getId(), "content"));
+      if (document.get("category") != null) {
+        solrProduct.setCategory(document.get("category").toString());
+      }
+      if (document.get("content") != null ) {
+        solrProduct.setDigest(Common.firstNOfString(document.get("content").toString(), request.getFirstNOfContent()));
+        solrProduct.setHighlighting(getHighlighting(response, solrProduct.getId(), "content"));
+      }
       solrProduct.setTitle(document.get("html_title").toString());
-      solrProduct.setManufacturerId(document.get("manufacturer_id").toString());
+      if (document.get("manufacturer_id") != null ) {
+        solrProduct.setManufacturerId(document.get("manufacturer_id").toString());
+      }
       products.add(solrProduct);
     }
     return products;
