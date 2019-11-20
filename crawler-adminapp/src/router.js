@@ -19,11 +19,13 @@ let router = new VueRouter({
         { 
             path: '/home', 
             name: 'home', 
+            meta : { requiresAuth: true, layout : 'sidebar' }, 
             component: () => import('./views/Home.vue') 
         },
         { 
             path: '/sites', 
             name: 'sites',
+            meta : { requiresAuth: true, layout : 'sidebar' }, 
             component: () => import('./views/Sites.vue') 
         }
     ]

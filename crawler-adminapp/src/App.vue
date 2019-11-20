@@ -8,7 +8,7 @@
 
 <script>
 
-const defaultLayout = "sidebar";
+const defaultLayout = "full";
 
 export default {
   name: 'app',
