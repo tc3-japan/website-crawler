@@ -1,12 +1,14 @@
 /* eslint-disable */
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import messages from '@/lang/en';
+
 import axios from 'axios';
 import config from '../config';
 import store from './store';
 
 Vue.use(VueI18n);
+
+const loadedLanguages = [ ];
 
 let defaultLanguage = (config && config.client) ? config.client.defaultLanguage : 'en';
 
@@ -15,9 +17,9 @@ export const i18n = new VueI18n({
   fallbackLocale: defaultLanguage
 });
 
-i18n.setLocaleMessage(defaultLanguage, messages);
 
-const loadedLanguages = [ defaultLanguage ];
+
+
 
 function setI18nLanguage (lang) {
   i18n.locale = lang;
@@ -40,6 +42,7 @@ export function loadLanguageAsync(lang) {
     return Promise.resolve(setI18nLanguage(lang));
   }
 
+
   // If the language hasn't been loaded yet
   return import(/* webpackChunkName: "lang-[request]" */ `./lang/${lang}.js`).then(
     messages => {
@@ -47,5 +50,10 @@ export function loadLanguageAsync(lang) {
       loadedLanguages.push(lang);
       return setI18nLanguage(lang);
     }
-  );
+  ).catch(e => {
+    if (lang != defaultLanguage)
+      return loadLanguageAsync(defaultLanguage);
+  });
 }
+
+loadLanguageAsync(defaultLanguage);
