@@ -38,6 +38,12 @@ export default {
 .locale-changer .input-group-text {
     background-color: #6b6979;
     border-color: #a6a4b7;
+    color: #c6c4db;
+}
+
+.high-contast.locale-changer .input-group-text {
+    background-color: #4d4b5c;
+    border-color: #c8c6da;
     color: #bcbad0;
 }
 </style>

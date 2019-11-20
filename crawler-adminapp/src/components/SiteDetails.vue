@@ -169,11 +169,11 @@
     </template>
 
     <template v-slot:modal-footer="{ ok, cancel }">
-      <b-button v-show="currentAction==='add'" variant="success" @click="createNew()">{{ $t('CREATE_BUTTON') }}</b-button>
-      <b-button v-show="currentAction==='edit'" variant="success" @click="update()">{{ $t('SAVE_BUTTON') }}</b-button>
-      <b-button v-show="currentAction==='view'" variant="success" @click="edit()">{{ $t('EDIT_BUTTON') }}</b-button>
-      <b-button v-show="readOnly" variant="danger" @click="cancel()">{{ $t('CLOSE_BUTTON') }}</b-button>
-      <b-button v-show="!readOnly" variant="danger" @click="cancel()">{{ $t('CANCEL_BUTTON') }}</b-button>
+      <b-button v-show="currentAction==='add'" variant="primary" @click="createNew()">{{ $t('CREATE_BUTTON') }}</b-button>
+      <b-button v-show="currentAction==='edit'" variant="primary" @click="update()">{{ $t('SAVE_BUTTON') }}</b-button>
+      <b-button v-show="currentAction==='view'" variant="primary" @click="edit()">{{ $t('EDIT_BUTTON') }}</b-button>
+      <b-button v-show="readOnly" variant="secondary" @click="cancel()">{{ $t('CLOSE_BUTTON') }}</b-button>
+      <b-button v-show="!readOnly" variant="secondary" @click="cancel()">{{ $t('CANCEL_BUTTON') }}</b-button>
     </template>
   </b-modal>
 </template>
