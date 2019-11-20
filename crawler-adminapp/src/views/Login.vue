@@ -68,7 +68,7 @@
                     </div>
                     <div class="text-center text-white opacity-8 mt-4">
                         <div class="row justify-content-md-center mb-3">
-                            <locale-changer class="col-sm-3" />
+                            <locale-changer class="col-sm-3 high-contast" />
                         </div>
                         Copyright &copy; ArchitectUI 2019
                     </div>
