@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "serve-production": "node server/server.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
@@ -18,6 +19,7 @@
     "core-js": "^3.3.2",
     "cors": "^2.8.5",
     "eslint-loader": "^3.0.2",
+    "express": "^4.17.1",
     "jquery": "^3.4.1",
     "popper.js": "^1.16.0",
     "vue": "^2.6.10",
