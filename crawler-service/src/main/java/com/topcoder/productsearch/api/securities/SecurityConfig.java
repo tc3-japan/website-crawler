@@ -61,10 +61,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             });
     if (authEnabled) {
       http
-          .authorizeRequests().anyRequest().authenticated()
+          .authorizeRequests()
+          .mvcMatchers("/search_products").authenticated()
           .and()
           .httpBasic();
-
     }
   }
 
