@@ -1,5 +1,4 @@
 import axios from 'axios';
-import config from '../../config';
 import Store from '../store';
 
 /**
@@ -24,7 +23,7 @@ export function setToken(token) {
 export function api() {
     // TODO: remove temporary authentication details
     return axios.create({
-        baseURL: config.api.baseURL,
+        baseURL: process.env.VUE_APP_API_BASE_URL,
         withCredentials: true,
         auth: {
             username: 'admin',

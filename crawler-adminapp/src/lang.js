@@ -3,14 +3,13 @@ import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 
 import axios from 'axios';
-import config from '../config';
 import store from './store';
 
 Vue.use(VueI18n);
 
 const loadedLanguages = [ ];
 
-let defaultLanguage = (config && config.client) ? config.client.defaultLanguage : 'en';
+let defaultLanguage = (process.env.VUE_APP_DEFAULT_LANGUAGE) ? process.env.VUE_APP_DEFAULT_LANGUAGE : 'en';
 
 export const i18n = new VueI18n({
   locale: defaultLanguage,
