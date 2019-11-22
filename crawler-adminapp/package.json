@@ -1,0 +1,72 @@
+{
+  "name": "crawler-adminapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve-production": "node server/server.js",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
+    "@fortawesome/vue-fontawesome": "^0.1.8",
+    "axios": "^0.19.0",
+    "bootstrap": "^4.3.1",
+    "bootstrap-vue": "^2.0.4",
+    "bootstrap4-toggle": "^3.6.1",
+    "core-js": "^3.3.2",
+    "cors": "^2.8.5",
+    "eslint-loader": "^3.0.2",
+    "express": "^4.17.1",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.16.0",
+    "vue": "^2.6.10",
+    "vue-i18n": "^8.15.0",
+    "vue-js-toggle-button": "^1.3.3",
+    "vue-perfect-scrollbar": "^0.2.1",
+    "vue-router": "^3.1.3",
+    "vue-sidebar-menu": "^4.4.1",
+    "vuelidate": "^0.7.4",
+    "vuex": "^3.1.1",
+    "vuex-persist": "^2.1.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.0.0",
+    "@vue/cli-plugin-eslint": "^4.0.0",
+    "@vue/cli-service": "^4.0.0",
+    "animate-sass": "^0.8.2",
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.6.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "eslint-plugin-vue-i18n": "^0.3.0",
+    "node-sass": "^4.13.0",
+    "pe7-icon": "^1.0.4",
+    "sass-loader": "^8.0.0",
+    "vue-template-compiler": "^2.6.10"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ]
+}
