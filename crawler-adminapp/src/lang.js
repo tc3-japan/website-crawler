@@ -16,10 +16,6 @@ export const i18n = new VueI18n({
   fallbackLocale: defaultLanguage
 });
 
-
-
-
-
 function setI18nLanguage (lang) {
   i18n.locale = lang;
   axios.defaults.headers.common['Accept-Language'] = lang;

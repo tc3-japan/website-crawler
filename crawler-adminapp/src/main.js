@@ -4,9 +4,7 @@ import router from './router';
 import { i18n } from './lang';
 import Vuelidate from 'vuelidate';
 import store from './store';
-import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-vue/dist/bootstrap-vue.css';
+
 import BootstrapVue from 'bootstrap-vue';
 import ToggleButton from 'vue-js-toggle-button';
 
