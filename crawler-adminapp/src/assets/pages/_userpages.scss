@@ -1,0 +1,45 @@
+// User Pages
+
+.app-logo {
+  height: $logo-height;
+  width: $logo-width;
+}
+
+.app-logo-inverse {
+  height: $logo-height;
+  width: $logo-width;
+}
+
+.app-login-box {
+
+  .login-header {
+    background-color: #434055;
+    color: white;
+  }
+
+  .modal-content {
+    border-radius: .5rem;
+    border: none;
+  }
+
+  .app-logo {
+    margin-bottom: $layout-spacer-lg;
+  }
+
+  label {
+    font-size: 1.1em;
+  }
+
+  h4 {
+    font-weight: normal;
+    margin-bottom: 10px;
+
+    div {
+      opacity: .6;
+    }
+
+    span {
+      font-size: $font-size-lg;
+    }
+  }
+}
