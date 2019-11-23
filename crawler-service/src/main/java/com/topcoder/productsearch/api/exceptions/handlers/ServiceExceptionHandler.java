@@ -4,15 +4,18 @@
 package com.topcoder.productsearch.api.exceptions.handlers;
 
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.topcoder.productsearch.api.exceptions.BadRequestException;
-import com.topcoder.productsearch.api.exceptions.NotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
@@ -23,10 +26,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.topcoder.productsearch.api.exceptions.BadRequestException;
+import com.topcoder.productsearch.api.exceptions.NotFoundException;
+import com.topcoder.productsearch.api.exceptions.UnauthorizedException;
 
 /**
  * The exception handler that maps exceptions to corresponding response status
@@ -93,6 +96,29 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+  /**
+   * Handle unauthorized exception.
+   *
+   * @param ex the exception
+   * @return the error response entity
+   */
+  @ExceptionHandler(UnauthorizedException.class)
+  @ResponseBody
+  public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException ex) {
+    return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+  }
+
+  /**
+   * Handle access denied exception.
+   *
+   * @param ex the exception
+   * @return the error response entity
+   */
+  @ExceptionHandler(AccessDeniedException.class)
+  @ResponseBody
+  public ResponseEntity<Object> handleUnauthorizedException(AccessDeniedException ex) {
+    return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+  }
 
     /**
      * Handle the other exceptions.
