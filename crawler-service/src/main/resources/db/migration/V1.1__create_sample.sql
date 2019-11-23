@@ -35,4 +35,19 @@ INSERT INTO `web_sites`
 );
 
 
+INSERT INTO `users`
+(
+`username`,
+`password`,
+`description`,
+`email`
+)
+VALUES
+(
+'admin',
+'aa2d6395dafbff009afbf0dcb22dfaecbd37731d7eec3b42285ddd45f62f5eea',
+'Administrator',
+'admin@topcoder-example.com'
+);
+
 
