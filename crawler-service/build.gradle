@@ -45,7 +45,8 @@ plugins {
 }
 apply plugin: 'com.palantir.docker'
 
-version = '1.0.5'
+// PR-75 version 1.0.7
+version = '1.0.7'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
