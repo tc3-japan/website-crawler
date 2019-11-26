@@ -1,23 +1,19 @@
 import axios from 'axios';
-import VueAxios from 'vue-axios';
-import Vue from 'vue';
 import Store from '../store';
 
-Vue.use(VueAxios, axios);
-
-function createAxiosInstance(baseURL) {
+function createAxiosInstance(contentType) {
     return axios.create({
-        baseURL: baseURL,
+        baseURL: process.env.VUE_APP_API_BASE_URL,
         withCredentials: true,
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            'Content-Type': contentType ? contentType : 'application/json',
             'Access-Control-Allow-Origin': '*'
         }
     });
 }
 
-let apiInstance = createAxiosInstance(process.env.VUE_APP_API_BASE_URL.replace(/\/?$/, '/') + 'api');
+let apiInstance = createAxiosInstance();
 
 apiInstance.interceptors
 .request
@@ -31,7 +27,7 @@ apiInstance.interceptors
     return config;
 });
 
-let authInstance = createAxiosInstance(process.env.VUE_APP_API_BASE_URL.replace(/\/?$/, '/') + 'oauth');
+let authInstance = createAxiosInstance('application/x-www-form-urlencoded');
 /**
  * Returns axios instance for accessing api
  */

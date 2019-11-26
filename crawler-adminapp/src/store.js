@@ -39,7 +39,7 @@ export default new Vuex.Store({
   },
   getters: {
     // Check if the user is authenticated based on the presence of access token
-    isAuthenticated: state => state.token !== null
+    isAuthenticated: state => state.token !== null && state.token !== undefined
   },
   plugins: [vuexLocal.plugin]
 });
