@@ -13,6 +13,7 @@ let defaultLanguage = (process.env.VUE_APP_DEFAULT_LANGUAGE) ? process.env.VUE_A
 
 export const i18n = new VueI18n({
   locale: defaultLanguage,
+  localeDir: 'lang',
   fallbackLocale: defaultLanguage
 });
 

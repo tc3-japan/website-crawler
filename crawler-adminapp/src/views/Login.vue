@@ -12,58 +12,60 @@
                                     </h4>
                                 </div>
                             </div>
-                            <div class="modal-body p-3">
-                                <div class="text-center">
-                                    <h4 class="mt-1">
-                                        <span>{{ $t('LOGIN_SUBTITLE') }}</span>
-                                    </h4>
-                                </div>
-                                <div class="pb-3">
-                                    <div class="divider"/>
-                                </div>
-                                    <b-alert 
-                                        :show="status.message"
-                                        dismissible
-                                        v-model="status.visible"
-                                        :variant="status.type">
-                                            {{ status.message }}
-                                    </b-alert>
-                                <b-form-group id="exampleInputGroup1"
-                                              label-for="exampleInput1">
-                                    <div class="position-relative row form-group">
-                                        <label class="offset-sm-1 col-sm-3 col-form-label">{{ $t('LOGIN_USER_ID') }}</label>
-                                        <div class="col-sm-7">
-                                            <b-form-input size="lg" id="exampleInput1"
-                                                v-model="username"
-                                                type="text"
-                                                required
-                                                :placeholder="$t('LOGIN_USER_ID_PLACEHOLDER')">
-                                            </b-form-input>
-                                            <div v-if="$v.username.$error && !$v.username.required" class="error invalid-feedback">{{$t('LOGIN_VALIDATION_ID_REQUIRED')}}</div>
-                                        </div>
+                            <form @submit.prevent="logIn">
+                                <div class="modal-body p-3">
+                                    <div class="text-center">
+                                        <h4 class="mt-1">
+                                            <span>{{ $t('LOGIN_SUBTITLE') }}</span>
+                                        </h4>
                                     </div>
-                                </b-form-group>
-                                <b-form-group id="exampleInputGroup2"
-                                              label-for="exampleInput2">
-                                    <div class="position-relative row form-group">
-                                        <label class="offset-sm-1 col-sm-3 col-form-label">{{ $t('LOGIN_PASSWORD') }}</label>
-                                        <div class="col-sm-7">
-                                            <b-form-input size="lg" id="exampleInput2"
-                                                v-model="password"
-                                                type="password"
-                                                required
-                                                :placeholder="$t('LOGIN_PASSWORD_PLACEHOLDER')">
-                                            </b-form-input>
-                                            <div v-if="$v.password.$error && !$v.password.required" class="error invalid-feedback">{{$t('LOGIN_VALIDATION_PASSWORD_REQUIRED')}}</div>
-                                        </div>
+                                    <div class="pb-3">
+                                        <div class="divider"/>
                                     </div>
-                                </b-form-group>
-                            </div>
-                            <div class="modal-footer clearfix">
-                                <div class="mx-auto">
-                                    <b-button @click="logIn" variant="primary" >{{ $t('LOGIN_BUTTON') }}</b-button>
+                                        <b-alert 
+                                            :show="status.message"
+                                            dismissible
+                                            v-model="status.visible"
+                                            :variant="status.type">
+                                                {{ status.message }}
+                                        </b-alert>
+                                    <b-form-group id="exampleInputGroup1"
+                                                label-for="exampleInput1">
+                                        <div class="position-relative row form-group">
+                                            <label class="offset-sm-1 col-sm-3 col-form-label">{{ $t('LOGIN_USER_ID') }}</label>
+                                            <div class="col-sm-7">
+                                                <b-form-input size="lg" id="exampleInput1"
+                                                    v-model="username"
+                                                    type="text"
+                                                    required
+                                                    :placeholder="$t('LOGIN_USER_ID_PLACEHOLDER')">
+                                                </b-form-input>
+                                                <div v-if="$v.username.$error && !$v.username.required" class="error invalid-feedback">{{$t('LOGIN_VALIDATION_ID_REQUIRED')}}</div>
+                                            </div>
+                                        </div>
+                                    </b-form-group>
+                                    <b-form-group id="exampleInputGroup2"
+                                                label-for="exampleInput2">
+                                        <div class="position-relative row form-group">
+                                            <label class="offset-sm-1 col-sm-3 col-form-label">{{ $t('LOGIN_PASSWORD') }}</label>
+                                            <div class="col-sm-7">
+                                                <b-form-input size="lg" id="exampleInput2"
+                                                    v-model="password"
+                                                    type="password"
+                                                    required
+                                                    :placeholder="$t('LOGIN_PASSWORD_PLACEHOLDER')">
+                                                </b-form-input>
+                                                <div v-if="$v.password.$error && !$v.password.required" class="error invalid-feedback">{{$t('LOGIN_VALIDATION_PASSWORD_REQUIRED')}}</div>
+                                            </div>
+                                        </div>
+                                    </b-form-group>
                                 </div>
-                            </div>
+                                <div class="modal-footer clearfix">
+                                    <div class="mx-auto">
+                                        <b-button type="submit" variant="primary" >{{ $t('LOGIN_BUTTON') }}</b-button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                     <div class="text-center text-white opacity-8 mt-4">
@@ -79,7 +81,7 @@
 </template>
 
 <script>
-import AuthService from '@/services/AuthService';
+import AuthService from '@/services/authService';
 import LocaleChanger from '../components/LocaleChanger';
 import { required } from 'vuelidate/lib/validators';
 
@@ -108,11 +110,20 @@ export default {
             })
             .catch(err => {
                 // An error occurred, display error message
-                this.status = {
-                    visible : true,
-                    message : this.$t('LOGIN_FAILED_UNKNOWN'),
-                    type : 'danger'
-                };
+                if (err.response.status === 401) {
+                    this.status = {
+                        visible : true,
+                        message : this.$t('LOGIN_FAILED_INVALID'),
+                        type : 'danger'
+                    };
+                }
+                else {
+                    this.status = {
+                        visible : true,
+                        message : this.$t('LOGIN_FAILED_UNKNOWN'),
+                        type : 'danger'
+                    };
+                }
             });
         }
     },
