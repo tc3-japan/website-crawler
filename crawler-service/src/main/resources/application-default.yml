@@ -37,10 +37,19 @@ server:
     min-response-size: 1024
 
 authentication:
-  enabled: false
-  credentials:
-    username: na
-    password: na
+  basic:
+    enabled: false
+    credentials:
+      username: na
+      password: na
+  token:
+    enabled: false
+    secret: SECRET
+    issuer: https://api.productsearch.topcodcer-dev.com
+    audience: https://auth.productsearch.topcodcer-dev.com
+    expiresIn: 36000
+  user:
+    salt: ABCDEFG
 
 cors:
   allowed-origins: "*"
@@ -48,6 +57,4 @@ cors:
 
 solr:
   uri: http://127.0.0.1:8983/solr/manufacturer_product
-
-crawler-settings:
 
