@@ -1,4 +1,5 @@
-import { api, setToken } from './api';
+import { auth } from './api';
+import Store from '@/store';
 
 /**
  * Calls API login endpoint
@@ -7,9 +8,9 @@ import { api, setToken } from './api';
  */
 function logIn(username, password) {
     return new Promise((resolve, reject) => {
-        api().post('/oauth/token', { username, password })
+        auth().post('/token', { username, password })
         .then(response => {
-            setToken(response.data.token);
+            Store.commit('setToken', response.data.access_token);
             resolve(response);
         })
         .catch(err => {
@@ -22,8 +23,8 @@ function logIn(username, password) {
  * Calls API login endpoint
  */
 function logOut() {
-    setToken(null);
-    return api().get('/oauth/logout');
+    Store.commit('setToken', null);
+    return auth().get('/logout');
 }
 
 export default {

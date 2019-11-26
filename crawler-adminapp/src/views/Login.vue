@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import AuthService from '@/services/AuthService';
+import AuthService from '@/services/authService';
 import LocaleChanger from '../components/LocaleChanger';
 import { required } from 'vuelidate/lib/validators';
 

@@ -24,8 +24,19 @@ export default new Vuex.Store({
     setToken(state, token) {
       state.token = token;
     },
+    logout(state) {
+      console.log('LOGOUT: SETTING TOKEN TO NULL');
+      state.token = '';
+    }
   },
-  actions: {},
+  actions: {
+    login({commit}, username, password) {
+
+    },
+    logout({commit}) {
+
+    }
+  },
   getters: {
     // Check if the user is authenticated based on the presence of access token
     isAuthenticated: state => state.token !== null

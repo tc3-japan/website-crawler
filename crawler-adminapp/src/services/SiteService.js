@@ -20,7 +20,7 @@ function fetchSiteDetails(id) {
  * @param object body - The site details
  */
 function createNewSite(body) {
-    return api().post(`/websites`, body);
+    return api().post('/websites', body);
 }
 
 /**
