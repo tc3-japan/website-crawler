@@ -1,5 +1,6 @@
 import { auth } from './api';
 import Store from '@/store';
+import qs from'querystring';
 
 /**
  * Calls API login endpoint
@@ -8,7 +9,7 @@ import Store from '@/store';
  */
 function logIn(username, password) {
     return new Promise((resolve, reject) => {
-        auth().post('/token', { username, password })
+        auth().post('/oauth/token', qs.stringify({ username, password }))
         .then(response => {
             Store.commit('setToken', response.data.access_token);
             resolve(response);
@@ -24,7 +25,7 @@ function logIn(username, password) {
  */
 function logOut() {
     Store.commit('setToken', null);
-    return auth().get('/logout');
+    return Promise.resolve(null); // auth().get('/oauth/logout')
 }
 
 export default {
