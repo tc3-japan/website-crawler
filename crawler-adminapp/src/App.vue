@@ -7,8 +7,10 @@
 </template>
 
 <script>
-
-const defaultLayout = "full";
+import AuthService from '@/services/authService';
+import { api } from '@/services/api';
+import Store from '@/store';
+const defaultLayout = 'full';
 
 export default {
   name: 'app',
@@ -16,6 +18,16 @@ export default {
     layout() {
       return (this.$route.meta.layout || defaultLayout) + '-layout';
     }
+  },
+  created: function () {
+    let router = this.$router;
+    return api().interceptors.response.use(undefined, function (err) {
+        // If the user is unauthorized, return to login screen
+        if (err.response.status === 401) {
+          AuthService.logOut();
+          router.push('/');
+        }
+    });
   }
 };
 </script>

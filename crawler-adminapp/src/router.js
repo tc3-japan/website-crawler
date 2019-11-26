@@ -40,10 +40,10 @@ router.beforeEach((to, from, next) => {
         requiresAuth = to.meta.requiresAuth;
     }
 
-    //// If the request page requires authentication but the user is not 
-    //// authenticated redirect them to the login screen
-    // if(requiresAuth && !store.getters.isAuthenticated)
-    //     return next('/');
+    // If the request page requires authentication but the user is not 
+    // authenticated redirect them to the login screen
+    if(requiresAuth && !store.getters.isAuthenticated)
+        return next('/');
 
     // Ensure the users desired language is loaded, based on stored state
     // and fallback to navigator language if no preferred language has been stored

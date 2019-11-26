@@ -179,7 +179,7 @@
 </template>
 
 <script>
-import SiteService from '@/services/SiteService';
+import SiteService from '@/services/siteService';
 import { required } from 'vuelidate/lib/validators';
 
 const defaultValues = {
