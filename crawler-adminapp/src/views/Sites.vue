@@ -33,6 +33,7 @@
       <b-table 
         striped="striped" 
         hover="hover" 
+        responsive 
         :items="sites" 
         :fields="displayFields"
         :filter="filter"
@@ -58,7 +59,7 @@
 <script>
 import PageTitle from '../components/PageTitle.vue';
 import SiteDetails from '../components/SiteDetails.vue';
-import SiteService from '@/services/SiteService';
+import SiteService from '@/services/siteService';
 
 export default {
   components: {
