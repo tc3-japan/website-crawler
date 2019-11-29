@@ -62,7 +62,7 @@ public class WebSiteService {
       webSiteRepository.save(webSite);
       return webSite;
     } catch (DataIntegrityViolationException dIntegrityViolationException) {
-      throw new BadRequestException(dIntegrityViolationException.getMessage());
+      throw new BadRequestException(dIntegrityViolationException.getMostSpecificCause().getMessage());
     }
   }
 
@@ -82,7 +82,7 @@ public class WebSiteService {
       webSiteRepository.save(webSite);
       return webSite;
     } catch (DataIntegrityViolationException dException) {
-      throw new BadRequestException(dException.getMessage());
+      throw new BadRequestException(dException.getMostSpecificCause().getMessage());
     }
     
     
