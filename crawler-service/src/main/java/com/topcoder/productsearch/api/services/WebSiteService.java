@@ -11,6 +11,7 @@ import com.topcoder.productsearch.common.util.Common;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -57,8 +58,12 @@ public class WebSiteService {
   public WebSite create(WebSite webSite) {
     checkWebSiteEntity(webSite);
     webSite.setCreatedAt(Date.from(Instant.now()));
-    webSiteRepository.save(webSite);
-    return webSite;
+    try { 
+      webSiteRepository.save(webSite);
+      return webSite;
+    } catch (DataIntegrityViolationException dIntegrityViolationException) {
+      throw new BadRequestException(dIntegrityViolationException.getMessage());
+    }
   }
 
   /**
@@ -73,8 +78,14 @@ public class WebSiteService {
     // checkWebSiteEntity(entity);
     WebSite webSite = get(id);
     BeanUtils.copyProperties(entity, webSite, Common.getNullPropertyNames(entity));
-    webSiteRepository.save(webSite);
-    return webSite;
+    try {
+      webSiteRepository.save(webSite);
+      return webSite;
+    } catch (DataIntegrityViolationException dException) {
+      throw new BadRequestException(dException.getMessage());
+    }
+    
+    
   }
 
   /**
