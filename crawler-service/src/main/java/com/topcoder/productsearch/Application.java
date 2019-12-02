@@ -5,7 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @SpringBootApplication(exclude = {FlywayAutoConfiguration.class, SolrAutoConfiguration.class})
 @ComponentScan({
@@ -32,5 +36,20 @@ public class Application {
       RestCondition.setRest(isRestMode);
     }
     new SpringApplicationBuilder(Application.class).web(isRestMode).run(args);
+  }
+
+  @Bean
+  public MessageSource messageSource() {
+      ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+      messageSource.setBasename("classpath:messages");
+      messageSource.setDefaultEncoding("UTF-8");
+      return messageSource;
+  }
+
+  @Bean
+  public LocalValidatorFactoryBean getValidator() {
+      LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
+      bean.setValidationMessageSource(messageSource());
+      return bean;
   }
 }
