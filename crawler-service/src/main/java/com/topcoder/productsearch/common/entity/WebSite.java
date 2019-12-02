@@ -57,15 +57,19 @@ public class WebSite {
   @Column(name = "supports_robots_txt")
   private Boolean supportsRobotsTxt;
 
+  @Min(value = 1, message = "{crawl_max_depth.min}")
   @Column(name = "crawl_max_depth")
   private Integer crawlMaxDepth = 10;
 
+  @Min(value = 1, message = "{crawl_time_limit.min}")
   @Column(name = "crawl_time_limit")
   private Integer crawlTimeLimit = 600;
 
+  @Min(value = 1, message = "{crawl_interval.min}")
   @Column(name = "crawl_interval")
   private Integer crawlInterval = 1000;
 
+  @Min(value = 1, message = "{parallel_size.min}")
   @Column(name = "parallel_size")
   private Integer parallelSize = 12;
 

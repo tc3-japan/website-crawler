@@ -77,7 +77,7 @@ public class WebSiteController {
    * @return the website
    */
   @PutMapping("{webSiteId}")
-  public WebSite update(@PathVariable("webSiteId") @NotNull Integer webSiteId, @RequestBody WebSite entity) {
+  public WebSite update(@PathVariable("webSiteId") @NotNull Integer webSiteId, @RequestBody @Valid WebSite entity) {
     return webSiteService.update(webSiteId, entity);
   }
 
