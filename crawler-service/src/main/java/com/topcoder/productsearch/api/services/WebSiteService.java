@@ -61,8 +61,8 @@ public class WebSiteService {
     try { 
       webSiteRepository.save(webSite);
       return webSite;
-    } catch (DataIntegrityViolationException dIntegrityViolationException) {
-      throw new BadRequestException(dIntegrityViolationException.getMostSpecificCause().getMessage());
+    } catch (DataIntegrityViolationException dException) {
+      throw new BadRequestException(dException.getMostSpecificCause().getMessage());
     }
   }
 
