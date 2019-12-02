@@ -60,6 +60,7 @@ export default {
     'SITE_VALIDATION_NAME_REQUIRED': 'Name is required',
     'SITE_VALIDATION_URL_REQUIRED': 'URL is required',
     'SITE_VALIDATION_URL_PATTERNS_REQUIRED' : 'Product page URL pattern is required',
+    'SITE_VALIDATION_MUST_BE_POSITIVE' : 'Value must be greater than or equal to zero',
     'CRUD_GENERIC_FAILURE': 'Something went wrong',
     'CREATE_BUTTON': 'Create',
     'SAVE_BUTTON': 'Save',
