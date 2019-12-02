@@ -18,7 +18,6 @@ let apiInstance = createAxiosInstance();
 apiInstance.interceptors
 .request
 .use(function (config) {
-    console.log('setting token', Store.state.token);
     if (Store.state.token)
         config.headers['Authorization'] = `Bearer ${Store.state.token}`;
     else {

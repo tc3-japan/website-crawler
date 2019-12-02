@@ -25,7 +25,6 @@ export default new Vuex.Store({
       state.token = token;
     },
     logout(state) {
-      console.log('LOGOUT: SETTING TOKEN TO NULL');
       state.token = '';
     }
   },
