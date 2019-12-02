@@ -27,6 +27,7 @@ export default {
           AuthService.logOut();
           router.push('/');
         }
+        return Promise.reject(err);
     });
   }
 };

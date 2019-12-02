@@ -127,6 +127,9 @@
               type="number"
               class="form-control"
             />
+            <div v-if="$v.siteDetails.$error">
+              <div v-if="!$v.siteDetails.crawl_max_depth.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE')}}</div>
+            </div>
           </div>
         </div>
         <div class="position-relative row form-group">
@@ -141,6 +144,9 @@
               type="number"
               class="form-control"
             />
+            <div v-if="$v.siteDetails.$error">
+              <div v-if="!$v.siteDetails.crawl_time_limit.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE')}}</div>
+            </div>
           </div>
         </div>
         <div class="position-relative row form-group">
@@ -155,6 +161,9 @@
               type="number"
               class="form-control"
             />
+            <div v-if="$v.siteDetails.$error">
+              <div v-if="!$v.siteDetails.crawl_interval.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE')}}</div>
+            </div>
           </div>
         </div>
       </form>
@@ -180,7 +189,7 @@
 
 <script>
 import SiteService from '@/services/siteService';
-import { required } from 'vuelidate/lib/validators';
+import { required, minValue } from 'vuelidate/lib/validators';
 
 const defaultValues = {
   crawl_max_depth: 10,
@@ -308,7 +317,7 @@ export default {
         
         // Pass the site details to the api
         SiteService.createNewSite(this.siteDetails)
-        .then(respone => {
+        .then(function (response) {
             this.$emit('sites-updated', { message : this.$t('SITE_CREATE_SUCCESS'), type : 'success' });
             this.hide();
         })
@@ -375,7 +384,12 @@ export default {
       this.status = { message : message, type : type, visible : true };
     },
     displayErrorResponse(error, fallbackMessageKey) {
-      let messageKey = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : fallbackMessageKey;
+      let messageKey = "";
+      if (error.response && error.response.data && error.response.data.message && error.response.status >= 400 && error.response.status < 500)
+        messageKey = error.response.data.message;
+      else 
+        messageKey = fallbackMessageKey;
+
       let message = this.$t(messageKey || 'CRUD_GENERIC_FAILURE');
       this.setStatus(message, 'danger');
     }
@@ -390,6 +404,15 @@ export default {
       },
       content_url_patterns : {
         required
+      },
+      crawl_max_depth : {
+        minValue : minValue(0)
+      },
+      crawl_time_limit : {
+        minValue : minValue(0)
+      },
+      crawl_interval : {
+        minValue : minValue(0)
       }
     }
 }
