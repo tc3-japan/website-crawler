@@ -60,6 +60,7 @@ export default {
     'SITE_VALIDATION_NAME_REQUIRED': '名前が必要です',
     'SITE_VALIDATION_URL_REQUIRED': 'URLが必要です',
     'SITE_VALIDATION_URL_PATTERNS_REQUIRED' : '製品ページのURLパターンが必要です',
+    'SITE_VALIDATION_MUST_BE_POSITIVE' : '値はゼロ以上でなければなりません',
     'CRUD_GENERIC_FAILURE': '何かがうまくいかなかった',
     'CREATE_BUTTON': '作成',
     'SAVE_BUTTON': '保存',
