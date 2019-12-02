@@ -38,5 +38,20 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### deploy the new image to AWS EKS
 
+## ssh to AWS EKS
+   
+`cd git/website-crawler/crawler-k8s/manifest/`
+create the admin-service.yaml if it doesn't already exist.
+
+create the admin-deployment.yaml file if it doesn't exist.
+
+change the image name in the admin-deployment.yaml to the version that is to be deployed and was pushed out to docker-hub
+
+Run the latest front end deployment by applying the admin-deployment.yaml
+`kubectl apply -f admin-deployment.yaml` 
+
+
+
+
 
 
