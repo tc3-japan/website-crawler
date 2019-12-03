@@ -1,9 +1,10 @@
 package com.topcoder.productsearch.api.models;
 
-import lombok.Data;
+import java.util.List;
 
 import javax.validation.constraints.Min;
-import java.util.List;
+
+import lombok.Data;
 
 
 /**
@@ -32,6 +33,6 @@ public class ProductSearchRequest {
   /**
    * first n characters of content
    */
-  @Min(value = 120, message = "productsearch_characters.min")
+  @Min(value = 1, message = "productsearch_characters.min")
   private Integer firstNOfContent = 120;
 }
