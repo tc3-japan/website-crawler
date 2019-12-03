@@ -22,7 +22,7 @@
               v-bind:class="{ 'form-control': true, 'is-invalid' : $v.siteDetails.name.$error}"
             />
             <div v-if="$v.siteDetails.$error">
-              <div v-if="!$v.siteDetails.name.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_NAME_REQUIRED')}}</div>
+              <div v-if="!$v.siteDetails.name.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_REQUIRED', { field: $t('SITE_DETAILS_NAME') })}}</div>
             </div>
           </div>
         </div>
@@ -51,7 +51,7 @@
               v-bind:class="{ 'form-control': true, 'is-invalid' : $v.siteDetails.url.$error}"
             />
             <div v-if="$v.siteDetails.$error">
-              <div v-if="!$v.siteDetails.url.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_URL_REQUIRED')}}</div>
+              <div v-if="!$v.siteDetails.url.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_REQUIRED', { field: $t('SITE_DETAILS_URL') })}}</div>
             </div>
           </div>
         </div>
@@ -68,7 +68,7 @@
               v-bind:class="{ 'form-control': true, 'is-invalid' : $v.siteDetails.content_url_patterns.$error}"
             ></textarea>
             <div v-if="$v.siteDetails.$error">
-              <div v-if="!$v.siteDetails.content_url_patterns.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_URL_PATTERNS_REQUIRED')}}</div>
+              <div v-if="!$v.siteDetails.content_url_patterns.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_REQUIRED', { field: $t('SITE_DETAILS_URL_PATTERN') })}}</div>
             </div>
           </div>
         </div>
@@ -128,12 +128,13 @@
               class="form-control"
             />
             <div v-if="$v.siteDetails.$error">
-              <div v-if="!$v.siteDetails.crawl_max_depth.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE')}}</div>
+              <div v-if="!$v.siteDetails.crawl_max_depth.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE', { field: $t('SITE_DETAILS_DEPTH') })}}</div>
+              <div v-if="!$v.siteDetails.crawl_max_depth.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_REQUIRED', { field: $t('SITE_DETAILS_DEPTH') })}}</div>
             </div>
           </div>
         </div>
         <div class="position-relative row form-group">
-          <label for="crawl_time_limit" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_MAX_TIME') }}</label>
+          <label for="crawl_time_limit" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_MAX_TIME') }} ({{ $t('SECONDS')}})</label>
           <div class="col-sm-10">
             <input
               :readonly="readOnly"
@@ -145,12 +146,13 @@
               class="form-control"
             />
             <div v-if="$v.siteDetails.$error">
-              <div v-if="!$v.siteDetails.crawl_time_limit.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE')}}</div>
+              <div v-if="!$v.siteDetails.crawl_time_limit.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE', { field: $t('SITE_DETAILS_MAX_TIME') })}}</div>
+              <div v-if="!$v.siteDetails.crawl_time_limit.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_REQUIRED', { field: $t('SITE_DETAILS_MAX_TIME') })}}</div>
             </div>
           </div>
         </div>
         <div class="position-relative row form-group">
-          <label for="crawl_interval" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_INTERVAL') }}</label>
+          <label for="crawl_interval" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_INTERVAL') }} ({{ $t('MILLISECONDS')}})</label>
           <div class="col-sm-10">
             <input
               :readonly='readOnly'
@@ -162,7 +164,8 @@
               class="form-control"
             />
             <div v-if="$v.siteDetails.$error">
-              <div v-if="!$v.siteDetails.crawl_interval.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE')}}</div>
+              <div v-if="!$v.siteDetails.crawl_interval.minValue" class="error invalid-feedback">{{$t('SITE_VALIDATION_MUST_BE_POSITIVE', { field: $t('SITE_DETAILS_INTERVAL') })}}</div>
+              <div v-if="!$v.siteDetails.crawl_interval.required" class="error invalid-feedback">{{$t('SITE_VALIDATION_REQUIRED', { field: $t('SITE_DETAILS_INTERVAL') })}}</div>
             </div>
           </div>
         </div>
@@ -193,8 +196,9 @@ import { required, minValue } from 'vuelidate/lib/validators';
 
 const defaultValues = {
   crawl_max_depth: 10,
-  crawl_time_limit: 600,
-  crawl_interval: 1000
+  crawl_time_limit: 3600,
+  crawl_interval: 1000,
+  supports_robots_txt: false
 };
 
 export default {
@@ -219,8 +223,7 @@ export default {
       this.siteDetails = JSON.parse(JSON.stringify(current));
     },
     siteDetails : {
-      handler(current, previous)
-      {
+      handler(current, previous) {
         // Only set dirty for changes after the initial siteDetails has been set
         if (this.initialValue)
           this.initialValue = false;
@@ -283,19 +286,22 @@ export default {
             this.$emit('Close');
             this.hide();
             this.$v.$reset();
+            this.status = {};
             this.dirty = false;
           }
         });
-      }
-      else {
+      } else {
         this.$emit('Close');
+        this.status = {};
         this.$v.$reset();
       }
     },
     onShown() {
+      this.$v.$reset();
+      this.status = {};
       this.currentAction = this.action;
       
-      if (this.currentAction === "add")
+      if (this.currentAction === 'add')
         this.siteDetails = Object.assign({}, defaultValues);
       else
         this.siteDetails = JSON.parse(JSON.stringify(this.site));
@@ -317,7 +323,7 @@ export default {
         
         // Pass the site details to the api
         SiteService.createNewSite(this.siteDetails)
-        .then(function (response) {
+        .then(response => {
             this.$emit('sites-updated', { message : this.$t('SITE_CREATE_SUCCESS'), type : 'success' });
             this.hide();
         })
@@ -339,7 +345,7 @@ export default {
 
         // Pass the updated site details to the api
         SiteService.updateSite(this.siteDetails)
-        .then(respone => {
+        .then(response => {
           this.$emit('sites-updated', { message : this.$t('SITE_UPDATE_SUCCESS'), type : 'success' });
           this.hide();
         })
@@ -384,7 +390,7 @@ export default {
       this.status = { message : message, type : type, visible : true };
     },
     displayErrorResponse(error, fallbackMessageKey) {
-      let messageKey = "";
+      let messageKey = '';
       if (error.response && error.response.data && error.response.data.message && error.response.status >= 400 && error.response.status < 500)
         messageKey = error.response.data.message;
       else 
@@ -406,13 +412,16 @@ export default {
         required
       },
       crawl_max_depth : {
-        minValue : minValue(0)
+        minValue : minValue(1),
+        required
       },
       crawl_time_limit : {
-        minValue : minValue(0)
+        minValue : minValue(1),
+        required
       },
       crawl_interval : {
-        minValue : minValue(0)
+        minValue : minValue(1),
+        required
       }
     }
 }
@@ -428,6 +437,10 @@ export default {
 .invalid-feedback {
   display: block;
   font-size: 1.0em;
+}
+
+textarea.form-control {
+  height: 120px;
 }
 
 </style>

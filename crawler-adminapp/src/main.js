@@ -6,6 +6,7 @@ import Vuelidate from 'vuelidate';
 import store from './store';
 
 import BootstrapVue from 'bootstrap-vue';
+import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 import ToggleButton from 'vue-js-toggle-button';
 
 import SidebarLayout from './layouts/Sidebar.vue';
