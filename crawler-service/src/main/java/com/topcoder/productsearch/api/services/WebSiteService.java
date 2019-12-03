@@ -1,6 +1,5 @@
 package com.topcoder.productsearch.api.services;
 
-
 import com.topcoder.productsearch.api.exceptions.BadRequestException;
 import com.topcoder.productsearch.api.exceptions.NotFoundException;
 import com.topcoder.productsearch.api.models.OffsetLimitPageable;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+
 
 /**
  * the website service
@@ -63,7 +63,7 @@ public class WebSiteService {
       return webSite;
     } catch (DataIntegrityViolationException dException) {
       throw new BadRequestException(dException.getMostSpecificCause().getMessage());
-    }
+    } 
   }
 
   /**
@@ -81,9 +81,11 @@ public class WebSiteService {
     try {
       webSiteRepository.save(webSite);
       return webSite;
-    } catch (DataIntegrityViolationException dException) {
+    } 
+    catch (DataIntegrityViolationException dException) {
       throw new BadRequestException(dException.getMostSpecificCause().getMessage());
-    }
+    } 
+    
     
     
   }
