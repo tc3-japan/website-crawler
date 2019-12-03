@@ -1,16 +1,16 @@
 package com.topcoder.productsearch.common.util;
 
-import com.gargoylesoftware.htmlunit.html.DomNode;
-import com.gargoylesoftware.htmlunit.html.DomNodeList;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.w3c.dom.Node;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jsoup.Jsoup;
+import org.w3c.dom.Node;
+
+import com.gargoylesoftware.htmlunit.html.DomNode;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * html dom helper
@@ -47,7 +47,7 @@ public class DomHelper {
     if (cssSelectors == null || cssSelectors.trim().length() == 0) {
       return page.getBody().asXml();
     }
-    String[] selectors = cssSelectors.split(",");
+    String[] selectors = cssSelectors.split(";");
     List<String> contents = new LinkedList<>();
     for (String selector : selectors) {
       // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
