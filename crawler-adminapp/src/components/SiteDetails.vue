@@ -317,7 +317,7 @@ export default {
         
         // Pass the site details to the api
         SiteService.createNewSite(this.siteDetails)
-        .then(function (response) {
+        .then(respone => {
             this.$emit('sites-updated', { message : this.$t('SITE_CREATE_SUCCESS'), type : 'success' });
             this.hide();
         })
