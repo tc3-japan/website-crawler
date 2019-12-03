@@ -311,13 +311,13 @@ export default {
         return;
 
       // Display save confirmation dialog
-      this.cofirmSave().then(confirmationResponse => {
+      this.confirmSave().then(confirmationResponse => {
         if (!confirmationResponse)
           return;
         
         // Pass the site details to the api
         SiteService.createNewSite(this.siteDetails)
-        .then(function (response) {
+        .then(respone => {
             this.$emit('sites-updated', { message : this.$t('SITE_CREATE_SUCCESS'), type : 'success' });
             this.hide();
         })
@@ -333,7 +333,7 @@ export default {
       if(this.$v.siteDetails.$error)
         return;
 
-      this.cofirmSave().then(confirmationResponse => {
+      this.confirmSave().then(confirmationResponse => {
         if (!confirmationResponse)
           return;
 
@@ -372,7 +372,7 @@ export default {
         });
       });
     },
-    cofirmSave() {
+    confirmSave() {
       return this.$bvModal.msgBoxConfirm(this.$t('SITE_SAVE_CONFIRMATION'), 
       { 
         title : this.$t('SITE_SAVE_CONFIRMATION_TITLE'),
