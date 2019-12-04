@@ -24,7 +24,7 @@ export default {
             this.$emit('input', this.replaceAll(this.replaceAll(event.target.value, '(\r\n|\n|\r)', ';'), ';+', ';'));
         },
         replaceAll(text, search, replacement) {
-            return text.replace(new RegExp(search, 'g'), replacement);
+            return text ? text.replace(new RegExp(search, 'g'), replacement) : '';
         }
     },
     computed: {
