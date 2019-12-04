@@ -72,7 +72,7 @@
                         <div class="row justify-content-md-center mb-3">
                             <locale-changer class="col-sm-3 high-contast" />
                         </div>
-                        Copyright &copy; ArchitectUI 2019
+                        <!-- Copyright &copy; ArchitectUI 2019 -->
                     </div>
                 </b-col>
             </div>
@@ -94,7 +94,8 @@ export default {
         return {
             username : '',
             password : '',
-            status : {}
+            status : {},
+            comments: true
         };
     },
     methods: {
@@ -106,7 +107,7 @@ export default {
             AuthService.logIn(this.username, this.password)
             .then(response => {
                 // On success redirect to the home page
-                this.$router.push('/home');
+                this.$router.push('/sites');
             })
             .catch(err => {
                 // An error occurred, display error message
@@ -116,8 +117,7 @@ export default {
                         message : this.$t('LOGIN_FAILED_INVALID'),
                         type : 'danger'
                     };
-                }
-                else {
+                } else {
                     this.status = {
                         visible : true,
                         message : this.$t('LOGIN_FAILED_UNKNOWN'),

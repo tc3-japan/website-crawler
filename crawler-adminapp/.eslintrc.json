@@ -25,6 +25,8 @@
         "no-use-before-define": "off",
         "brace-style": ["warn", "1tbs", { "allowSingleLine": true }],
         "max-statements": ["warn", {"max": 100}],
-        "semi": ["error", "always"]
+        "semi": ["error", "always"],
+        "vue-i18n/no-missing-keys" : "off",
+        "vue-i18n/no-raw-text" : "off"
     }
 }
