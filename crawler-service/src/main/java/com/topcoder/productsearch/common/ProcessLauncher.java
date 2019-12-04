@@ -1,12 +1,7 @@
 package com.topcoder.productsearch.common;
 
-import com.topcoder.productsearch.cleaner.service.CleanerService;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.repository.WebSiteRepository;
-import com.topcoder.productsearch.converter.service.ConverterService;
-import com.topcoder.productsearch.crawler.service.CrawlerService;
-import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
-import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +9,14 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import com.topcoder.productsearch.api.services.AuthService;
+import com.topcoder.productsearch.cleaner.service.CleanerService;
+import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.converter.service.ConverterService;
+import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
 
 @Component
 public class ProcessLauncher implements ApplicationRunner {
@@ -54,6 +56,12 @@ public class ProcessLauncher implements ApplicationRunner {
    */
   @Autowired
   ValidatePagesService validatePagesService;
+
+  /**
+   * the authentication service
+   */
+  @Autowired
+  AuthService authService;
 
   /**
    * get site by input args if exist
@@ -119,7 +127,15 @@ public class ProcessLauncher implements ApplicationRunner {
     if (args.containsOption("rest")) {
       return;
     }
-    
+    if (args.containsOption("passwd")) {
+      List<String> pw = args.getOptionValues("passwd");
+      if (pw == null || pw.isEmpty()) {
+        throw new IllegalArgumentException("Missing value for --passwd option.");
+      }
+      authService.generatePassword(pw.get(0));
+      return;
+    }
+
     List<String> procs = args.getOptionValues("proc");
     if (procs == null || procs.isEmpty()
         || isConverter(procs)
@@ -160,6 +176,7 @@ public class ProcessLauncher implements ApplicationRunner {
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=validate-pages");
+      logger.info("usage : ./gradlew bootRun -Pargs=--passwd={password}");
     }
   }
 }

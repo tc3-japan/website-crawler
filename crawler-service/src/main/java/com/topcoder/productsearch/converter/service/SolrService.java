@@ -5,6 +5,8 @@ import com.topcoder.productsearch.api.models.SolrProduct;
 import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.common.util.DomHelper;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -120,11 +122,14 @@ public class SolrService {
 
     logger.info("search product with params " + request.toString());
     if (request.getQuery() != null && request.getQuery().size() > 0) {
-      String title = request.getQuery().stream().map(keyword -> "html_title:" + keyword)
-          .collect(Collectors.joining(" AND "));
-      String body = request.getQuery().stream().map(keyword -> "html_body:" + keyword)
-          .collect(Collectors.joining(" AND "));
-      String q = String.format("(%s) OR (%s)", title, body);
+      String[] searchFields = {"manufacturer_id", "html_title", "content", "category"};
+      List<String> searchQueries = new LinkedList<>();
+      for (int i = 0; i < searchFields.length; i++) {
+        int finalI = i;
+        searchQueries.add("(" + request.getQuery().stream().map(keyword -> searchFields[finalI] + ":" + "\"" + keyword + "\"")
+                .collect(Collectors.joining(" AND ")) + ")");
+      }
+      String q = String.join(" OR ", searchQueries);
       logger.info("search q = " + q);
       query.set("q", q);
     } else {
@@ -132,7 +137,9 @@ public class SolrService {
     }
     query.set("start", request.getStart());
     query.set("rows", request.getRows());
-    query.set("fl", "id,manufacturer_name,product_url, page_updated_at,score");
+    query.set("fl", "id,manufacturer_name,product_url, page_updated_at,score,category,manufacturer_id,content,html_title");
+    query.set("hl", "on");
+    query.set("hl.fl", "content");
 
     QueryResponse response = httpSolrClient.query(query);
     List<SolrProduct> products = new LinkedList<>();
@@ -144,10 +151,27 @@ public class SolrService {
       solrProduct.setManufacturerName(document.get("manufacturer_name").toString());
       solrProduct.setScore(Float.valueOf(document.get("score").toString()));
       solrProduct.setUrl(document.get("product_url").toString());
+      if (document.get("category") != null) {
+        solrProduct.setCategory(document.get("category").toString());
+      }
+      if (document.get("content") != null ) {
+        solrProduct.setDigest(Common.firstNOfString(document.get("content").toString(), request.getFirstNOfContent()));
+        solrProduct.setHighlighting(getHighlighting(response, solrProduct.getId(), "content"));
+      }
+      solrProduct.setTitle(document.get("html_title").toString());
+      if (document.get("manufacturer_id") != null ) {
+        solrProduct.setManufacturerId(document.get("manufacturer_id").toString());
+      }
       products.add(solrProduct);
     }
     return products;
+  }
 
+  private List<String> getHighlighting(QueryResponse response, String id, String field){
+    if(response.getHighlighting().containsKey(id)){
+      return response.getHighlighting().get(id).get(field);
+    }
+    return null;
   }
 
 
@@ -172,6 +196,13 @@ public class SolrService {
     document.addField("product_url", page.getUrl());
     document.addField("html_title", page.getTitle());
     document.addField("html_body", page.getBody());
+
+    // force convert to string for solr document
+    // "1" will identify as number in solr document
+    document.addField("manufacturer_id", site.getId() + " ");
+
+    document.addField("content", new DomHelper().htmlToText(page.getContent()));
+    document.addField("category", page.getCategory());
     document.addField("page_updated_at", Date.from(Instant.now()));
     return document;
   }

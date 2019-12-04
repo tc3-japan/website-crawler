@@ -27,17 +27,30 @@ else
   CORE_URL=http://localhost:8983/solr/manufacturer_product
   SCHEMA_URL="$CORE_URL/schema"
   echo "Update schema on $SCHEMA_URL"
+
   curl -X POST -H 'Content-type:application/json' \
-    --data-binary @/opt/solr/add-field-manufacturer_name.json $SCHEMA_URL
-  
+    --data-binary @/opt/solr/add-field-category.json $SCHEMA_URL
+
   curl -X POST -H 'Content-type:application/json' \
-    --data-binary @/opt/solr/add-field-product_url.json $SCHEMA_URL
-  
+    --data-binary @/opt/solr/add-field-content.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_body.json $SCHEMA_URL
+
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/add-field-html_title.json $SCHEMA_URL
 
   curl -X POST -H 'Content-type:application/json' \
-    --data-binary @/opt/solr/add-field-html_body.json $SCHEMA_URL
+    --data-binary @/opt/solr/add-field-manufacturer_id.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-manufacturer_name.json $SCHEMA_URL
+  
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-page_updated_at.json $SCHEMA_URL
+  
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-product_url.json $SCHEMA_URL
 
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/replace-field-type-text_ja.json $SCHEMA_URL

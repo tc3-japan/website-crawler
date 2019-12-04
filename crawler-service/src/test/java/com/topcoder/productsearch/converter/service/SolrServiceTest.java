@@ -21,9 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -97,6 +95,7 @@ public class SolrServiceTest extends AbstractUnitTest {
   public void testCreateOrUpdate() throws IOException, SolrServerException {
     CPage cPage = new CPage();
     cPage.setUrl("http://test.com");
+    cPage.setContent("<content>test</content>");
     when(solrDocumentList.getNumFound()).thenReturn(0L);
     solrService.createOrUpdate(cPage);
     verify(httpSolrClient, times(1)).add(any(SolrInputDocument.class));
@@ -123,10 +122,24 @@ public class SolrServiceTest extends AbstractUnitTest {
     when(solrDocument.get("manufacturer_name")).thenReturn("manufacturer_name");
     when(solrDocument.get("score")).thenReturn("1.23");
     when(solrDocument.get("product_url")).thenReturn("product_url");
+    when(solrDocument.get("category")).thenReturn("category");
+    when(solrDocument.get("content")).thenReturn("content");
+    when(solrDocument.get("html_title")).thenReturn("html_title");
+    when(solrDocument.get("manufacturer_id")).thenReturn("manufacturer_id");
+
     List<SolrProduct> solrProducts = solrService.searchProduct(request);
 
     verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
     assertEquals(10, solrProducts.size());
+
+    Map<String, Map<String,List<String>>> highlighting = new HashMap<>();
+    Map<String,List<String>> idH = new HashMap<>();
+    highlighting.put("id",idH);
+    idH.put("content",new LinkedList<>());
+    idH.get("content").add("<em>test</em>");
+    when(queryResponse.getHighlighting()).thenReturn(highlighting);
+    solrService.searchProduct(request);
+    verify(httpSolrClient, times(2)).query(any(SolrQuery.class));
   }
 
 
