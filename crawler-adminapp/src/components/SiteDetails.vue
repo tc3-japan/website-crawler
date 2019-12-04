@@ -89,16 +89,16 @@
         <div class="position-relative row form-group">
           <label for="content_selector" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_SELECTORS') }}</label>
           <div class="col-sm-10">
-            <textarea 
+            <selector-area 
               :readonly="readOnly" 
               name="content_selector" 
               id="content_selector" 
               v-model="siteDetails.content_selector" 
-              class="form-control"
               :placeholder="$t('SITE_DETAILS_SELECTORS_PLACEHOLDER')"
-            ></textarea>
+            ></selector-area >
           </div>
         </div>
+         {{siteDetails.content_selector}}
         <div class="position-relative row form-group">
           <label for="supports_robots_txt" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_ROBOTS') }}</label>
           <div class="col-sm-10">
@@ -193,6 +193,7 @@
 <script>
 import SiteService from '@/services/siteService';
 import { required, minValue } from 'vuelidate/lib/validators';
+import SelectorArea from '@/components/SelectorArea.vue';
 
 const defaultValues = {
   crawl_max_depth: 10,
@@ -203,6 +204,9 @@ const defaultValues = {
 
 export default {
   name: 'SiteDetails',
+  components: {
+    SelectorArea
+  },
   props: {
     site: {
       type: Object,
