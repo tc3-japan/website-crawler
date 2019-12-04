@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "category",
+    "type": "string",
+    "required": false,
+    "indexed": true,
+    "stored": true
+  }
+}

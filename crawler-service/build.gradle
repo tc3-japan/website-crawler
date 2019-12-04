@@ -45,7 +45,8 @@ plugins {
 }
 apply plugin: 'com.palantir.docker'
 
-version = '1.0.4'
+// Merge PR-79 version 1.0.8
+version = '1.0.8'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
@@ -68,19 +69,23 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-actuator:1.5.7.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-aop:1.5.7.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-security:1.5.7.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-validation:1.5.7.RELEASE'
     compile group: 'org.apache.solr', name: 'solr-solrj', version: '8.2.0'
     compile group: 'com.panforge', name: 'robots', version: '1.4.2'
     compile 'mysql:mysql-connector-java:8.0.13'
     compile 'net.sourceforge.htmlunit:htmlunit:2.33'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.12'
     compile group: 'com.panforge', name: 'robots', version: '1.4.2'
+    compile 'org.jsoup:jsoup:1.12.1'
 
+    compile 'com.auth0:java-jwt:3.8.3'
+    compile 'com.auth0:auth0-spring-security-api:1.2.6'
 
-    implementation 'org.flywaydb:flyway-core:5.1.4'
+    compile 'org.flywaydb:flyway-core:5.1.4'
     // compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
 
-    compileOnly 'org.projectlombok:lombok:1.18.8'
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compileOnly 'org.projectlombok:lombok:1.18.2'
+    annotationProcessor 'org.projectlombok:lombok:1.18.2'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
@@ -116,7 +121,7 @@ def applicationConfig = new org.yaml.snakeyaml.Yaml().load(("crawler-service/src
 
 
 lombok {
-    version = '1.18.8'
+    version = '1.18.2'
 }
 
 tasks.withType(com.github.spotbugs.SpotBugsTask) {
@@ -153,7 +158,7 @@ jacocoTestReport {
     }
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: ['com/**/Application**', 'com/**/specifications/**', 'com/**/securities/**', 'com/panforge/robotstxt/**'])
+            fileTree(dir: it, exclude: ['com/**/Application**', 'com/**/specifications/**', 'com/**/securities/**', 'com/panforge/robotstxt/**','com/**/handlers/**'])
         }))
     }
 }
