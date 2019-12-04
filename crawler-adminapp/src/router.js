@@ -17,12 +17,6 @@ let router = new VueRouter({
             component: () => import('./views/Login.vue') 
         },
         { 
-            path: '/home', 
-            name: 'home', 
-            meta : { requiresAuth: true, layout : 'sidebar' }, 
-            component: () => import('./views/Home.vue') 
-        },
-        { 
             path: '/sites', 
             name: 'sites',
             meta : { requiresAuth: true, layout : 'sidebar' }, 
@@ -51,8 +45,7 @@ router.beforeEach((to, from, next) => {
         loadLanguageAsync(store.state.language).then(() => next());
     } else if (navigator.languages && navigator.languages.length > 0) {
         loadLanguageAsync(navigator.languages[0]).then(() => next());
-    }
-    else {
+    } else {
         next();
     }
 });
