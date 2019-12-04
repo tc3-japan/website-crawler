@@ -16,20 +16,19 @@
           label-size="sm"
           label-for="filterInput"
           class="mb-0"
-        >
-          <b-input-group size="sm" class="mb-3">
-            <b-form-input
-              v-model="filter"
-              type="search"
-              id="filterInput"
-              :placeholder="$t('SITES_FILTER_PLACEHOLDER')"
-            ></b-form-input>
-            <b-input-group-append>
-              <b-button :disabled="!filter" @click="filter = ''">{{ $t('SITES_FILTER_CLEAR') }}</b-button>
-            </b-input-group-append>
-          </b-input-group>
-        </b-form-group>
-      
+      >
+        <b-input-group size="sm" class="mb-3">
+          <b-form-input
+            v-model="filter"
+            type="search"
+            id="filterInput"
+            :placeholder="$t('SITES_FILTER_PLACEHOLDER')"
+          ></b-form-input>
+          <b-input-group-append>
+            <b-button :disabled="!filter" @click="filter = ''">{{ $t('SITES_FILTER_CLEAR') }}</b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-form-group>
       <b-table 
         striped="striped" 
         hover="hover" 
@@ -81,40 +80,46 @@ export default {
   computed: {
     displayFields : function() {
 
-    return [
-          {
-            key: 'id',
-            label: this.$t('SITES_TABLE_ID'),
-            sortable: true
-          },
-          {
-            key: 'name',
-            label: this.$t('SITES_TABLE_NAME'),
-            sortable: true
-          },
-          {
-            key: 'description',
-            label: this.$t('SITES_TABLE_DESCRIPTION'),
-            sortable: false
-          },
-          {
-            key: 'url',
-            label: this.$t('SITES_TABLE_URL'),
-            sortable: false
-          },
-          {
-            key: 'created_at',
-            label: this.$t('SITES_TABLE_CREATED'),
-            sortable: true,
-            class: 'date-column'
-          },
-          {
-            key: 'last_modified_at',
-            label: this.$t('SITES_TABLE_LAST_MODIFIED'),
-            sortable: true,
-            class: 'date-column'
+      return [
+        {
+          key: 'id',
+          label: this.$t('SITES_TABLE_ID'),
+          sortable: true
+        },
+        {
+          key: 'name',
+          label: this.$t('SITES_TABLE_NAME'),
+          sortable: true
+        },
+        {
+          key: 'description',
+          label: this.$t('SITES_TABLE_DESCRIPTION'),
+          sortable: false
+        },
+        {
+          key: 'url',
+          label: this.$t('SITES_TABLE_URL'),
+          sortable: false
+        },
+        {
+          key: 'created_at',
+          label: this.$t('SITES_TABLE_CREATED'),
+          sortable: true,
+          class: 'date-column',
+          formatter: (value, key, item) => {
+            return this.formatDate(value);
           }
-        ];
+        },
+        {
+          key: 'last_modified_at',
+          label: this.$t('SITES_TABLE_LAST_MODIFIED'),
+          sortable: true,
+          class: 'date-column',
+          formatter: (value, key, item) => {
+            return this.formatDate(value);
+          }
+        }
+      ];
     }
   },
   mounted() {
@@ -151,6 +156,12 @@ export default {
     setStatus(message, type) {
       // Displays an alert message
       this.status = { message : message, type : type, visible : true };
+    },
+    formatDate(date) {
+      if (!date)
+        return '';
+      let isoString = new Date(date).toISOString();
+      return isoString.slice(0,10) + ' ' + isoString.slice(11,19);
     }
   }
 };
