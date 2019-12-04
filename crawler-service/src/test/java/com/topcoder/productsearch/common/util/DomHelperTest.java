@@ -86,7 +86,7 @@ public class DomHelperTest {
     when(domNode.asXml()).thenReturn("<div>text</div>");
     when(page.querySelectorAll(anyString())).thenReturn(domNodes);
 
-    assertEquals(true, domHelper.getContentsByCssSelectors(page, "product-info,test").startsWith("<content selector=\"product-info\">"));
+    assertEquals(true, domHelper.getContentsByCssSelectors(page, "product-info;test").startsWith("<content selector=\"product-info\">"));
   }
 
   @Test
