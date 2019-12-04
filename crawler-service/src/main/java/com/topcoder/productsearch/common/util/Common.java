@@ -7,17 +7,22 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
 import com.topcoder.productsearch.common.specifications.PageSpecification;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.beans.FeatureDescriptor;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -25,6 +30,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Common static class
@@ -237,4 +243,39 @@ public class Common {
    
     return url.matches(".*html");
   }
+
+  /**
+   * get first n of string
+   *
+   * @param content the string content
+   * @param length  the n
+   * @return the split content
+   */
+  public static String firstNOfString(String content, Integer length) {
+    String[] parts = content.split(" ");
+    int index = 0;
+    for (int i = 0; i < parts.length; i++) {
+      int newIndex = index + parts[i].length() + (i > 0 ? 1 : 0);
+      if (newIndex > length) {
+        break;
+      }
+      index = newIndex;
+    }
+    return content.substring(0, Math.min(content.length(), index)) + (content.length() > index ? " ..." : "");
+  }
+
+  /**
+   * Get the entity null properties names.
+   *
+   * @param source the entity
+   * @return the null properties names.
+   */
+  public static String[] getNullPropertyNames(Object source) {
+    final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
+    return Stream.of(wrappedSource.getPropertyDescriptors())
+        .map(FeatureDescriptor::getName)
+        .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
+        .toArray(String[]::new);
+  }
+
 }

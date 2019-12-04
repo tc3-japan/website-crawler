@@ -3,9 +3,8 @@ package com.topcoder.productsearch.common.util;
 
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -44,6 +43,15 @@ public class DomHelperTest {
   @Mock
   Node node;
 
+  @Mock
+  HtmlPage page;
+
+  @Mock
+  HtmlElement body;
+
+  @Mock
+  DomNodeList<DomNode> domNodes;
+
   @InjectMocks
   DomHelper domHelper;
 
@@ -60,6 +68,31 @@ public class DomHelperTest {
     List<String> urls = domHelper.findAllUrls(htmlPage);
     assertEquals(urls.size(), 1);
     assertEquals(urls.get(0), "http://google.com");
+  }
+
+  @Test
+  public void testGetContentsByCssSelectors(){
+
+    when(page.getBody()).thenReturn(body);
+    when(body.asXml()).thenReturn("<body></body>");
+
+    assertEquals("<body></body>", domHelper.getContentsByCssSelectors(page, null));
+    assertEquals("<body></body>", domHelper.getContentsByCssSelectors(page, " "));
+
+    when(domNodes.size()).thenReturn(1);
+    when(domNodes.get(anyInt())).thenReturn(domNode);
+
+
+    when(domNode.asXml()).thenReturn("<div>text</div>");
+    when(page.querySelectorAll(anyString())).thenReturn(domNodes);
+
+    assertEquals(true, domHelper.getContentsByCssSelectors(page, "product-info,test").startsWith("<content selector=\"product-info\">"));
+  }
+
+  @Test
+  public void testGetCategoryByPattern(){
+    assertEquals("name",domHelper.getCategoryByPattern("your name?","your (\\w++)?"));
+    assertEquals("",domHelper.getCategoryByPattern("your name?","your ([abc]++)?"));
   }
 
 

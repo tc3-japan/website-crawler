@@ -1,9 +1,10 @@
 package com.topcoder.productsearch.api.controller;
 
-import com.topcoder.productsearch.api.models.ProductSearchRequest;
-import com.topcoder.productsearch.api.models.SolrProduct;
-import com.topcoder.productsearch.converter.service.SolrService;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.io.IOException;
-import java.util.List;
+import com.topcoder.productsearch.api.models.ProductSearchRequest;
+import com.topcoder.productsearch.api.models.SolrProduct;
+import com.topcoder.productsearch.converter.service.SolrService;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Product Controller class
@@ -36,7 +39,7 @@ public class ProductController {
    * @param request the search request
    * @return the result
    */
-  @PostMapping("/")
+  @PostMapping()
   public List<SolrProduct> searchProduct(@Valid @RequestBody ProductSearchRequest request)
       throws IOException, SolrServerException {
     return solrService.searchProduct(request);

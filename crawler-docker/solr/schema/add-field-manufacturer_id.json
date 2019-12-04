@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "manufacturer_id",
+    "type": "string",
+    "required": true,
+    "indexed": true,
+    "stored": true
+  }
+}
