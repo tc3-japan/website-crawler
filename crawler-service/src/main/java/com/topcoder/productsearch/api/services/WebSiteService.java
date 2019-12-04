@@ -78,6 +78,7 @@ public class WebSiteService {
     // checkWebSiteEntity(entity);
     WebSite webSite = get(id);
     BeanUtils.copyProperties(entity, webSite, Common.getNullPropertyNames(entity));
+    webSite.setLastModifiedAt(Date.from(Instant.now()));
     try {
       webSiteRepository.save(webSite);
       return webSite;
