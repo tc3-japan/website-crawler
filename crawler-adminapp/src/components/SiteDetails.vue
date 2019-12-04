@@ -98,7 +98,6 @@
             ></selector-area >
           </div>
         </div>
-         {{siteDetails.content_selector}}
         <div class="position-relative row form-group">
           <label for="supports_robots_txt" class="col-sm-2 col-form-label">{{ $t('SITE_DETAILS_ROBOTS') }}</label>
           <div class="col-sm-10">
