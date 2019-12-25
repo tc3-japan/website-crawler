@@ -1,13 +1,8 @@
 package com.topcoder.productsearch.api.services;
 
-import com.topcoder.productsearch.api.exceptions.BadRequestException;
-import com.topcoder.productsearch.api.exceptions.NotFoundException;
-import com.topcoder.productsearch.api.models.OffsetLimitPageable;
-import com.topcoder.productsearch.api.models.WebSiteSearchRequest;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.repository.WebSiteRepository;
-import com.topcoder.productsearch.common.util.Common;
-import lombok.RequiredArgsConstructor;
+import java.time.Instant;
+import java.util.Date;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,8 +10,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Date;
+import com.topcoder.productsearch.api.exceptions.BadRequestException;
+import com.topcoder.productsearch.api.exceptions.NotFoundException;
+import com.topcoder.productsearch.api.models.OffsetLimitPageable;
+import com.topcoder.productsearch.api.models.WebSiteSearchRequest;
+import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.crawler.SinglePageCrawler;
+
+import lombok.RequiredArgsConstructor;
 
 
 /**
@@ -58,12 +62,12 @@ public class WebSiteService {
   public WebSite create(WebSite webSite) {
     checkWebSiteEntity(webSite);
     webSite.setCreatedAt(Date.from(Instant.now()));
-    try { 
+    try {
       webSiteRepository.save(webSite);
       return webSite;
     } catch (DataIntegrityViolationException dException) {
       throw new BadRequestException(dException.getMostSpecificCause().getMessage());
-    } 
+    }
   }
 
   /**
@@ -82,13 +86,11 @@ public class WebSiteService {
     try {
       webSiteRepository.save(webSite);
       return webSite;
-    } 
+    }
     catch (DataIntegrityViolationException dException) {
       throw new BadRequestException(dException.getMostSpecificCause().getMessage());
-    } 
-    
-    
-    
+    }
+
   }
 
   /**
@@ -118,6 +120,22 @@ public class WebSiteService {
   }
 
   /**
+   * crawl a website and scrape contents in the specified url.
+   * @param id - id of the website
+   * @param url - target url
+   * @return
+   */
+  public CPage crawl(Integer id, String url) {
+
+    WebSite webSite = this.webSiteRepository.findOne(id);
+    if (webSite == null) {
+      throw new NotFoundException("Not found any web site with id: " + id);
+    }
+
+    return new SinglePageCrawler(webSite).crawl(url);
+  }
+
+  /**
    * make sure id not in website
    *
    * @param site the website entity
@@ -137,7 +155,7 @@ public class WebSiteService {
     if (site.getId() != null) {
       throw new BadRequestException("id should not be present in request body");
     }
-    if ((site.getUrl() != null && site.getUrl().isEmpty()) 
+    if ((site.getUrl() != null && site.getUrl().isEmpty())
         || (site.getContentUrlPatterns() != null && site.getContentUrlPatterns().isEmpty())
          || (site.getName() != null && site.getName().isEmpty()) ) {
       throw new BadRequestException("Name, URL and / or Content URL Patterns cannot be blank ");
