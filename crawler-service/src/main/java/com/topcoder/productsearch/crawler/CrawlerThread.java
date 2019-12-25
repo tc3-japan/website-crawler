@@ -1,6 +1,17 @@
 package com.topcoder.productsearch.crawler;
 
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -20,16 +31,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Instant;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Crawler Thread class
@@ -196,6 +197,12 @@ public class CrawlerThread implements Runnable {
     urls.forEach(urlLink -> {
       String homeUrl = crawlerTask.getSite().getUrl();
 
+      if (urlLink.startsWith("//")) {
+        // add the schema (http: or https:)
+        String[] part1s = homeUrl.split("//");
+        urlLink = part1s[0] + urlLink;
+      }
+
       if (urlLink.startsWith("http") && !urlLink.contains(homeUrl)) {
         // Filter out external URLs
         return;
@@ -272,7 +279,7 @@ public class CrawlerThread implements Runnable {
       logger.info("skip " + url + " , because of robots.txt disallow this");
       return;
     }
-    
+
     expandUrl.add(url);
   }
 
