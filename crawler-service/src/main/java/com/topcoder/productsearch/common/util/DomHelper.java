@@ -68,6 +68,9 @@ public class DomHelper {
    * @return the category
    */
   public String getCategoryByPattern(String bodyString, String pattern) {
+    if (bodyString == null || pattern == null) {
+      return null;
+    }
     Pattern p = Pattern.compile(pattern, Pattern.MULTILINE);
     Matcher matcher = p.matcher(bodyString);
     String category = "";
