@@ -52,7 +52,7 @@ public class AuthService {
   }
 
   public void generatePassword(String password) {
-    logger.info("============ PASSOWRD HASH =============");
+    logger.info("============ PASSWORD HASH =============");
     logger.info(getHash(password));
     logger.info("========================================");
   }
