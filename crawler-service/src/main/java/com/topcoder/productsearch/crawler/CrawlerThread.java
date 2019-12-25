@@ -162,7 +162,7 @@ public class CrawlerThread implements Runnable {
    *
    * @param page the html page
    */
-  private void handlingPage(HtmlPage page) {
+  protected void handlingPage(HtmlPage page) {
 
     Integer pageId = null;
     if (Common.isMatch(crawlerTask.getSite(), crawlerTask.getUrl())) {
@@ -266,7 +266,8 @@ public class CrawlerThread implements Runnable {
    * @param url the url
    */
   private void enqueue(String url) {
-    if (crawlerService.getThreadPoolExecutor().hasReachedTimeLimit(crawlerTask.getSite().getCrawlTimeLimit())) {
+    if (crawlerService != null
+        && crawlerService.getThreadPoolExecutor().hasReachedTimeLimit(crawlerTask.getSite().getCrawlTimeLimit())) {
       logger.info("skip " + url + " , because of reached time limit");
       return;
     }
