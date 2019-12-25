@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.topcoder.productsearch.api.models.WebSiteSearchRequest;
 import com.topcoder.productsearch.api.services.WebSiteService;
+import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 
 import lombok.RequiredArgsConstructor;
@@ -56,6 +58,20 @@ public class WebSiteController {
   @ResponseStatus(HttpStatus.CREATED)
   public WebSite create(@RequestBody @Valid WebSite webSite) {
     return webSiteService.create(webSite);
+  }
+
+  /**
+   * download contents of the specified url and scrape data from it.
+   *
+   * @param webSiteId - the website id
+   * @param url - the target url
+   * @return
+   */
+  @PostMapping("{webSiteId}/crawl")
+  public CPage crawl(@PathVariable("webSiteId") @NotNull Integer webSiteId,
+      @RequestParam("url") @NotNull String url) {
+
+    return this.webSiteService.crawl(webSiteId, url);
   }
 
   /**
