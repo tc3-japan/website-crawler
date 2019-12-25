@@ -132,7 +132,10 @@ public class ProcessLauncher implements ApplicationRunner {
       if (pw == null || pw.isEmpty()) {
         throw new IllegalArgumentException("Missing value for --passwd option.");
       }
-      authService.generatePassword(pw.get(0));
+      logger.info("============ PASSWORD HASH =============");
+      logger.info(authService.generatePassword(pw.get(0)));
+      logger.info("========================================");
+
       return;
     }
 
