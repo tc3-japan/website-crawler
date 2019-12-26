@@ -51,10 +51,6 @@ public class AuthService {
     return getHash(password).equals(user.getPassword());
   }
 
-  public String generatePassword(String password) {
-    return getHash(password);
-  }
-
   protected String getHash(String secret) {
     HashGenerator gen = new HashGenerator();
 
