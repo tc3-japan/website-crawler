@@ -9,7 +9,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import com.topcoder.productsearch.api.services.AuthService;
+import com.topcoder.productsearch.api.services.UserService;
 import com.topcoder.productsearch.cleaner.service.CleanerService;
 import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
 import com.topcoder.productsearch.common.entity.WebSite;
@@ -61,7 +61,7 @@ public class ProcessLauncher implements ApplicationRunner {
    * the authentication service
    */
   @Autowired
-  AuthService authService;
+  UserService userService;
 
   /**
    * get site by input args if exist
@@ -128,13 +128,15 @@ public class ProcessLauncher implements ApplicationRunner {
       return;
     }
     if (args.containsOption("passwd")) {
-      List<String> pw = args.getOptionValues("passwd");
-      if (pw == null || pw.isEmpty()) {
+      List<String> passwd = args.getOptionValues("passwd");
+      if (passwd == null || passwd.isEmpty()) {
         throw new IllegalArgumentException("Missing value for --passwd option.");
       }
-      logger.info("============ PASSWORD HASH =============");
-      logger.info(authService.generatePassword(pw.get(0)));
-      logger.info("========================================");
+      String[] usernamePassword = passwd.get(0).split(":");
+      if (usernamePassword.length < 1) {
+        throw new IllegalArgumentException("Invalid value for --passwd option. It should be 'username:password'.");
+      }
+      this.userService.updatePassword(usernamePassword[0], usernamePassword[1]);
 
       return;
     }
@@ -179,7 +181,7 @@ public class ProcessLauncher implements ApplicationRunner {
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=validate-pages");
-      logger.info("usage : ./gradlew bootRun -Pargs=--passwd={password}");
+      logger.info("usage : ./gradlew bootRun -Pargs=--passwd={username:password}");
     }
   }
 }
