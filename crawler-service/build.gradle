@@ -117,7 +117,7 @@ if (project.hasProperty('production')) {
     profile = 'production'
 }
 
-def applicationConfig = new org.yaml.snakeyaml.Yaml().load(("/Users/kohata/work/projects/topcoder/Japan/yd-prodsearch/git/website-crawler/crawler-service/src/main/resources/application-${profile ? profile : 'default'}.yml" as File).text)
+def applicationConfig = new org.yaml.snakeyaml.Yaml().load(("crawler-service/src/main/resources/application-${profile ? profile : 'default'}.yml" as File).text)
 
 
 lombok {
