@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.topcoder.productsearch.api.exceptions.UnauthorizedException;
 import com.topcoder.productsearch.api.models.Token;
 import com.topcoder.productsearch.api.services.AuthService;
+import com.topcoder.productsearch.api.services.UserService;
 import com.topcoder.productsearch.common.entity.User;
-import com.topcoder.productsearch.common.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +24,7 @@ public class AuthController {
   private static Logger logger = LoggerFactory.getLogger(AuthController.class);
 
   @Autowired
-  private UserRepository userRepository;
+  private UserService userService;
 
   @Autowired
   private AuthService authService;
@@ -34,7 +34,7 @@ public class AuthController {
       @RequestParam(value = "username", required = true) String username,
       @RequestParam(value = "password", required = true) String password) {
 
-    User user = this.userRepository.findByUsername(username);
+    User user = this.userService.findByUsername(username);
     if (user == null) {
       throw new UnauthorizedException("wrong username or password.");
     }
