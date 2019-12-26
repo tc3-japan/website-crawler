@@ -1,18 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: converter-job
+  name: passwd-job
 spec:
   template:
     metadata:
       labels:
-        app: converter-job
+        app: passwd-job
     spec:
       restartPolicy: Never
       containers:
       - args:
-        - --proc=converter
-        - --site=1
+        - --passwd=admin:adminpass
         image: tc3jp/productsearch-service:develop-1.0.12
         name: crawler
         env:
