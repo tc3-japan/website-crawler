@@ -2,7 +2,7 @@ version: "3"
 services:
 
   solr:
-    image: tc3jp/productsearch-solr:8.1.1-3
+    image: tc3jp/productsearch-solr:8.1.1-4
     build:
       context: ./solr/
     volumes:

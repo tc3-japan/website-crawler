@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # https://github.com/docker-solr/docker-solr/blob/master/8.1/scripts/solr-demo
-# 
+#
 
 set -euo pipefail
 
@@ -41,20 +41,50 @@ else
     --data-binary @/opt/solr/add-field-html_title.json $SCHEMA_URL
 
   curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area1.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area2.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area3.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area4.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area5.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area6.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area7.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area8.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area9.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-html_area10.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/add-field-manufacturer_id.json $SCHEMA_URL
 
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/add-field-manufacturer_name.json $SCHEMA_URL
-  
+
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/add-field-page_updated_at.json $SCHEMA_URL
-  
+
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/add-field-product_url.json $SCHEMA_URL
 
   curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/replace-field-type-text_ja.json $SCHEMA_URL
-  
+
   curl -X POST -H 'Content-type:application/json' \
     -d'{
       "set-property" : {"requestDispatcher.requestParsers.enableRemoteStreaming":true},
