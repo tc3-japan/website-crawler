@@ -11,7 +11,7 @@ services:
       - 8983:8983
   
   mysql:
-    image: tc3jp/productsearch-mysql:8.0.17
+    image: tc3jp/productsearch-mysql:8.0.17-4
     build:
       context: ./mysql/
     volumes:
