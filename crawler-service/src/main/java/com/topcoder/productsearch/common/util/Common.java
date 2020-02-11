@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.beans.FeatureDescriptor;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -276,6 +278,22 @@ public class Common {
         .map(FeatureDescriptor::getName)
         .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
         .toArray(String[]::new);
+  }
+
+  /**
+   * get value by name
+   * @param object the object
+   * @param name the field name
+   * @param <T> the return type
+   * @return return value
+   */
+  public static <T> T getValueByName(Object object, String name) {
+    try {
+      Method method = object.getClass().getMethod("get" + StringUtils.capitalize(name));
+      return (T)method.invoke(object);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
 }
