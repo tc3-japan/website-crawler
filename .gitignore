@@ -2,3 +2,4 @@
 .idea
 **/.DS_Store
 crawler-service/out
+*.log
