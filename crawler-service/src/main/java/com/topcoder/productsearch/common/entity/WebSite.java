@@ -91,4 +91,18 @@ public class WebSite {
   @Column(name = "deleted")
   @JsonIgnore
   private Boolean deleted = Boolean.FALSE;
+
+  /**
+   * default search weights
+   */
+  private Float weight1;
+  private Float weight2;
+  private Float weight3;
+  private Float weight4;
+  private Float weight5;
+  private Float weight6;
+  private Float weight7;
+  private Float weight8;
+  private Float weight9;
+  private Float weight10;
 }

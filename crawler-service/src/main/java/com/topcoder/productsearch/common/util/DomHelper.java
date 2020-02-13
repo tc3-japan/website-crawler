@@ -4,8 +4,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.w3c.dom.Node;
 
 import com.gargoylesoftware.htmlunit.html.DomNode;
@@ -91,5 +95,16 @@ public class DomHelper {
    */
   public String htmlToText(String htmlStr) {
     return Jsoup.parse(htmlStr).text();
+  }
+
+  /**
+   * get html area list from contents
+   * @param contents the html contents
+   * @return the list
+   */
+  public List<String> getHtmlAreasFromContents(String contents) {
+    Document document = Jsoup.parse(contents);
+    Elements elements = document.select("content");
+    return elements.stream().map(Element::html).collect(Collectors.toList());
   }
 }

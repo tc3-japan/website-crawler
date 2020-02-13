@@ -18,15 +18,15 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +42,11 @@ public class SolrService {
    * the logger
    */
   private static final Logger logger = LoggerFactory.getLogger(SolrService.class);
+
+  /**
+   * number of html area
+   */
+  private static final int NUMBER_OF_HTML_AREA = 10;
 
   /**
    * the website repository
@@ -122,11 +127,14 @@ public class SolrService {
 
     logger.info("search product with params " + request.toString());
     if (request.getQuery() != null && request.getQuery().size() > 0) {
-      String[] searchFields = {"manufacturer_id", "html_title", "content", "category"};
+      List<String> searchFields = new ArrayList<>(Arrays.asList("manufacturer_id", "html_title", "content", "category"));
+      for (int i = 0; i < NUMBER_OF_HTML_AREA; i++) {
+        searchFields.add("html_area" + (i + 1));
+      }
       List<String> searchQueries = new LinkedList<>();
-      for (int i = 0; i < searchFields.length; i++) {
+      for (int i = 0; i < searchFields.size(); i++) {
         int finalI = i;
-        searchQueries.add("(" + request.getQuery().stream().map(keyword -> searchFields[finalI] + ":" + "\"" + keyword + "\"")
+        searchQueries.add("(" + request.getQuery().stream().map(keyword -> searchFields.get(finalI) + ":" + "\"" + keyword + "\"")
                 .collect(Collectors.joining(" AND ")) + ")");
       }
       String q = String.join(" OR ", searchQueries);
@@ -134,6 +142,14 @@ public class SolrService {
       query.set("q", q);
     } else {
       query.set("q", "*:*");
+    }
+
+    String qf = this.getQF(request.getSiteId() == null ?
+            null : webSiteRepository.findOne(request.getSiteId()), request.getWeights());
+    if (!qf.isEmpty()) {
+      query.set("qf", qf);
+      query.set("defType=dismax");
+      logger.info("qf=" + qf + "&defType=dismax");
     }
     query.set("start", request.getStart());
     query.set("rows", request.getRows());
@@ -167,6 +183,34 @@ public class SolrService {
     return products;
   }
 
+  /**
+   * get search qf
+   * @param site the site
+   * @param weights the weights
+   * @return the qf string
+   */
+  String getQF(WebSite site, List<Float> weights) {
+    List<String> qfParts = new LinkedList<>();
+    for (int i = 0; i < NUMBER_OF_HTML_AREA; i++) {
+      Float w = null;
+      if (weights != null && weights.size() > i) {
+        w = weights.get(i);
+      } else if (site != null) {
+        w = Common.getValueByName(site, "weight" + (i + 1));
+      }
+      if (w != null) {
+        qfParts.add(String.format("html_area%d^%.2f", (i + 1), w));
+      }
+    }
+    return String.join(" ", qfParts);
+  }
+  /**
+   * get Highlighting content
+   * @param response the slor response
+   * @param id the document id
+   * @param field the document filed
+   * @return the Highlighting string
+   */
   private List<String> getHighlighting(QueryResponse response, String id, String field){
     if(response.getHighlighting().containsKey(id)){
       return response.getHighlighting().get(id).get(field);
@@ -186,6 +230,7 @@ public class SolrService {
   private SolrInputDocument pageToDocument(CPage page) throws IOException, SolrServerException {
     WebSite site = webSiteRepository.findOne(page.getSiteId());
     String id = findByURL(page.getUrl());
+    DomHelper domHelper = new DomHelper();
 
     // set id if exist
     SolrInputDocument document = new SolrInputDocument();
@@ -201,9 +246,14 @@ public class SolrService {
     // "1" will identify as number in solr document
     document.addField("manufacturer_id", site.getId() + " ");
 
-    document.addField("content", new DomHelper().htmlToText(page.getContent()));
+    document.addField("content", domHelper.htmlToText(page.getContent()));
     document.addField("category", page.getCategory());
     document.addField("page_updated_at", Date.from(Instant.now()));
+
+    List<String> htmlAreas = domHelper.getHtmlAreasFromContents(page.getContent());
+    for (int i = 0; i < htmlAreas.size(); i++) {
+      document.addField("html_area" + (i + 1), htmlAreas.get(i));
+    }
     return document;
   }
 
