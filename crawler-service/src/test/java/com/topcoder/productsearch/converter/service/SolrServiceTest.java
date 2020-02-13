@@ -4,6 +4,7 @@ import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.api.models.ProductSearchRequest;
 import com.topcoder.productsearch.api.models.SolrProduct;
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -115,6 +116,12 @@ public class SolrServiceTest extends AbstractUnitTest {
     query.add("women");
     query.add("leg");
     request.setQuery(query);
+    List<Float> weights = new ArrayList<>();
+    weights.add(1.0f);
+    weights.add(2.0f);
+    request.setSiteId(1);
+    request.setWeights(weights);
+
     when(solrDocumentList.size()).thenReturn(10);
     when(solrDocumentList.get(any(Integer.class))).thenReturn(solrDocument);
     when(solrDocument.get("id")).thenReturn("id");
@@ -160,5 +167,15 @@ public class SolrServiceTest extends AbstractUnitTest {
     List<SolrProduct> solrProducts = solrService.searchProduct(request);
     verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
     assertEquals(0, solrProducts.size());
+  }
+
+  @Test
+  public void testHGetQF() {
+    WebSite site = new WebSite();
+    site.setWeight2(1.0f);
+
+    List<Float> weights = new ArrayList<>();
+    weights.add(2.0f);
+    assertEquals(solrService.getQF(site, weights), "html_area1^2.00 html_area2^1.00");
   }
 }
