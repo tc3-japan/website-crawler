@@ -105,4 +105,10 @@ public class WebSite {
   private Float weight8;
   private Float weight9;
   private Float weight10;
+
+  /**
+   * google search param
+   */
+  @Column(name = "google_param")
+  private String googleParam;
 }
