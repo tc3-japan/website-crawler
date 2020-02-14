@@ -1,5 +1,7 @@
 package com.topcoder.productsearch.common.util;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.panforge.robotstxt.CustomRobotsTxtReader;
 import com.panforge.robotstxt.RobotsTxt;
 import com.topcoder.productsearch.common.entity.CPage;
@@ -18,13 +20,12 @@ import org.springframework.data.domain.Pageable;
 
 import java.beans.FeatureDescriptor;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -242,7 +243,7 @@ public class Common {
   }
 
   public static boolean endsWithHTML(String url) {
-   
+
     return url.matches(".*html");
   }
 
@@ -296,4 +297,39 @@ public class Common {
     }
   }
 
+  /**
+   * set value by name
+   *
+   * @param object the object
+   * @param name   the field name
+   * @param v      the value
+   * @param <T>    the value type
+   * @return return value
+   */
+  public static <T> void setValueByName(Object object, String name, T v) {
+    try {
+      Field declaredField = object.getClass().getDeclaredField(name);
+      boolean accessible = declaredField.isAccessible();
+      declaredField.setAccessible(true);
+      declaredField.set(object, v);
+      declaredField.setAccessible(accessible);
+    } catch (Exception e) {
+      logger.warn(String.format("inject %s with %s into object failed, %s", name, v.toString(), e.getMessage()));
+    }
+  }
+
+  /**
+   * create web client
+   *
+   * @return the web client
+   */
+  public static WebClient createWebClient() {
+    WebClient webClient = new WebClient(new BrowserVersion.BrowserVersionBuilder(BrowserVersion.CHROME).build());
+    webClient.getOptions().setJavaScriptEnabled(false);
+    webClient.getOptions().setThrowExceptionOnScriptError(false);
+    webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+    webClient.getOptions().setCssEnabled(false);
+    webClient.getOptions().setRedirectEnabled(true);
+    return webClient;
+  }
 }

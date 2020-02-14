@@ -22,6 +22,8 @@ import com.topcoder.productsearch.api.securities.RestCondition;
     "com.topcoder.productsearch.common",
     "com.topcoder.productsearch.crawler",
     "com.topcoder.productsearch.converter",
+    "com.topcoder.productsearch.opt_gen_truth",
+    "com.topcoder.productsearch.opt_evaluate",
     "com.topcoder.productsearch.cleaner"})
 public class Application {
 

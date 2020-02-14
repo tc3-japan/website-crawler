@@ -21,4 +21,6 @@ authentication:
     username: admin
     password: adminpass
 
-crawler-settings:
+search-opt:
+  number-of-url: 10
+  search-max-pages: 10
