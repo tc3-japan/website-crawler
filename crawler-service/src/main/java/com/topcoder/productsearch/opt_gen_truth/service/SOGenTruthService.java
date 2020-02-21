@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -90,7 +91,7 @@ public class SOGenTruthService {
    */
   @Transactional
   public void genTruth(WebSite site, String searchWords) throws Exception {
-    String params = searchWords + (site.getGoogleParam() == null ? "" : ("+" + site.getGoogleParam()));
+    String params = searchWords + (site.getGoogleParam() == null ? "" : site.getGoogleParam());
 
     URL url = new URL("https://www.google.com/search?q=" + params);
     logger.info("start request " + url.toString());
@@ -104,6 +105,7 @@ public class SOGenTruthService {
     soTruthRepository.save(soTruth);
 
 
+    List<SOTruthDetail> details = new ArrayList<>();
     while (pageIndex < searchMaxPages) {
 
       // search in page N
@@ -124,10 +126,11 @@ public class SOGenTruthService {
           soTruthDetail.setUrl(href);
           soTruthDetail.setTitle(node.querySelector("div").asText());
           soTruthDetail.setScore(0.f);
-          soTruthDetailRepository.save(soTruthDetail);
+          details.add(soTruthDetail);
           rank += 1;
 
           if (rank > numberOfUrl) {
+            soTruthDetailRepository.save(details);
             logger.info("found all product pages, exit ...");
             return;
           }
@@ -140,6 +143,7 @@ public class SOGenTruthService {
         page = anchors.get(0).click();
       } else {
         logger.info("did not find next button, exit ...");
+        soTruthDetailRepository.save(details);
         return;
       }
       pageIndex += 1;

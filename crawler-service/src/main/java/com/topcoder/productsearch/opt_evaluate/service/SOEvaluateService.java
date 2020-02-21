@@ -9,9 +9,11 @@ import com.topcoder.productsearch.common.repository.SOResultRepository;
 import com.topcoder.productsearch.common.repository.SOTruthDetailRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.converter.service.SolrService;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +64,13 @@ public class SOEvaluateService {
   SOEvaluationRepository soEvaluationRepository;
 
   /**
+   * the search opt evaluate threshold value
+   */
+  @Setter // for unit test
+  @Value("${search-opt.evaluate-threshold}")
+  Integer evaluateThreshold;
+
+  /**
    * create reference data by scraping the result of Google search with some search words for the specific web site.
    *
    * @param site        the website
@@ -106,8 +115,8 @@ public class SOEvaluateService {
       soResultDetail.setTitle(product.getTitle());
       soResultDetail.setUrl(product.getUrl());
       soResultDetails.add(soResultDetail);
-      soResultDetailRepository.save(soResultDetail);
     }
+    soResultDetailRepository.save(soResultDetails);
 
     // evaluate
     /*
@@ -126,7 +135,7 @@ public class SOEvaluateService {
      */
     List<SOTruthDetail> soTruthDetails = soTruthDetailRepository.findByTruthId(soTruth.getId());
     int N = soTruthDetails.size();
-    int t = (int)(N / 2.f);
+    int t = evaluateThreshold;
     float sum = 0;
 
     logger.info("start evaluate for product");
