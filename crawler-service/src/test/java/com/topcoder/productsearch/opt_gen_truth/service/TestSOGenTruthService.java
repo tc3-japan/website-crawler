@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -76,21 +77,21 @@ public class TestSOGenTruthService {
     soGenTruthService.setWebClient(Common.createWebClient());
     site.setId(1);
     site.setContentUrlPatterns("https://www.uniqlo.com/jp/store/goods/[\\d\\-]+");
-    site.setGoogleParam("site:https://www.uniqlo.com/jp/");
+    site.setGoogleParam("+site:https://www.uniqlo.com/jp/");
     soGenTruthService.genTruth(site, "クルーネックT MEN");
-    verify(soTruthDetailRepository, times(5)).save(any(SOTruthDetail.class));
+    verify(soTruthDetailRepository, times(1)).save(any(List.class));
     verify(soTruthRepository, times(1)).save(any(SOTruth.class));
 
     soGenTruthService.setSearchMaxPages(20);
     site.setGoogleParam(null);
     soGenTruthService.genTruth(site, "setSearchMax");
-    verify(soTruthDetailRepository, times(5)).save(any(SOTruthDetail.class));
+    verify(soTruthDetailRepository, times(2)).save(any(List.class));
     verify(soTruthRepository, times(2)).save(any(SOTruth.class));
 
 
     soGenTruthService.setSearchMaxPages(1);
     soGenTruthService.genTruth(site, "setSearchMax");
-    verify(soTruthDetailRepository, times(5)).save(any(SOTruthDetail.class));
+    verify(soTruthDetailRepository, times(2)).save(any(List.class));
     verify(soTruthRepository, times(3)).save(any(SOTruth.class));
   }
 }

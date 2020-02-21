@@ -62,4 +62,4 @@ solr:
 search-opt:
   number-of-url: 10
   search-max-pages: 50
-  
+  evaluate-threshold: 2

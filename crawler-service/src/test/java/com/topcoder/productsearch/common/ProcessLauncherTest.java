@@ -82,7 +82,8 @@ public class ProcessLauncherTest {
     when(webSiteRepository.findOne(siteId)).thenReturn(webSite);
     when(webSiteRepository.findOne(Integer.valueOf(1))).thenReturn(webSite);
     when(webSiteRepository.findOne(2)).thenReturn(null);
-    when(soTruthRepository.findOne(anyInt())).thenReturn(soTruth);
+    when(soTruthRepository.findOne(1)).thenReturn(soTruth);
+    when(soTruthRepository.findOne(2)).thenReturn(null);
     doNothing().when(crawlerService).crawler();
     doNothing().when(converterService).convert(webSite);
     doNothing().when(converterService).convert(webSite);
@@ -158,11 +159,28 @@ public class ProcessLauncherTest {
     processLauncher.run(args);
     verify(soEvaluateService, times(1)).evaluate(any(WebSite.class),any(SOTruth.class),anyString(),anyList());
 
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,4", "--search-words=\"クルーネックT MEN\""});
+    try {
+      processLauncher.run(args);
+    } catch (Exception e) {
+      assertEquals(e.getMessage(), "parameter truth is required");
+    }
+    verify(soEvaluateService, times(1)).evaluate(any(WebSite.class), any(SOTruth.class), anyString(), anyList());
+
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,x",
         "--truth=1"});
     processLauncher.run(args);
     verify(soEvaluateService, times(1)).evaluate(any(WebSite.class),any(SOTruth.class),anyString(),anyList());
 
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,x",
+        "--truth=2"});
+    try {
+      processLauncher.run(args);
+    } catch (Exception e) {
+      assertEquals(e.getMessage(), "cannot find truth where id = 2");
+    }
+    verify(soEvaluateService, times(1)).evaluate(any(WebSite.class), any(SOTruth.class), anyString(), anyList());
+    
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--truth=1"});
     processLauncher.run(args);
     verify(soEvaluateService, times(2)).evaluate(any(WebSite.class), any(SOTruth.class), anyString(), anyList());

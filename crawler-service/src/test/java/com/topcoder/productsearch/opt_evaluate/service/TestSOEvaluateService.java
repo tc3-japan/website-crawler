@@ -67,7 +67,7 @@ public class TestSOEvaluateService {
     when(soEvaluationRepository.save(any(SOEvaluation.class))).thenReturn(soEvaluation);
     when(soResultRepository.save(any(SOResult.class))).thenReturn(soResult);
     when(soResultDetailRepository.save(any(SOResultDetail.class))).thenReturn(soResultDetail);
-
+    soEvaluateService.setEvaluateThreshold(2);
     List<SOTruthDetail> truthDetails = new ArrayList<>();
     List<SolrProduct> solrProducts = new ArrayList<>();
     for (int i = 0; i < 5; i++) {

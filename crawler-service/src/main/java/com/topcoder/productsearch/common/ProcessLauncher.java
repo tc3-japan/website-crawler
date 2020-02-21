@@ -222,7 +222,16 @@ public class ProcessLauncher implements ApplicationRunner {
       WebSite site = getSite(args);
       String searchWords = getParams(args, "search-words");
       String weightsString = getParams(args, "weights");
-      SOTruth soTruth = soTruthRepository.findOne(Integer.valueOf(Objects.requireNonNull(getParams(args, "truth"))));
+
+      String truthId = getParams(args, "truth");
+      if (truthId == null) {
+        throw new IllegalArgumentException("parameter truth is required");
+      }
+
+      SOTruth soTruth = soTruthRepository.findOne(Integer.valueOf(truthId));
+      if (soTruth == null) {
+        throw new IllegalArgumentException("cannot find truth where id = " + truthId);
+      }
       if (weightsString == null) {
         soEvaluateService.evaluate(site, soTruth, searchWords, null);
       } else {
