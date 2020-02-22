@@ -142,4 +142,14 @@ public class CommonTest {
     assertNull(Common.getValueByName(site,"notExistMethod"));
     assertNull(Common.getValueByName(site,"weight2"));
   }
+
+  @Test
+  public void testSetValueByName() {
+    WebSite site = new WebSite();
+    site.setName("name");
+    Common.setValueByName(site, "name2", "name");
+    assertEquals(site.getName(), "name");
+    Common.setValueByName(site, "name", "new-name");
+    assertEquals(site.getName(), "new-name");
+  }
 }

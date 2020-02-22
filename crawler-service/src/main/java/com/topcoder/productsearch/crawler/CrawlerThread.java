@@ -112,13 +112,7 @@ public class CrawlerThread implements Runnable {
    * init thread
    */
   public void init() {
-    webClient = new WebClient(new BrowserVersion.BrowserVersionBuilder(BrowserVersion.CHROME).build());
-    webClient.getOptions().setJavaScriptEnabled(false);
-    webClient.getOptions().setThrowExceptionOnScriptError(false);
-    webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-    webClient.getOptions().setCssEnabled(false);
-    webClient.getOptions().setRedirectEnabled(true);
-
+    webClient = Common.createWebClient();
     // set the webclient timeout, unit is milliseconds
     webClient.getOptions().setTimeout(timeout);
 

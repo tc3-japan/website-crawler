@@ -1,7 +1,15 @@
 package com.topcoder.productsearch.common;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.topcoder.productsearch.api.exceptions.BadRequestException;
+import com.topcoder.productsearch.common.entity.SOTruth;
+import com.topcoder.productsearch.common.repository.SOTruthRepository;
+import com.topcoder.productsearch.opt_evaluate.service.SOEvaluateService;
+import com.topcoder.productsearch.opt_gen_truth.service.SOGenTruthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +40,13 @@ public class ProcessLauncher implements ApplicationRunner {
    */
   @Autowired
   WebSiteRepository webSiteRepository;
+
+
+  /**
+   * search opt truth repository
+   */
+  @Autowired
+  SOTruthRepository soTruthRepository;
 
   /**
    * the crawler service
@@ -64,6 +79,19 @@ public class ProcessLauncher implements ApplicationRunner {
   UserService userService;
 
   /**
+   * search opt evaluate service
+   */
+  @Autowired
+  SOEvaluateService soEvaluateService;
+
+
+  /**
+   * search opt gen truth service
+   */
+  @Autowired
+  SOGenTruthService soGenTruthService;
+
+  /**
    * get site by input args if exist
    *
    * @param args the application CLI args
@@ -78,7 +106,7 @@ public class ProcessLauncher implements ApplicationRunner {
       if (website == null) {
         //throw new Exception("can not find website where id = " + websiteId);
         logger.info("Cannot find website where id = " + websiteId);
-        System.out.println("************************************* Cannot find website where id = "+ websiteId +" ****************************");
+        System.out.println("************************************* Cannot find website where id = " + websiteId + " ****************************");
       }
       return website;
     }
@@ -113,6 +141,21 @@ public class ProcessLauncher implements ApplicationRunner {
    */
   private boolean isValidatePages(List<String> procs) {
     return procs != null && "validate-pages".equalsIgnoreCase(procs.get(0));
+  }
+
+  /**
+   * get params
+   *
+   * @param args the CLI args
+   * @param key  the key
+   * @return the string value
+   */
+  private String getParams(ApplicationArguments args, String key) {
+    List<String> values = args.getOptionValues(key);
+    if (values == null) {
+      return null;
+    }
+    return values.get(0);
   }
 
   /**
@@ -175,12 +218,50 @@ public class ProcessLauncher implements ApplicationRunner {
       }
       logger.info(">>> Start crawling on : " + crawlerService.getWebSite().getName());
       crawlerService.crawler();
+    } else if ("opt_evaluate".equalsIgnoreCase(procs.get(0))) {
+      WebSite site = getSite(args);
+      String searchWords = getParams(args, "search-words");
+      String weightsString = getParams(args, "weights");
+
+      String truthId = getParams(args, "truth");
+      if (truthId == null) {
+        throw new IllegalArgumentException("parameter truth is required");
+      }
+
+      SOTruth soTruth = soTruthRepository.findOne(Integer.valueOf(truthId));
+      if (soTruth == null) {
+        throw new IllegalArgumentException("cannot find truth where id = " + truthId);
+      }
+      if (weightsString == null) {
+        soEvaluateService.evaluate(site, soTruth, searchWords, null);
+      } else {
+        List<Float> weights;
+        try {
+          weights = Arrays.stream(weightsString.split(",")).map(Float::valueOf)
+              .collect(Collectors.toList());
+        } catch (Exception e) {
+          logger.info(weightsString + " is not an valid int array");
+          logger.info("Exiting...");
+          return;
+        }
+        soEvaluateService.evaluate(site, soTruth, searchWords, weights);
+      }
+    } else if ("opt_gen_truth".equalsIgnoreCase(procs.get(0))) {
+      WebSite site = getSite(args);
+      String searchWords = getParams(args, "search-words");
+      if (searchWords == null) {
+        logger.info("search-words is required");
+        return;
+      }
+      soGenTruthService.genTruth(site, searchWords);
     } else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=validate-pages");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1 --proc=opt_gen_truth --search-words=\"keyword1 keyword2\"");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1 --proc=opt_evaluate --search-words=\"keyword1 keyword2\" --weights=1,2,3,4,5");
       logger.info("usage : ./gradlew bootRun -Pargs=--passwd={username:password}");
     }
   }
