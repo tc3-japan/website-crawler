@@ -85,6 +85,7 @@ CREATE TABLE `web_sites`  (
   `weight8`               decimal(15,5) UNSIGNED NULL,
   `weight9`               decimal(15,5) UNSIGNED NULL,
   `weight10`              decimal(15,5) UNSIGNED NULL,
+  `google_param`           varchar(1024) NULL,
   `created_at`            datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified_at`      datetime NULL,
   `deleted`               tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
