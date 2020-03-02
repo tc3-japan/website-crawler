@@ -56,10 +56,11 @@ public class DomHelper {
     for (String selector : selectors) {
       // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
       DomNodeList<DomNode> domNodes = page.querySelectorAll(selector);
+      StringBuilder sb = new StringBuilder();
       for (int i = 0; i < domNodes.size(); i++) {
-        contents.add(String.format("<content selector=\"%s\">%s</content>",
-            selector, domNodes.get(i).asXml()));
+       sb.append(domNodes.get(i).asXml());
       }
+     contents.add(String.format("<content selector=\"%s\">%s</content>", selector, sb.toString()));
     }
     return String.join("\n", contents);
   }
