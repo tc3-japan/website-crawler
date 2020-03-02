@@ -1,32 +1,28 @@
 package com.topcoder.productsearch.opt_gen_truth.service;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.html.DomNodeList;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.topcoder.productsearch.common.entity.CPage;
-import com.topcoder.productsearch.common.entity.SOTruth;
-import com.topcoder.productsearch.common.entity.SOTruthDetail;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.repository.SOTruthDetailRepository;
-import com.topcoder.productsearch.common.repository.SOTruthRepository;
-import com.topcoder.productsearch.common.util.Common;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.topcoder.productsearch.common.entity.SOTruth;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.SOTruthDetailRepository;
+import com.topcoder.productsearch.common.repository.SOTruthRepository;
+import com.topcoder.productsearch.common.util.Common;
 
 /**
  * Unit test for SOGenTruthService
@@ -91,7 +87,7 @@ public class TestSOGenTruthService {
 
     soGenTruthService.setSearchMaxPages(1);
     soGenTruthService.genTruth(site, "setSearchMax");
-    verify(soTruthDetailRepository, times(2)).save(any(List.class));
+    verify(soTruthDetailRepository, times(3)).save(any(List.class));
     verify(soTruthRepository, times(3)).save(any(SOTruth.class));
   }
 }
