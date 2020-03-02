@@ -260,8 +260,8 @@ public class ProcessLauncher implements ApplicationRunner {
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=validate-pages");
-      logger.info("usage : ./gradlew bootRun -Pargs=--site=1 --proc=opt_gen_truth --search-words=\"keyword1 keyword2\"");
-      logger.info("usage : ./gradlew bootRun -Pargs=--site=1 --proc=opt_evaluate --search-words=\"keyword1 keyword2\" --weights=1,2,3,4,5");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=opt_gen_truth,--search-words=\"keyword1 keyword2\"");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=opt_evaluate,--search-words=\"keyword1 keyword2\",--weights=1,2,3,4,5");
       logger.info("usage : ./gradlew bootRun -Pargs=--passwd={username:password}");
     }
   }
