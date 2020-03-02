@@ -1,23 +1,5 @@
 package com.topcoder.productsearch.common.util;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.panforge.robotstxt.CustomRobotsTxtReader;
-import com.panforge.robotstxt.RobotsTxt;
-import com.topcoder.productsearch.common.entity.CPage;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.models.PageSearchCriteria;
-import com.topcoder.productsearch.common.repository.PageRepository;
-import com.topcoder.productsearch.common.specifications.PageSpecification;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
 import java.beans.FeatureDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -34,6 +16,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import com.gargoylesoftware.css.parser.CSSErrorHandler;
+import com.gargoylesoftware.css.parser.CSSException;
+import com.gargoylesoftware.css.parser.CSSParseException;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.ScriptException;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
+import com.panforge.robotstxt.CustomRobotsTxtReader;
+import com.panforge.robotstxt.RobotsTxt;
+import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.models.PageSearchCriteria;
+import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.specifications.PageSpecification;
 
 /**
  * Common static class
@@ -330,6 +337,19 @@ public class Common {
     webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
     webClient.getOptions().setCssEnabled(false);
     webClient.getOptions().setRedirectEnabled(true);
+
+    webClient.setJavaScriptErrorListener(new JavaScriptErrorListener() {
+      @Override public void timeoutError(HtmlPage page, long allowedTime, long executionTime) {}
+      @Override public void scriptException(HtmlPage page, ScriptException scriptException) {}
+      @Override public void malformedScriptURL(HtmlPage page, String url, MalformedURLException malformedURLException) {}
+      @Override public void loadScriptError(HtmlPage page, URL scriptUrl, Exception exception) {}
+    });
+    webClient.setCssErrorHandler(new CSSErrorHandler() {
+      @Override public void warning(CSSParseException exception) throws CSSException {}
+      @Override public void fatalError(CSSParseException exception) throws CSSException {}
+      @Override public void error(CSSParseException exception) throws CSSException {}
+    });
+
     return webClient;
   }
 }

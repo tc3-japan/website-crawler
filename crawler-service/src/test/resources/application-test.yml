@@ -1,9 +1,11 @@
 debug: false
-logging.level:
+logging:
+  level:
     root: INFO
-    jp.go.meti: DEBUG
     org.springframework.jdbc.core: INFO
-
+    com.gargoylesoftware.htmlunit: ERROR
+    com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter: OFF
+    
 spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/webcrawler_test?useSSL=false&nullNamePatternMatchesAll=true

@@ -76,11 +76,13 @@ public class SOGenTruthService {
     href = href.split("&")[0];
     // remove last /
     href = href.charAt(href.length() - 1) == '/' ? href.substring(0, href.length() - 1) : href;
+
     return href;
   }
 
   public SOGenTruthService() {
     this.webClient = Common.createWebClient();
+    this.webClient.getOptions().setJavaScriptEnabled(true);
   }
 
   /**
@@ -104,17 +106,17 @@ public class SOGenTruthService {
     soTruth.setSiteId(site.getId());
     soTruthRepository.save(soTruth);
 
-
     List<SOTruthDetail> details = new ArrayList<>();
     while (pageIndex < searchMaxPages) {
 
       // search in page N
       logger.info("start progress search page " + (pageIndex + 1));
-      DomNodeList<DomNode> domNodes = page.querySelectorAll("a");
+      DomNodeList<DomNode> domNodes = page.querySelectorAll("#search .r > a");
 
       for (int i = 0; i < domNodes.getLength(); i++) {
         DomNode node = domNodes.get(i);
-        String href = this.unzipRealUrl(node.getAttributes().getNamedItem("href").getNodeValue());
+        //String href = this.unzipRealUrl(node.getAttributes().getNamedItem("href").getNodeValue());
+        String href = node.getAttributes().getNamedItem("href").getNodeValue();
         if (href == null) {
           continue;
         }
@@ -124,7 +126,7 @@ public class SOGenTruthService {
           soTruthDetail.setRank(rank);
           soTruthDetail.setTruthId(soTruth.getId());
           soTruthDetail.setUrl(href);
-          soTruthDetail.setTitle(node.querySelector("div").asText());
+          soTruthDetail.setTitle(node.querySelector("h3").asText());
           soTruthDetail.setScore(0.f);
           details.add(soTruthDetail);
           rank += 1;
@@ -138,7 +140,7 @@ public class SOGenTruthService {
       }
 
       // try to find next link
-      List<HtmlAnchor> anchors = page.getByXPath("//a[@aria-label='Next page']");
+      List<HtmlAnchor> anchors = page.getByXPath("//a[@id='pnnext']");
       if (anchors.size() > 0) {
         page = anchors.get(0).click();
       } else {
