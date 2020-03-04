@@ -157,7 +157,7 @@ public class ProcessLauncherTest {
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,4",
         "--truth=1", "--search-words=\"クルーネックT MEN\""});
     processLauncher.run(args);
-    verify(soEvaluateService, times(1)).evaluate(any(WebSite.class),any(SOTruth.class),anyString(),anyList());
+    verify(soEvaluateService, times(1)).evaluate(any(SOTruth.class),anyString(),anyList());
 
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,4", "--search-words=\"クルーネックT MEN\""});
     try {
@@ -165,12 +165,12 @@ public class ProcessLauncherTest {
     } catch (Exception e) {
       assertEquals(e.getMessage(), "parameter truth is required");
     }
-    verify(soEvaluateService, times(1)).evaluate(any(WebSite.class), any(SOTruth.class), anyString(), anyList());
+    verify(soEvaluateService, times(1)).evaluate( any(SOTruth.class), anyString(), anyList());
 
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,x",
         "--truth=1"});
     processLauncher.run(args);
-    verify(soEvaluateService, times(1)).evaluate(any(WebSite.class),any(SOTruth.class),anyString(),anyList());
+    verify(soEvaluateService, times(1)).evaluate(any(SOTruth.class),anyString(),anyList());
 
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,x",
         "--truth=2"});
@@ -179,23 +179,23 @@ public class ProcessLauncherTest {
     } catch (Exception e) {
       assertEquals(e.getMessage(), "cannot find truth where id = 2");
     }
-    verify(soEvaluateService, times(1)).evaluate(any(WebSite.class), any(SOTruth.class), anyString(), anyList());
+    verify(soEvaluateService, times(1)).evaluate( any(SOTruth.class), anyString(), anyList());
     
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--truth=1"});
     processLauncher.run(args);
-    verify(soEvaluateService, times(2)).evaluate(any(WebSite.class), any(SOTruth.class), anyString(), anyList());
+    verify(soEvaluateService, times(2)).evaluate( any(SOTruth.class), anyString(), anyList());
 
 
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1"});
     processLauncher.run(args);
-    verify(soGenTruthService, times(0)).genTruth(any(WebSite.class), anyString());
+    verify(soGenTruthService, times(0)).genTruth(any(WebSite.class), anyString(), anyBoolean());
 
 
 
 
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1","--search-words=\"test word\""});
     processLauncher.run(args);
-    verify(soGenTruthService, times(1)).genTruth(any(WebSite.class), anyString());
+    verify(soGenTruthService, times(1)).genTruth(any(WebSite.class), anyString(), anyBoolean());
 
   }
 
