@@ -8,6 +8,7 @@ import com.topcoder.productsearch.common.repository.SOResultDetailRepository;
 import com.topcoder.productsearch.common.repository.SOResultRepository;
 import com.topcoder.productsearch.common.repository.SOTruthDetailRepository;
 import com.topcoder.productsearch.converter.service.SolrService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -92,7 +93,7 @@ public class TestSOEvaluateService {
     // test
     float eps = 0.000001f;
 
-    SOEvaluation evaluation = soEvaluateService.evaluate(webSite, soTruth, "test word", weights);
+    SOEvaluation evaluation = soEvaluateService.evaluate(soTruth, "test word", weights);
     assertEquals(evaluation.getScore(), 65, eps);
 
     solrProducts.get(0).setScore(4.f);
@@ -101,15 +102,15 @@ public class TestSOEvaluateService {
     solrProducts.get(3).setScore(3.f);
     solrProducts.get(4).setScore(1.f);
 
-    evaluation = soEvaluateService.evaluate(webSite, soTruth, "test word", weights);
+    evaluation = soEvaluateService.evaluate(soTruth, "test word", weights);
     assertEquals(evaluation.getScore(), 37, eps);
 
     solrProducts.get(0).setUrl("url10");
-    evaluation = soEvaluateService.evaluate(webSite, soTruth, "test word", weights);
+    evaluation = soEvaluateService.evaluate(soTruth, "test word", weights);
     assertEquals(evaluation.getScore(), 34, eps);
 
     when(soTruth.getSearchWords()).thenReturn("test word");
-    evaluation = soEvaluateService.evaluate(webSite, soTruth, null, null);
+    evaluation = soEvaluateService.evaluate(soTruth, null, null);
     assertEquals(evaluation.getScore(), 34, eps);
   }
 }

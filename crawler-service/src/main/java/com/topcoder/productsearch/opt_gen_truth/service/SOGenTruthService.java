@@ -11,6 +11,9 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.SOTruthDetailRepository;
 import com.topcoder.productsearch.common.repository.SOTruthRepository;
 import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.crawler.CrawlerTask;
+import com.topcoder.productsearch.crawler.CrawlerThread;
+import com.topcoder.productsearch.crawler.CrawlerThreadPoolExecutor;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * search opt gen truth service
@@ -90,9 +94,10 @@ public class SOGenTruthService {
    *
    * @param site        whe website
    * @param searchWords the search words
+   * @param crawl       crawl pages found in Google search if true
    */
   @Transactional
-  public void genTruth(WebSite site, String searchWords) throws Exception {
+  public void genTruth(WebSite site, String searchWords, boolean crawl) throws Exception {
     String params = searchWords + (site.getGoogleParam() == null ? "" : site.getGoogleParam());
 
     URL url = new URL("https://www.google.com/search?q=" + params);
@@ -133,7 +138,8 @@ public class SOGenTruthService {
 
           if (rank > numberOfUrl) {
             soTruthDetailRepository.save(details);
-            logger.info("found all product pages, exit ...");
+            logger.info("found all product pages, check next steps ...");
+            doCrawl(details, crawl, site);
             return;
           }
         }
@@ -144,11 +150,52 @@ public class SOGenTruthService {
       if (anchors.size() > 0) {
         page = anchors.get(0).click();
       } else {
-        logger.info("did not find next button, exit ...");
+        logger.info("did not find next button, check next steps ...");
         soTruthDetailRepository.save(details);
+        doCrawl(details, crawl, site);
         return;
       }
       pageIndex += 1;
     }
+
+    /*
+     * when reached max page, but details.length < number of expected details
+     */
+    soTruthDetailRepository.save(details);
+    doCrawl(details, crawl, site);
+  }
+
+  /**
+   * crawl pages in SOTruthDetail list
+   *
+   * @param details the pages
+   * @param crawl   is need do crawl
+   * @param webSite the web site
+   */
+  void doCrawl(List<SOTruthDetail> details, boolean crawl, WebSite webSite) {
+    if (details.isEmpty() || !crawl) {
+      logger.info("no need crawl these pages or no pages found, will exit ...");
+      return;
+    }
+
+    CrawlerThreadPoolExecutor threadPoolExecutor = new CrawlerThreadPoolExecutor(webSite.getParallelSize(),
+        webSite.getCrawlInterval());
+    threadPoolExecutor.setExecutedHandler(runnable -> {
+    });
+
+    details.forEach(soTruthDetail -> {
+      CrawlerThread thread = new CrawlerThread();
+      CrawlerTask task = new CrawlerTask(soTruthDetail.getUrl(), webSite, null);
+      thread.setCrawlerTask(task);
+      thread.setTaskInterval(webSite.getCrawlInterval());
+      thread.setTimeout((webSite.getTimeoutPageDownload() * 60 * 1000));
+      thread.setRetryTimes(webSite.getRetryTimes());
+      thread.setMaxDepth(1); // only this one page
+      thread.setCrawlerService(null);
+      thread.init();
+      threadPoolExecutor.schedule(thread, webSite.getCrawlInterval(), TimeUnit.MILLISECONDS);
+    });
+    threadPoolExecutor.shutdown();
+    logger.info("all process done, exit ...");
   }
 }

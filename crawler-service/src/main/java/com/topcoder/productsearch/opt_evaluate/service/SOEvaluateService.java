@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -73,17 +74,16 @@ public class SOEvaluateService {
   /**
    * create reference data by scraping the result of Google search with some search words for the specific web site.
    *
-   * @param site        the website
    * @param soTruth     the search opt truth
    * @param searchWords the search words
    * @param weights     the search weights
    */
   @Transactional
-  public SOEvaluation evaluate(WebSite site, SOTruth soTruth, String searchWords, List<Float> weights) throws Exception {
+  public SOEvaluation evaluate(SOTruth soTruth, String searchWords, List<Float> weights) throws Exception {
     String words = searchWords == null ? soTruth.getSearchWords() : searchWords;
 
     ProductSearchRequest request = new ProductSearchRequest();
-    request.setSiteId(site.getId());
+    request.setManufacturerIds(Collections.singletonList(soTruth.getSiteId()));
     request.setWeights(weights);
     request.setQuery(Arrays.asList(words.split(" ")));
 
@@ -93,7 +93,7 @@ public class SOEvaluateService {
     // result
     SOResult soResult = new SOResult();
     soResult.setSearchWords(words);
-    soResult.setSiteId(site.getId());
+    soResult.setSiteId(soTruth.getSiteId());
 
     if (weights != null) {
       for (int i = 0; i < weights.size(); i++) {
@@ -163,7 +163,7 @@ public class SOEvaluateService {
     evaluation.setScore(sum);
     evaluation.setResultId(soResult.getId());
     evaluation.setTruthId(soTruth.getId());
-    evaluation.setSiteId(site.getId());
+    evaluation.setSiteId(soTruth.getSiteId());
     soEvaluationRepository.save(evaluation);
     return evaluation;
   }

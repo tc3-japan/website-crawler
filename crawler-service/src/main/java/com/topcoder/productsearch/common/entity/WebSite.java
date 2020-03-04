@@ -57,6 +57,9 @@ public class WebSite {
   @Column(name = "supports_robots_txt")
   private Boolean supportsRobotsTxt;
 
+  @Column(name = "supports_js")
+  private Boolean supportsJs;
+
   @Min(value = 1, message = "{crawl_max_depth.min}")
   @Column(name = "crawl_max_depth")
   private Integer crawlMaxDepth = 10;
