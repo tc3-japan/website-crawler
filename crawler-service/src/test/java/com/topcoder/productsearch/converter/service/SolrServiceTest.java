@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -119,7 +120,7 @@ public class SolrServiceTest extends AbstractUnitTest {
     List<Float> weights = new ArrayList<>();
     weights.add(1.0f);
     weights.add(2.0f);
-    request.setSiteId(1);
+    request.setManufacturerIds(Collections.singletonList(1));
     request.setWeights(weights);
 
     when(solrDocumentList.size()).thenReturn(10);
@@ -176,6 +177,6 @@ public class SolrServiceTest extends AbstractUnitTest {
 
     List<Float> weights = new ArrayList<>();
     weights.add(2.0f);
-    assertEquals(solrService.getQF(site, weights), "html_area1^2.00 html_area2^1.00");
+    assertTrue(solrService.getQF(site, weights).contains("html_area1^2.00 html_area2^1.00"));
   }
 }

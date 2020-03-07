@@ -1,5 +1,6 @@
 package com.topcoder.productsearch.api.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -43,8 +44,8 @@ public class ProductSearchRequest {
   private List<Float> weights;
 
   /**
-   * specify a site ID
+   * site id list, default is empty
    */
-  @JsonProperty("site_id")
-  private Integer siteId;
+  @JsonProperty("manufacturer_ids")
+  private List<Integer> manufacturerIds = new ArrayList<>();
 }

@@ -4,8 +4,13 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
+import com.gargoylesoftware.htmlunit.html.DomNode;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,6 +28,8 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.SOTruthDetailRepository;
 import com.topcoder.productsearch.common.repository.SOTruthRepository;
 import com.topcoder.productsearch.common.util.Common;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 /**
  * Unit test for SOGenTruthService
@@ -46,18 +53,42 @@ public class TestSOGenTruthService {
   SOTruthDetailRepository soTruthDetailRepository;
 
   @Mock
-  DomNodeList domNodeList;
-
-  @Mock
   HtmlAnchor htmlAnchor;
 
+  @Mock
+  DomNodeList<DomNode> domNodeList;
+
+  @Mock
+  NamedNodeMap namedNodeMap;
+
+  @Mock
+  Node hrefNode;
+
+  @Mock
+  DomNode domNode;
   @InjectMocks
   SOGenTruthService soGenTruthService;
 
+  @Before
+  public void init() throws IOException {
+    when(webClient.getPage(any(URL.class))).thenReturn(page);
+    when(page.querySelectorAll(anyString())).thenReturn(domNodeList);
+    when(domNodeList.getLength()).thenReturn(2);
+    when(domNodeList.get(anyInt())).thenReturn(domNode);
+    when(domNode.getAttributes()).thenReturn(namedNodeMap);
+    when(namedNodeMap.getNamedItem(anyString())).thenReturn(hrefNode);
+    when(domNode.querySelector(anyString())).thenReturn(domNode);
+    when(domNode.asText()).thenReturn("string");
+    when(hrefNode.getNodeValue()).thenReturn("https://www.uniqlo.com/jp/store/goods/123124");
+
+    when(htmlAnchor.click()).thenReturn(page);
+  }
 
   @Test
   public void testUnzipUrl() {
     assertEquals(soGenTruthService.unzipRealUrl("/url?q=https://test.com/&a=x"), "https://test.com");
+    assertEquals(soGenTruthService.unzipRealUrl("/url?q=https://test.com&a=x"), "https://test.com");
+    assertNull(soGenTruthService.unzipRealUrl("test"));
   }
 
   /**
@@ -71,22 +102,25 @@ public class TestSOGenTruthService {
     soGenTruthService.setNumberOfUrl(5);
     soGenTruthService.setSearchMaxPages(2);
     soGenTruthService.setWebClient(Common.createWebClient());
+    soGenTruthService.setWebClient(webClient);
     site.setId(1);
     site.setContentUrlPatterns("https://www.uniqlo.com/jp/store/goods/[\\d\\-]+");
     site.setGoogleParam("+site:https://www.uniqlo.com/jp/");
-    soGenTruthService.genTruth(site, "クルーネックT MEN");
+    site.setSupportsJs(false);
+    soGenTruthService.genTruth(site, "クルーネックT MEN", false);
     verify(soTruthDetailRepository, times(1)).save(any(List.class));
     verify(soTruthRepository, times(1)).save(any(SOTruth.class));
 
+    when(page.getByXPath(anyString())).thenReturn(Collections.singletonList(htmlAnchor));
     soGenTruthService.setSearchMaxPages(20);
     site.setGoogleParam(null);
-    soGenTruthService.genTruth(site, "setSearchMax");
+    soGenTruthService.genTruth(site, "setSearchMax", true);
     verify(soTruthDetailRepository, times(2)).save(any(List.class));
     verify(soTruthRepository, times(2)).save(any(SOTruth.class));
 
 
     soGenTruthService.setSearchMaxPages(1);
-    soGenTruthService.genTruth(site, "setSearchMax");
+    soGenTruthService.genTruth(site, "setSearchMax", true);
     verify(soTruthDetailRepository, times(3)).save(any(List.class));
     verify(soTruthRepository, times(3)).save(any(SOTruth.class));
   }

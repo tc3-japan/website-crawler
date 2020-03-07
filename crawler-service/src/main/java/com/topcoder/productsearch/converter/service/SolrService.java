@@ -138,24 +138,28 @@ public class SolrService {
                 .collect(Collectors.joining(" AND ")) + ")");
       }
       String q = String.join(" OR ", searchQueries);
-      logger.info("search q = " + q);
       query.set("q", q);
     } else {
       query.set("q", "*:*");
     }
 
-    String qf = this.getQF(request.getSiteId() == null ?
-            null : webSiteRepository.findOne(request.getSiteId()), request.getWeights());
+    String qf = this.getQF(request.getManufacturerIds().isEmpty() ?
+        null : webSiteRepository.findOne(request.getManufacturerIds().get(0)), request.getWeights());
     if (!qf.isEmpty()) {
       query.set("qf", qf);
-      query.set("defType=dismax");
-      logger.info("qf=" + qf + "&defType=dismax");
+      query.set("defType", "dismax");
+    }
+
+    if (!request.getManufacturerIds().isEmpty()) {
+      String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
+      query.set("fq", "manufacturer_id:(" + fq + ")");
     }
     query.set("start", request.getStart());
     query.set("rows", request.getRows());
     query.set("fl", "id,manufacturer_name,product_url, page_updated_at,score,category,manufacturer_id,content,html_title");
     query.set("hl", "on");
     query.set("hl.fl", "content");
+    logger.info(query.toLocalParamsString());
 
     QueryResponse response = httpSolrClient.query(query);
     List<SolrProduct> products = new LinkedList<>();
@@ -200,6 +204,8 @@ public class SolrService {
       }
       if (w != null) {
         qfParts.add(String.format("html_area%d^%.2f", (i + 1), w));
+      } else {
+        qfParts.add(String.format("html_area%d", (i + 1)));
       }
     }
     return String.join(" ", qfParts);
@@ -244,7 +250,7 @@ public class SolrService {
 
     // force convert to string for solr document
     // "1" will identify as number in solr document
-    document.addField("manufacturer_id", site.getId() + " ");
+    document.addField("manufacturer_id", site.getId() + "");
 
     document.addField("content", domHelper.htmlToText(page.getContent()));
     document.addField("category", page.getCategory());
