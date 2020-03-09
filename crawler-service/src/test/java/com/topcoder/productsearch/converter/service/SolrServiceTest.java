@@ -177,6 +177,12 @@ public class SolrServiceTest extends AbstractUnitTest {
 
     List<Float> weights = new ArrayList<>();
     weights.add(2.0f);
-    assertTrue(solrService.getQF(site, weights).contains("html_area1^2.00 html_area2^1.00"));
+
+    assertEquals("html_area1^2.00", solrService.getQF(site, weights));
+
+    assertEquals("html_area2^1.00", solrService.getQF(site, null));
+
+    assertEquals("html_area1 html_area2 html_area3 html_area4 html_area5 html_area6 html_area7 html_area8 html_area9 html_area10",
+      solrService.getQF(null, null));
   }
 }

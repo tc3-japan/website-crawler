@@ -1,14 +1,12 @@
 package com.topcoder.productsearch.converter.service;
 
-import com.topcoder.productsearch.api.models.ProductSearchRequest;
-import com.topcoder.productsearch.api.models.SolrProduct;
-import com.topcoder.productsearch.common.entity.CPage;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.repository.WebSiteRepository;
-import com.topcoder.productsearch.common.util.Common;
-import com.topcoder.productsearch.common.util.DomHelper;
-import lombok.Getter;
-import lombok.Setter;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -18,16 +16,20 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.topcoder.productsearch.api.models.ProductSearchRequest;
+import com.topcoder.productsearch.api.models.SolrProduct;
+import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.common.util.DomHelper;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * the solr service
@@ -123,32 +125,23 @@ public class SolrService {
    * @return the list of product
    */
   public List<SolrProduct> searchProduct(ProductSearchRequest request) throws IOException, SolrServerException {
-    SolrQuery query = new SolrQuery();
+    if (request == null) {
+      throw new IllegalArgumentException("request must be specified.");
+    }
 
-    logger.info("search product with params " + request.toString());
-    if (request.getQuery() != null && request.getQuery().size() > 0) {
-      List<String> searchFields = new ArrayList<>(Arrays.asList("manufacturer_id", "html_title", "content", "category"));
-      for (int i = 0; i < NUMBER_OF_HTML_AREA; i++) {
-        searchFields.add("html_area" + (i + 1));
-      }
-      List<String> searchQueries = new LinkedList<>();
-      for (int i = 0; i < searchFields.size(); i++) {
-        int finalI = i;
-        searchQueries.add("(" + request.getQuery().stream().map(keyword -> searchFields.get(finalI) + ":" + "\"" + keyword + "\"")
-                .collect(Collectors.joining(" AND ")) + ")");
-      }
-      String q = String.join(" OR ", searchQueries);
-      query.set("q", q);
+    SolrQuery query = new SolrQuery();
+    logger.info("search product with params: " + request.toString());
+
+    if (request.getQuery() != null) {
+      query.set("q", String.join(" ", request.getQuery()));
     } else {
-      query.set("q", "*:*");
+      query.set("q.alt", "*:*");
     }
 
     String qf = this.getQF(request.getManufacturerIds().isEmpty() ?
         null : webSiteRepository.findOne(request.getManufacturerIds().get(0)), request.getWeights());
-    if (!qf.isEmpty()) {
-      query.set("qf", qf);
-      query.set("defType", "dismax");
-    }
+    query.set("qf", qf);
+    query.set("defType", "dismax");
 
     if (!request.getManufacturerIds().isEmpty()) {
       String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
@@ -156,9 +149,10 @@ public class SolrService {
     }
     query.set("start", request.getStart());
     query.set("rows", request.getRows());
-    query.set("fl", "id,manufacturer_name,product_url, page_updated_at,score,category,manufacturer_id,content,html_title");
+    query.set("fl", "id,manufacturer_id,manufacturer_name,product_url,page_updated_at,html_title,content,category,score");
     query.set("hl", "on");
     query.set("hl.fl", "content");
+    query.setShowDebugInfo(true);
     logger.info(query.toLocalParamsString());
 
     QueryResponse response = httpSolrClient.query(query);
@@ -195,18 +189,26 @@ public class SolrService {
    */
   String getQF(WebSite site, List<Float> weights) {
     List<String> qfParts = new LinkedList<>();
-    for (int i = 0; i < NUMBER_OF_HTML_AREA; i++) {
-      Float w = null;
-      if (weights != null && weights.size() > i) {
-        w = weights.get(i);
-      } else if (site != null) {
-        w = Common.getValueByName(site, "weight" + (i + 1));
+    if (weights != null && weights.size()>0) {
+      int i = 0;
+      for (Float w : weights) {
+        qfParts.add(String.format("html_area%d^%.2f", (++i), (w != null ? w : 0f )));
       }
-      if (w != null) {
-        qfParts.add(String.format("html_area%d^%.2f", (i + 1), w));
-      } else {
-        qfParts.add(String.format("html_area%d", (i + 1)));
+      return String.join(" ", qfParts);
+    }
+    if (site != null) {
+      for (int i = 1; i <= NUMBER_OF_HTML_AREA; i++) {
+        Float w = Common.getValueByName(site, "weight" + i);
+        if (w != null) {
+          qfParts.add(String.format("html_area%d^%.2f", i, w));
+        }
       }
+    }
+    if (qfParts.size() > 0) {
+      return String.join(" ", qfParts);
+    }
+    for (int i = 1; i <= NUMBER_OF_HTML_AREA; i++) {
+      qfParts.add(String.format("html_area%d", i));
     }
     return String.join(" ", qfParts);
   }
