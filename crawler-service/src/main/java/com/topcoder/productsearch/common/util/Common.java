@@ -295,13 +295,17 @@ public class Common {
    * @param <T> the return type
    * @return return value
    */
+  @SuppressWarnings("unchecked")
   public static <T> T getValueByName(Object object, String name) {
-    try {
-      Method method = object.getClass().getMethod("get" + StringUtils.capitalize(name));
-      return (T)method.invoke(object);
-    } catch (Exception e) {
-      return null;
-    }
+      try {
+        Method method = object.getClass().getMethod("get" + StringUtils.capitalize(name));
+        return (T)method.invoke(object);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        logger.warn(e.getMessage(), e);
+        return null;
+      }
   }
 
   /**
