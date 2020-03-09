@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Evaluate service
@@ -65,10 +67,17 @@ public class SOEvaluateService {
   SOEvaluationRepository soEvaluationRepository;
 
   /**
+   * number of expected url need search
+   */
+  @Setter // for unit test
+  @Value("${optimization.list_size:10}")
+  private Integer listSize;
+
+  /**
    * the search opt evaluate threshold value
    */
   @Setter // for unit test
-  @Value("${search-opt.evaluate-threshold}")
+  @Value("${optimization.priority_rank_threshold:3}")
   Integer evaluateThreshold;
 
   /**
@@ -85,7 +94,8 @@ public class SOEvaluateService {
     ProductSearchRequest request = new ProductSearchRequest();
     request.setManufacturerIds(Collections.singletonList(soTruth.getSiteId()));
     request.setWeights(weights);
-    request.setQuery(Arrays.asList(words.split(" ")));
+    request.setQuery(Arrays.asList(words.split("\\s+")));
+    request.setRows(listSize * 3);
 
     List<SolrProduct> products = solrService.searchProduct(request);
 
@@ -133,6 +143,8 @@ public class SOEvaluateService {
      * t	: Threshold for priority ranks (e.g: 3)
      * e(x)	:  {2 if x ≦ t, 1 if x > t}
      */
+    Map<String, SOResultDetail> urlResultsMap = soResultDetails.stream()
+        .collect(Collectors.toMap(r -> r.getUrl().toLowerCase(), r -> r));
     List<SOTruthDetail> soTruthDetails = soTruthDetailRepository.findByTruthId(soTruth.getId());
     int N = soTruthDetails.size();
     int t = evaluateThreshold;
@@ -141,7 +153,7 @@ public class SOEvaluateService {
     logger.info("start evaluate for product");
     for (SOTruthDetail soTruthDetail : soTruthDetails) {
 
-      SOResultDetail resultDetail = this.getResultDetailByTruthDetail(soTruthDetail, soResultDetails);
+      SOResultDetail resultDetail = urlResultsMap.get(soTruthDetail.getUrl().toLowerCase());
 
       if (resultDetail == null) {
         logger.info(String.format("[truth] %d:%s - [result] null - sum:%f", soTruthDetail.getRank(),
@@ -167,21 +179,4 @@ public class SOEvaluateService {
     soEvaluationRepository.save(evaluation);
     return evaluation;
   }
-
-  /**
-   * find result detail by truth url
-   *
-   * @param soTruthDetail   the truth item
-   * @param soResultDetails the result details
-   * @return the result detail
-   */
-  SOResultDetail getResultDetailByTruthDetail(SOTruthDetail soTruthDetail, List<SOResultDetail> soResultDetails) {
-    for (SOResultDetail soResultDetail : soResultDetails) {
-      if (soTruthDetail.getUrl().equalsIgnoreCase(soResultDetail.getUrl())) {
-        return soResultDetail;
-      }
-    }
-    return null;
-  }
-
 }
