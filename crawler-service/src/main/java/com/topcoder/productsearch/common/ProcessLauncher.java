@@ -247,11 +247,12 @@ public class ProcessLauncher implements ApplicationRunner {
     } else if ("opt_gen_truth".equalsIgnoreCase(procs.get(0))) {
       WebSite site = getSite(args);
       String searchWords = getParams(args, "search-words");
-      boolean crawl = "true".equalsIgnoreCase(getParams(args, "crawl"));
+
       if (searchWords == null) {
         logger.info("search-words is required");
         return;
       }
+      boolean crawl = args.containsOption("crawl");
       soGenTruthService.genTruth(site, searchWords, crawl);
     } else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
@@ -259,7 +260,7 @@ public class ProcessLauncher implements ApplicationRunner {
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=validate-pages");
-      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=opt_gen_truth,--crawl=true,--search-words=\"keyword1 keyword2\"");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=opt_gen_truth,--crawl,--search-words=\"keyword1 keyword2\"");
       logger.info("usage : ./gradlew bootRun -Pargs=--truth=1,--proc=opt_evaluate,--search-words=\"keyword1 keyword2\",--weights=1,2,3,4,5");
       logger.info("usage : ./gradlew bootRun -Pargs=--passwd={username:password}");
     }
