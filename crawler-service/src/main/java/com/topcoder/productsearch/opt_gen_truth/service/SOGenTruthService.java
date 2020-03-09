@@ -55,13 +55,13 @@ public class SOGenTruthService {
   /**
    * number of expected url need search
    */
-  @Value("${search-opt.number-of-url}")
+  @Value("${optimization.list_size:10}")
   private Integer numberOfUrl;
 
   /**
    * only search first number of pages
    */
-  @Value("${search-opt.search-max-pages}")
+  @Value("${optimization.search_max_pages:10}")
   private Integer searchMaxPages;
 
   /**

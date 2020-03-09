@@ -68,6 +68,8 @@ public class TestSOEvaluateService {
     when(soEvaluationRepository.save(any(SOEvaluation.class))).thenReturn(soEvaluation);
     when(soResultRepository.save(any(SOResult.class))).thenReturn(soResult);
     when(soResultDetailRepository.save(any(SOResultDetail.class))).thenReturn(soResultDetail);
+
+    soEvaluateService.setListSize(3);
     soEvaluateService.setEvaluateThreshold(2);
     List<SOTruthDetail> truthDetails = new ArrayList<>();
     List<SolrProduct> solrProducts = new ArrayList<>();
@@ -86,9 +88,6 @@ public class TestSOEvaluateService {
     when(solrService.searchProduct(any(ProductSearchRequest.class))).thenReturn(solrProducts);
     when(soTruthDetailRepository.findByTruthId(anyInt())).thenReturn(truthDetails);
     List<Float> weights = Arrays.asList(1.0f, 2.0f);
-
-    WebSite webSite = new WebSite();
-    webSite.setId(1);
 
     // test
     float eps = 0.000001f;
