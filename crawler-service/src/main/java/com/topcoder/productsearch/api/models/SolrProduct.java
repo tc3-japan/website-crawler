@@ -35,4 +35,9 @@ public class SolrProduct {
 
   private String digest;
   private List<String> highlighting;
+
+  /**
+   * the debug explain
+   */
+  private String explain;
 }
