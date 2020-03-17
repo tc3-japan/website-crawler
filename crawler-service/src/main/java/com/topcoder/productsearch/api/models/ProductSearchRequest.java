@@ -48,4 +48,9 @@ public class ProductSearchRequest {
    */
   @JsonProperty("manufacturer_ids")
   private List<Integer> manufacturerIds = new ArrayList<>();
+
+  /**
+   * debug, will return explain
+   */
+  private boolean debug = false;
 }

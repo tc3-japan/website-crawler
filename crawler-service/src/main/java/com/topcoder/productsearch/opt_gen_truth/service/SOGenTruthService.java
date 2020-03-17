@@ -5,16 +5,22 @@ import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.topcoder.productsearch.api.models.ProductSearchRequest;
+import com.topcoder.productsearch.api.models.SolrProduct;
+import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.SOTruth;
 import com.topcoder.productsearch.common.entity.SOTruthDetail;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.PageRepository;
 import com.topcoder.productsearch.common.repository.SOTruthDetailRepository;
 import com.topcoder.productsearch.common.repository.SOTruthRepository;
 import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.converter.service.SolrService;
 import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
 import com.topcoder.productsearch.crawler.CrawlerThreadPoolExecutor;
 import lombok.Setter;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +28,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * search opt gen truth service
@@ -53,6 +61,18 @@ public class SOGenTruthService {
   private SOTruthDetailRepository soTruthDetailRepository;
 
   /**
+   * slor service
+   */
+  @Autowired
+  private SolrService solrService;
+
+  /**
+   * page repository
+   */
+  @Autowired
+  PageRepository pageRepository;
+
+  /**
    * number of expected url need search
    */
   @Value("${optimization.list_size:10}")
@@ -70,17 +90,10 @@ public class SOGenTruthService {
   private WebClient webClient;
 
   String unzipRealUrl(String href) {
-    String PREFIX = "/url?q=";
-    if (!href.startsWith(PREFIX)) {
-      return null;
-    }
-    // remove prefix
-    href = href.substring(PREFIX.length());
     // remove all params
-    href = href.split("&")[0];
+    href = href.split("\\?")[0];
     // remove last /
     href = href.charAt(href.length() - 1) == '/' ? href.substring(0, href.length() - 1) : href;
-
     return href;
   }
 
@@ -120,8 +133,7 @@ public class SOGenTruthService {
 
       for (int i = 0; i < domNodes.getLength(); i++) {
         DomNode node = domNodes.get(i);
-        //String href = this.unzipRealUrl(node.getAttributes().getNamedItem("href").getNodeValue());
-        String href = node.getAttributes().getNamedItem("href").getNodeValue();
+        String href = this.unzipRealUrl(node.getAttributes().getNamedItem("href").getNodeValue());
         if (href == null) {
           continue;
         }
@@ -139,7 +151,7 @@ public class SOGenTruthService {
           if (rank > numberOfUrl) {
             soTruthDetailRepository.save(details);
             logger.info("found all product pages, check next steps ...");
-            doCrawl(details, crawl, site);
+            doNext(details, crawl, site, searchWords);
             return;
           }
         }
@@ -152,7 +164,7 @@ public class SOGenTruthService {
       } else {
         logger.info("did not find next button, check next steps ...");
         soTruthDetailRepository.save(details);
-        doCrawl(details, crawl, site);
+        doNext(details, crawl, site, searchWords);
         return;
       }
       pageIndex += 1;
@@ -162,17 +174,17 @@ public class SOGenTruthService {
      * when reached max page, but details.length < number of expected details
      */
     soTruthDetailRepository.save(details);
-    doCrawl(details, crawl, site);
+    doNext(details, crawl, site, searchWords);
   }
 
   /**
-   * crawl pages in SOTruthDetail list
+   * crawl pages, converter, update similarity scores in SOTruthDetail list
    *
    * @param details the pages
    * @param crawl   is need do crawl
    * @param webSite the web site
    */
-  void doCrawl(List<SOTruthDetail> details, boolean crawl, WebSite webSite) {
+  void doNext(List<SOTruthDetail> details, boolean crawl, WebSite webSite, String searchWords) throws IOException, SolrServerException {
     if (details.isEmpty() || !crawl) {
       logger.info("no need crawl these pages or no pages found, will exit ...");
       return;
@@ -196,6 +208,78 @@ public class SOGenTruthService {
       threadPoolExecutor.schedule(thread, webSite.getCrawlInterval(), TimeUnit.MILLISECONDS);
     });
     threadPoolExecutor.shutdown();
+
+    // wait CrawlerThreadPoolExecutor finished all task
+    while (true) {
+      try {
+        Thread.sleep(100);
+        if (threadPoolExecutor.isTerminated()) {
+          break;
+        }
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
+    logger.info("crawl progress finished, now start create/update solr index for pages ...");
+
+    details.forEach(soTruthDetail -> {
+      CPage cPage = pageRepository.findByUrl(soTruthDetail.getUrl());
+      try {
+        solrService.createOrUpdate(cPage);
+      } catch (Exception e) {
+        logger.error("create/update for page " + cPage.getUrl() + " failed");
+        logger.trace(e.getMessage());
+        e.printStackTrace();
+      }
+    });
+
+    logger.info("create/update solr index progress finished, now start update similarity scores for pages ...");
+
+    ProductSearchRequest request = new ProductSearchRequest();
+    request.setManufacturerIds(Collections.singletonList(webSite.getId()));
+    request.setQuery(Arrays.asList(searchWords.split("\\s+")));
+    request.setDebug(true);
+
+    Map<String, String> explainMap = new HashMap<>();
+    List<SolrProduct> products = solrService.searchProduct(request);
+    products.forEach(solrProduct -> explainMap.put(solrProduct.getUrl()
+        , solrProduct.getExplain()));
+    details.forEach(soTruthDetail -> {
+      Map<String, Float> scores =
+          this.getSimilarityScoresByExplain(explainMap.get(soTruthDetail.getUrl()));
+
+      for (int i = 1; i <= 10; i++) {
+        Common.setValueByName(soTruthDetail, "simArea" + i, scores.get("html_area" + i));
+      }
+    });
+    soTruthDetailRepository.save(details);
     logger.info("all process done, exit ...");
+  }
+
+  /**
+   * get Similarity scores by explain
+   *
+   * @param explain the debug information
+   * @return the map
+   */
+  Map<String, Float> getSimilarityScoresByExplain(String explain) {
+    Map<String,Float> scores = new HashMap<>();
+
+    if (explain == null) {
+      return scores;
+    }
+
+    Pattern pattern = Pattern.compile("\n(.+?) (= weight.+?) ");
+    Matcher matcher = pattern.matcher(explain);
+
+
+    while (matcher.find()) {
+      String[] parts = matcher.group(0).split("=");
+      Float score = Float.parseFloat(parts[0].trim());
+      String key = parts[1].split(":")[0].substring(8);
+      scores.put(key, scores.getOrDefault(key, 0.0f) + score);
+    }
+    return scores;
   }
 }
