@@ -4,6 +4,7 @@ import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.api.models.ProductSearchRequest;
 import com.topcoder.productsearch.api.models.SolrProduct;
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -115,6 +117,12 @@ public class SolrServiceTest extends AbstractUnitTest {
     query.add("women");
     query.add("leg");
     request.setQuery(query);
+    List<Float> weights = new ArrayList<>();
+    weights.add(1.0f);
+    weights.add(2.0f);
+    request.setManufacturerIds(Collections.singletonList(1));
+    request.setWeights(weights);
+
     when(solrDocumentList.size()).thenReturn(10);
     when(solrDocumentList.get(any(Integer.class))).thenReturn(solrDocument);
     when(solrDocument.get("id")).thenReturn("id");
@@ -160,5 +168,21 @@ public class SolrServiceTest extends AbstractUnitTest {
     List<SolrProduct> solrProducts = solrService.searchProduct(request);
     verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
     assertEquals(0, solrProducts.size());
+  }
+
+  @Test
+  public void testHGetQF() {
+    WebSite site = new WebSite();
+    site.setWeight2(1.0f);
+
+    List<Float> weights = new ArrayList<>();
+    weights.add(2.0f);
+
+    assertEquals("html_area1^2.00", solrService.getQF(site, weights));
+
+    assertEquals("html_area2^1.00", solrService.getQF(site, null));
+
+    assertEquals("html_area1 html_area2 html_area3 html_area4 html_area5 html_area6 html_area7 html_area8 html_area9 html_area10",
+      solrService.getQF(null, null));
   }
 }

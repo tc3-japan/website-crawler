@@ -7,6 +7,7 @@ logging:
     root: INFO
     org.springframework.jdbc.core: DEBUG
     com.gargoylesoftware.htmlunit: ERROR
+    com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter: OFF
 
 spring:
   datasource:
@@ -57,4 +58,9 @@ cors:
 
 solr:
   uri: http://127.0.0.1:8983/solr/manufacturer_product
+
+optimization:
+  list_size: 10
+  search_max_pages: 50
+  priority_rank_threshold: 2
 

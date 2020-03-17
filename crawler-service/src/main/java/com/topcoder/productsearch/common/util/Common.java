@@ -1,12 +1,22 @@
 package com.topcoder.productsearch.common.util;
 
-import com.panforge.robotstxt.CustomRobotsTxtReader;
-import com.panforge.robotstxt.RobotsTxt;
-import com.topcoder.productsearch.common.entity.CPage;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.models.PageSearchCriteria;
-import com.topcoder.productsearch.common.repository.PageRepository;
-import com.topcoder.productsearch.common.specifications.PageSpecification;
+import java.beans.FeatureDescriptor;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,21 +26,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.beans.FeatureDescriptor;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.gargoylesoftware.css.parser.CSSErrorHandler;
+import com.gargoylesoftware.css.parser.CSSException;
+import com.gargoylesoftware.css.parser.CSSParseException;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.ScriptException;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
+import com.panforge.robotstxt.CustomRobotsTxtReader;
+import com.panforge.robotstxt.RobotsTxt;
+import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.models.PageSearchCriteria;
+import com.topcoder.productsearch.common.repository.PageRepository;
+import com.topcoder.productsearch.common.specifications.PageSpecification;
 
 /**
  * Common static class
@@ -240,7 +250,7 @@ public class Common {
   }
 
   public static boolean endsWithHTML(String url) {
-   
+
     return url.matches(".*html");
   }
 
@@ -278,4 +288,72 @@ public class Common {
         .toArray(String[]::new);
   }
 
+  /**
+   * get value by name
+   * @param object the object
+   * @param name the field name
+   * @param <T> the return type
+   * @return return value
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T getValueByName(Object object, String name) {
+      try {
+        Method method = object.getClass().getMethod("get" + StringUtils.capitalize(name));
+        return (T)method.invoke(object);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        logger.warn(e.getMessage(), e);
+        return null;
+      }
+  }
+
+  /**
+   * set value by name
+   *
+   * @param object the object
+   * @param name   the field name
+   * @param v      the value
+   * @param <T>    the value type
+   * @return return value
+   */
+  public static <T> void setValueByName(Object object, String name, T v) {
+    try {
+      Field declaredField = object.getClass().getDeclaredField(name);
+      boolean accessible = declaredField.isAccessible();
+      declaredField.setAccessible(true);
+      declaredField.set(object, v);
+      declaredField.setAccessible(accessible);
+    } catch (Exception e) {
+      logger.warn(String.format("inject %s with %s into object failed, %s", name, v.toString(), e.getMessage()));
+    }
+  }
+
+  /**
+   * create web client
+   *
+   * @return the web client
+   */
+  public static WebClient createWebClient() {
+    WebClient webClient = new WebClient(new BrowserVersion.BrowserVersionBuilder(BrowserVersion.CHROME).build());
+    webClient.getOptions().setJavaScriptEnabled(false);
+    webClient.getOptions().setThrowExceptionOnScriptError(false);
+    webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+    webClient.getOptions().setCssEnabled(false);
+    webClient.getOptions().setRedirectEnabled(true);
+
+    webClient.setJavaScriptErrorListener(new JavaScriptErrorListener() {
+      @Override public void timeoutError(HtmlPage page, long allowedTime, long executionTime) {}
+      @Override public void scriptException(HtmlPage page, ScriptException scriptException) {}
+      @Override public void malformedScriptURL(HtmlPage page, String url, MalformedURLException malformedURLException) {}
+      @Override public void loadScriptError(HtmlPage page, URL scriptUrl, Exception exception) {}
+    });
+    webClient.setCssErrorHandler(new CSSErrorHandler() {
+      @Override public void warning(CSSParseException exception) throws CSSException {}
+      @Override public void fatalError(CSSParseException exception) throws CSSException {}
+      @Override public void error(CSSParseException exception) throws CSSException {}
+    });
+
+    return webClient;
+  }
 }

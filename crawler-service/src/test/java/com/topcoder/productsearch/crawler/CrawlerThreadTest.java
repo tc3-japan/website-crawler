@@ -100,7 +100,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
 
 
   public CrawlerThreadTest() throws MalformedURLException {
-
+    task.setSite(webSite);
   }
 
   @Before

@@ -1,9 +1,11 @@
 package com.topcoder.productsearch.api.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.Min;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 
@@ -35,4 +37,20 @@ public class ProductSearchRequest {
    */
   @Min(value = 1, message = "productsearch_characters.min")
   private Integer firstNOfContent = 120;
+
+  /**
+   * The weight is a number and it represents how the related field is important in the search
+   */
+  private List<Float> weights;
+
+  /**
+   * site id list, default is empty
+   */
+  @JsonProperty("manufacturer_ids")
+  private List<Integer> manufacturerIds = new ArrayList<>();
+
+  /**
+   * debug, will return explain
+   */
+  private boolean debug = false;
 }
