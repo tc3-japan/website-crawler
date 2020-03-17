@@ -144,7 +144,6 @@ public class SOGenTruthService {
           soTruthDetail.setTruthId(soTruth.getId());
           soTruthDetail.setUrl(href);
           soTruthDetail.setTitle(node.querySelector("h3").asText());
-          soTruthDetail.setScore(0.f);
           details.add(soTruthDetail);
           rank += 1;
 
@@ -225,12 +224,15 @@ public class SOGenTruthService {
 
     details.forEach(soTruthDetail -> {
       CPage cPage = pageRepository.findByUrl(soTruthDetail.getUrl());
+      if (cPage == null) {
+        logger.debug("page is not found in databse. url: " + soTruthDetail.getUrl());
+        return;
+      }
       try {
+        logger.info("create/update for " + cPage.getUrl());
         solrService.createOrUpdate(cPage);
       } catch (Exception e) {
-        logger.error("create/update for page " + cPage.getUrl() + " failed");
-        logger.trace(e.getMessage());
-        e.printStackTrace();
+        logger.error("create/update for page " + cPage.getUrl() + " failed", e);
       }
     });
 
@@ -239,22 +241,33 @@ public class SOGenTruthService {
     ProductSearchRequest request = new ProductSearchRequest();
     request.setManufacturerIds(Collections.singletonList(webSite.getId()));
     request.setQuery(Arrays.asList(searchWords.split("\\s+")));
+    request.setRows(2000);
+    request.setWeights(Arrays.asList(new Float[] {1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F}));
     request.setDebug(true);
 
-    Map<String, String> explainMap = new HashMap<>();
+    Map<String, SolrProduct> productMap = new HashMap<>();
     List<SolrProduct> products = solrService.searchProduct(request);
-    products.forEach(solrProduct -> explainMap.put(solrProduct.getUrl()
-        , solrProduct.getExplain()));
-    details.forEach(soTruthDetail -> {
+    products.forEach(solrProduct -> productMap.put(solrProduct.getUrl(), solrProduct));
+
+    int hitCount = 0;
+    for(Iterator<SOTruthDetail> iter = details.iterator(); iter.hasNext(); )  {
+      SOTruthDetail soTruthDetail = iter.next();
+      SolrProduct p = productMap.get(soTruthDetail.getUrl());
+      if (p == null) {
+        continue;
+      }
+      hitCount++;
+      soTruthDetail.setScore(p.getScore());
       Map<String, Float> scores =
-          this.getSimilarityScoresByExplain(explainMap.get(soTruthDetail.getUrl()));
+          this.getSimilarityScoresByExplain(p.getExplain());
 
       for (int i = 1; i <= 10; i++) {
         Common.setValueByName(soTruthDetail, "simArea" + i, scores.get("html_area" + i));
       }
-    });
+    };
     soTruthDetailRepository.save(details);
-    logger.info("all process done, exit ...");
+    logger.info("truth id: " + details.get(0).getTruthId() + ", # of details w/ similarities: " + hitCount);
+    logger.info("all processes done, exit ...");
   }
 
   /**
