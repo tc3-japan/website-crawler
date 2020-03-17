@@ -43,4 +43,28 @@ public class SOTruthDetail {
   @Column(name = "last_modified_at")
   @UpdateTimestamp
   private Date lastModifiedAt;
+
+  /**
+   * similarity scores from solr
+   */
+  @Column(name = "sim_area1")
+  private Float simArea1;
+  @Column(name = "sim_area2")
+  private Float simArea2;
+  @Column(name = "sim_area3")
+  private Float simArea3;
+  @Column(name = "sim_area4")
+  private Float simArea4;
+  @Column(name = "sim_area5")
+  private Float simArea5;
+  @Column(name = "sim_area6")
+  private Float simArea6;
+  @Column(name = "sim_area7")
+  private Float simArea7;
+  @Column(name = "sim_area8")
+  private Float simArea8;
+  @Column(name = "sim_area9")
+  private Float simArea9;
+  @Column(name = "sim_area10")
+  private Float simArea10;
 }

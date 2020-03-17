@@ -2,9 +2,7 @@ package com.topcoder.productsearch.converter.service;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -14,6 +12,7 @@ import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.util.SimpleOrderedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,10 +151,22 @@ public class SolrService {
     query.set("fl", "id,manufacturer_id,manufacturer_name,product_url,page_updated_at,html_title,content,category,score");
     query.set("hl", "on");
     query.set("hl.fl", "content");
-    query.setShowDebugInfo(true);
+    query.setShowDebugInfo(request.isDebug());
     logger.info(query.toLocalParamsString());
 
     QueryResponse response = httpSolrClient.query(query);
+
+    Map<String, String> debugInfo = new HashMap<>();
+    if (request.isDebug() && response.getDebugMap() != null) {
+      response.getDebugMap().forEach((key, obj) -> {
+        if (key.equalsIgnoreCase("explain")) {
+          SimpleOrderedMap explain = (SimpleOrderedMap) obj;
+          for (int i = 0; i < explain.size(); i++) {
+            debugInfo.put(explain.getName(i), explain.getVal(i).toString());
+          }
+        }
+      });
+    }
     List<SolrProduct> products = new LinkedList<>();
     for (int i = 0; i < response.getResults().size(); i++) {
       SolrProduct solrProduct = new SolrProduct();
@@ -176,6 +187,7 @@ public class SolrService {
       if (document.get("manufacturer_id") != null ) {
         solrProduct.setManufacturerId(document.get("manufacturer_id").toString());
       }
+      solrProduct.setExplain(debugInfo.get(solrProduct.getId()));
       products.add(solrProduct);
     }
     return products;
@@ -264,5 +276,7 @@ public class SolrService {
     }
     return document;
   }
+
+
 
 }
