@@ -51,10 +51,9 @@ public class ConverterService {
    * @throws InterruptedException when thread interrupted
    */
   public void convert(WebSite webSite) throws InterruptedException {
-    // WebSite webSite = webSiteRepository.findOne(webSiteId);
-    // if (webSite == null) {
-    //   throw new InterruptedException("can not find website where id = "+webSiteId);
-    // }
+    if (webSite == null) {
+      throw new IllegalArgumentException("webSite must be specified.");
+    }
     Common.readAndProcessPage(new PageSearchCriteria(webSite.getId(), null),
         webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
             threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService,

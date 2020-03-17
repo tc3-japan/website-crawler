@@ -1,14 +1,10 @@
 package com.topcoder.productsearch.converter.service;
 
-import com.topcoder.productsearch.api.models.ProductSearchRequest;
-import com.topcoder.productsearch.api.models.SolrProduct;
-import com.topcoder.productsearch.common.entity.CPage;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.repository.WebSiteRepository;
-import com.topcoder.productsearch.common.util.Common;
-import com.topcoder.productsearch.common.util.DomHelper;
-import lombok.Getter;
-import lombok.Setter;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -16,18 +12,23 @@ import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.util.SimpleOrderedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.topcoder.productsearch.api.models.ProductSearchRequest;
+import com.topcoder.productsearch.api.models.SolrProduct;
+import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.common.util.DomHelper;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * the solr service
@@ -42,6 +43,11 @@ public class SolrService {
    * the logger
    */
   private static final Logger logger = LoggerFactory.getLogger(SolrService.class);
+
+  /**
+   * number of html area
+   */
+  private static final int NUMBER_OF_HTML_AREA = 10;
 
   /**
    * the website repository
@@ -118,30 +124,49 @@ public class SolrService {
    * @return the list of product
    */
   public List<SolrProduct> searchProduct(ProductSearchRequest request) throws IOException, SolrServerException {
-    SolrQuery query = new SolrQuery();
+    if (request == null) {
+      throw new IllegalArgumentException("request must be specified.");
+    }
 
-    logger.info("search product with params " + request.toString());
-    if (request.getQuery() != null && request.getQuery().size() > 0) {
-      String[] searchFields = {"manufacturer_id", "html_title", "content", "category"};
-      List<String> searchQueries = new LinkedList<>();
-      for (int i = 0; i < searchFields.length; i++) {
-        int finalI = i;
-        searchQueries.add("(" + request.getQuery().stream().map(keyword -> searchFields[finalI] + ":" + "\"" + keyword + "\"")
-                .collect(Collectors.joining(" AND ")) + ")");
-      }
-      String q = String.join(" OR ", searchQueries);
-      logger.info("search q = " + q);
-      query.set("q", q);
+    SolrQuery query = new SolrQuery();
+    logger.info("search product with params: " + request.toString());
+
+    if (request.getQuery() != null) {
+      query.set("q", String.join(" ", request.getQuery()));
     } else {
-      query.set("q", "*:*");
+      query.set("q.alt", "*:*");
+    }
+
+    String qf = this.getQF(request.getManufacturerIds().isEmpty() ?
+        null : webSiteRepository.findOne(request.getManufacturerIds().get(0)), request.getWeights());
+    query.set("qf", qf);
+    query.set("defType", "dismax");
+
+    if (!request.getManufacturerIds().isEmpty()) {
+      String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
+      query.set("fq", "manufacturer_id:(" + fq + ")");
     }
     query.set("start", request.getStart());
     query.set("rows", request.getRows());
-    query.set("fl", "id,manufacturer_name,product_url, page_updated_at,score,category,manufacturer_id,content,html_title");
+    query.set("fl", "id,manufacturer_id,manufacturer_name,product_url,page_updated_at,html_title,content,category,score");
     query.set("hl", "on");
     query.set("hl.fl", "content");
+    query.setShowDebugInfo(request.isDebug());
+    logger.info(query.toLocalParamsString());
 
     QueryResponse response = httpSolrClient.query(query);
+
+    Map<String, String> debugInfo = new HashMap<>();
+    if (request.isDebug() && response.getDebugMap() != null) {
+      response.getDebugMap().forEach((key, obj) -> {
+        if (key.equalsIgnoreCase("explain")) {
+          SimpleOrderedMap explain = (SimpleOrderedMap) obj;
+          for (int i = 0; i < explain.size(); i++) {
+            debugInfo.put(explain.getName(i), explain.getVal(i).toString());
+          }
+        }
+      });
+    }
     List<SolrProduct> products = new LinkedList<>();
     for (int i = 0; i < response.getResults().size(); i++) {
       SolrProduct solrProduct = new SolrProduct();
@@ -162,11 +187,50 @@ public class SolrService {
       if (document.get("manufacturer_id") != null ) {
         solrProduct.setManufacturerId(document.get("manufacturer_id").toString());
       }
+      solrProduct.setExplain(debugInfo.get(solrProduct.getId()));
       products.add(solrProduct);
     }
     return products;
   }
 
+  /**
+   * get search qf
+   * @param site the site
+   * @param weights the weights
+   * @return the qf string
+   */
+  String getQF(WebSite site, List<Float> weights) {
+    List<String> qfParts = new LinkedList<>();
+    if (weights != null && weights.size()>0) {
+      int i = 0;
+      for (Float w : weights) {
+        qfParts.add(String.format("html_area%d^%.2f", (++i), (w != null ? w : 0f )));
+      }
+      return String.join(" ", qfParts);
+    }
+    if (site != null) {
+      for (int i = 1; i <= NUMBER_OF_HTML_AREA; i++) {
+        Float w = Common.getValueByName(site, "weight" + i);
+        if (w != null) {
+          qfParts.add(String.format("html_area%d^%.2f", i, w));
+        }
+      }
+    }
+    if (qfParts.size() > 0) {
+      return String.join(" ", qfParts);
+    }
+    for (int i = 1; i <= NUMBER_OF_HTML_AREA; i++) {
+      qfParts.add(String.format("html_area%d", i));
+    }
+    return String.join(" ", qfParts);
+  }
+  /**
+   * get Highlighting content
+   * @param response the slor response
+   * @param id the document id
+   * @param field the document filed
+   * @return the Highlighting string
+   */
   private List<String> getHighlighting(QueryResponse response, String id, String field){
     if(response.getHighlighting().containsKey(id)){
       return response.getHighlighting().get(id).get(field);
@@ -186,6 +250,7 @@ public class SolrService {
   private SolrInputDocument pageToDocument(CPage page) throws IOException, SolrServerException {
     WebSite site = webSiteRepository.findOne(page.getSiteId());
     String id = findByURL(page.getUrl());
+    DomHelper domHelper = new DomHelper();
 
     // set id if exist
     SolrInputDocument document = new SolrInputDocument();
@@ -199,12 +264,19 @@ public class SolrService {
 
     // force convert to string for solr document
     // "1" will identify as number in solr document
-    document.addField("manufacturer_id", site.getId() + " ");
+    document.addField("manufacturer_id", site.getId() + "");
 
-    document.addField("content", new DomHelper().htmlToText(page.getContent()));
+    document.addField("content", domHelper.htmlToText(page.getContent()));
     document.addField("category", page.getCategory());
     document.addField("page_updated_at", Date.from(Instant.now()));
+
+    List<String> htmlAreas = domHelper.getHtmlAreasFromContents(page.getContent());
+    for (int i = 0; i < htmlAreas.size(); i++) {
+      document.addField("html_area" + (i + 1), htmlAreas.get(i));
+    }
     return document;
   }
+
+
 
 }

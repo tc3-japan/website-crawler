@@ -112,16 +112,13 @@ public class CrawlerThread implements Runnable {
    * init thread
    */
   public void init() {
-    webClient = new WebClient(new BrowserVersion.BrowserVersionBuilder(BrowserVersion.CHROME).build());
-    webClient.getOptions().setJavaScriptEnabled(false);
-    webClient.getOptions().setThrowExceptionOnScriptError(false);
-    webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-    webClient.getOptions().setCssEnabled(false);
-    webClient.getOptions().setRedirectEnabled(true);
-
+    webClient = Common.createWebClient();
     // set the webclient timeout, unit is milliseconds
     webClient.getOptions().setTimeout(timeout);
-
+    // set enable/disable Javascript (default: false)
+    if (crawlerTask.getSite().getSupportsJs() != null) {
+      webClient.getOptions().setJavaScriptEnabled(crawlerTask.getSite().getSupportsJs());
+    }
     if (SpringTool.getApplicationContext() != null) {
       pageRepository = SpringTool.getApplicationContext().getBean(PageRepository.class);
       destinationURLRepository = SpringTool.getApplicationContext().getBean(DestinationURLRepository.class);

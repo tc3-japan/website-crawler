@@ -1,12 +1,16 @@
 package com.topcoder.productsearch.common;
 
 import com.topcoder.productsearch.cleaner.service.CleanerService;
+import com.topcoder.productsearch.common.entity.SOTruth;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.SOTruthRepository;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
 import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
 import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
+import com.topcoder.productsearch.opt_evaluate.service.SOEvaluateService;
+import com.topcoder.productsearch.opt_gen_truth.service.SOGenTruthService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -45,6 +49,18 @@ public class ProcessLauncherTest {
   @Mock
   ValidatePagesService validatePagesService;
 
+  @Mock
+  SOTruthRepository soTruthRepository;
+
+  @Mock
+  SOEvaluateService soEvaluateService;
+
+  @Mock
+  SOGenTruthService soGenTruthService;
+
+  @Mock
+  SOTruth soTruth;
+
   @InjectMocks
   ProcessLauncher processLauncher;
 
@@ -66,6 +82,8 @@ public class ProcessLauncherTest {
     when(webSiteRepository.findOne(siteId)).thenReturn(webSite);
     when(webSiteRepository.findOne(Integer.valueOf(1))).thenReturn(webSite);
     when(webSiteRepository.findOne(2)).thenReturn(null);
+    when(soTruthRepository.findOne(1)).thenReturn(soTruth);
+    when(soTruthRepository.findOne(2)).thenReturn(null);
     doNothing().when(crawlerService).crawler();
     doNothing().when(converterService).convert(webSite);
     doNothing().when(converterService).convert(webSite);
@@ -130,10 +148,54 @@ public class ProcessLauncherTest {
     processLauncher.run(args5);
     verify(converterService, times(0)).convert(webSite);
 
- 
+
     args5 = new DefaultApplicationArguments(new String[]{"--proc=validate-pages", "--site=1"});
     processLauncher.run(args5);
     verify(validatePagesService, times(1)).validate(webSite);
+
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,4",
+        "--truth=1", "--search-words=\"クルーネックT MEN\""});
+    processLauncher.run(args);
+    verify(soEvaluateService, times(1)).evaluate(any(SOTruth.class),anyString(),anyList());
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,4", "--search-words=\"クルーネックT MEN\""});
+    try {
+      processLauncher.run(args);
+    } catch (Exception e) {
+      assertEquals(e.getMessage(), "parameter truth is required");
+    }
+    verify(soEvaluateService, times(1)).evaluate( any(SOTruth.class), anyString(), anyList());
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,x",
+        "--truth=1"});
+    processLauncher.run(args);
+    verify(soEvaluateService, times(1)).evaluate(any(SOTruth.class),anyString(),anyList());
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--weights=1.1,2.5,3,x",
+        "--truth=2"});
+    try {
+      processLauncher.run(args);
+    } catch (Exception e) {
+      assertEquals(e.getMessage(), "cannot find truth where id = 2");
+    }
+    verify(soEvaluateService, times(1)).evaluate( any(SOTruth.class), anyString(), anyList());
+    
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--truth=1"});
+    processLauncher.run(args);
+    verify(soEvaluateService, times(2)).evaluate( any(SOTruth.class), anyString(), anyList());
+
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1"});
+    processLauncher.run(args);
+    verify(soGenTruthService, times(0)).genTruth(any(WebSite.class), anyString(), anyBoolean());
+
+
+
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1","--search-words=\"test word\""});
+    processLauncher.run(args);
+    verify(soGenTruthService, times(1)).genTruth(any(WebSite.class), anyString(), anyBoolean());
 
   }
 

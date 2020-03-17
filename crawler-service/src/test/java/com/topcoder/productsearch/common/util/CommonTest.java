@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -130,5 +131,25 @@ public class CommonTest {
   public void testFirstOfString() {
     assertEquals("test", Common.firstNOfString("test", 4));
     assertEquals("hello ...", Common.firstNOfString("hello world", 7));
+  }
+
+  @Test
+  public void testGetValueByName() {
+    WebSite site = new WebSite();
+    site.setWeight1(1.0f);
+
+    assertEquals(Common.getValueByName(site, "weight1"), Float.valueOf(1.0f));
+    assertNull(Common.getValueByName(site,"notExistMethod"));
+    assertNull(Common.getValueByName(site,"weight2"));
+  }
+
+  @Test
+  public void testSetValueByName() {
+    WebSite site = new WebSite();
+    site.setName("name");
+    Common.setValueByName(site, "name2", "name");
+    assertEquals(site.getName(), "name");
+    Common.setValueByName(site, "name", "new-name");
+    assertEquals(site.getName(), "new-name");
   }
 }

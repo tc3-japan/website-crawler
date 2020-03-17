@@ -96,4 +96,14 @@ public class DomHelperTest {
   }
 
 
+  @Test
+  public void testGetHtmlAreas() {
+    String contents = "<content>a</content><content>b</content>";
+    List<String> areas = domHelper.getHtmlAreasFromContents(contents);
+
+    assertEquals(areas.size(), 2);
+    assertEquals(areas.get(0), "a");
+    assertEquals(areas.get(1), "b");
+  }
+
 }
