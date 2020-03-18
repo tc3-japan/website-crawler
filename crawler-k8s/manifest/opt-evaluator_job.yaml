@@ -1,18 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: validator-job
+  name: opt-evaluator-job
 spec:
   template:
     metadata:
       labels:
-        app: validator-job
+        app: opt-evaluator-job
     spec:
       restartPolicy: Never
       containers:
       - args:
-        - --proc=validate-pages
-        - --site=1
+        - --proc=opt_evaluate
+        - --truth=1
+        - --weights=1,1,1,1,1,1,1,1,1,1
         image: tc3jp/productsearch-service:develop-1.0.13
         name: crawler
         env:
