@@ -22,3 +22,10 @@ services:
     image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
     command: "--proc=validate-pages --site=1"
 
+  truth_gen:
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
+    command: '--proc=opt_gen_truth --site=1 --search-words="MENS Jeans"'
+
+  evaluator:
+    image: tc3jp/productsearch-service:${PROFILE}-${API_VER}
+    command: '--proc=opt_evaluate --truth=1 --weights=1,1,1,1,1,1,1,1,1,1'

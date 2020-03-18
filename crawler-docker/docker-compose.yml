@@ -2,7 +2,7 @@ version: "3"
 services:
 
   solr:
-    image: tc3jp/productsearch-solr:8.1.1-4
+    image: tc3jp/productsearch-solr:8.1.1-1.0.13
     build:
       context: ./solr/
     volumes:
@@ -11,7 +11,7 @@ services:
       - 8983:8983
   
   mysql:
-    image: tc3jp/productsearch-mysql:8.0.17-4
+    image: tc3jp/productsearch-mysql:8.0.17-1.0.13
     build:
       context: ./mysql/
     volumes:

@@ -1,18 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: validator-job
+  name: opt-truth-gen-job
 spec:
   template:
     metadata:
       labels:
-        app: validator-job
+        app: opt-truth-gen-job
     spec:
       restartPolicy: Never
       containers:
       - args:
-        - --proc=validate-pages
+        - --proc=opt_gen_truth
         - --site=1
+        - --search-words="MENS Jeans"
         image: tc3jp/productsearch-service:develop-1.0.13
         name: crawler
         env:
