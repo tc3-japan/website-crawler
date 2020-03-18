@@ -122,9 +122,19 @@ public class Common {
    * @return the updated url
    */
   public static String normalize(String url) {
+    if (url == null) {
+      return null;
+    }
     // TODO: The site-specific code
-    String[] parts = url.split("&");
-    return Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
+    if (url.contains("cgid=")) {
+      String[] parts = url.split("&");
+      url = Arrays.stream(parts).filter(part -> !part.startsWith("cgid=")).collect(Collectors.joining("&"));
+    }
+    // remove a slash at the end.
+    if (url.endsWith("/")) {
+      url = url.substring(0, url.length()-1);
+    }
+    return url;
   }
 
   /**

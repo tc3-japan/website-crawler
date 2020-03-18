@@ -58,11 +58,10 @@ public class CommonTest {
 
   @Test
   public void testNormalize() {
-    String url = "https://www.uniqlo.com/us/en/women-airism-slip-alexander" +
-        "-wang-418189.html?dwvar_418189_color=COL09&cgid=women-airism-collection";
-    assertEquals("https://www.uniqlo.com/us/en/women-airism-" +
-        "slip-alexander-wang-418189.html?dwvar_418189_color=COL09", Common.normalize(url));
+    String url = "https://www.uniqlo.com/us/en/women-airism-slip-alexander-wang-418189.html?dwvar_418189_color=COL09&cgid=women-airism-collection";
+    assertEquals("https://www.uniqlo.com/us/en/women-airism-slip-alexander-wang-418189.html?dwvar_418189_color=COL09", Common.normalize(url));
     assertEquals("http://test.com?a=b", Common.normalize("http://test.com?a=b"));
+    assertEquals("http://test.com/products/123456", Common.normalize("http://test.com/products/123456/"));
   }
 
   @Test
@@ -110,7 +109,7 @@ public class CommonTest {
   //   assertEquals(false, Common.hasAccess(site, "https://www.uniqlo.com/us/en/search"));
   //   assertEquals(true, Common.hasAccess(site, "https://www.uniqlo.com/us/en/test.html"));
   // }
-  
+
   @Test
   public void testIsUnnecessary() {
     assertEquals(true, Common.isUnnecessary("https://www.ikea.com/furniture-dealer.pdf"));
