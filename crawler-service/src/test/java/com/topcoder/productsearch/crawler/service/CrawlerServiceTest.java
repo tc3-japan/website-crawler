@@ -3,6 +3,7 @@ package com.topcoder.productsearch.crawler.service;
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
 
@@ -34,12 +35,12 @@ public class CrawlerServiceTest extends AbstractUnitTest {
 
   @Mock
   WebSiteRepository webSiteRepository;
-  
+
   @InjectMocks
   CrawlerServiceCreator creator;
 
   WebSite site = createWebSite();
-  
+
   CrawlerService crawlerService;
 
   @Before
@@ -59,7 +60,8 @@ public class CrawlerServiceTest extends AbstractUnitTest {
   @Test
   public void testService() {
     crawlerService.crawler();
-    assertEquals(crawlerService.getShouldVisit().getOrDefault(site.getUrl(), Boolean.FALSE), Boolean.TRUE);
+    assertEquals(crawlerService.getShouldVisit().getOrDefault(
+        Common.normalize(site.getUrl()), Boolean.FALSE), Boolean.TRUE);
     assertEquals(crawlerService.getQueueTasks().size(), 0);
 
     CrawlerThread thread = new CrawlerThread();

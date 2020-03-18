@@ -163,7 +163,8 @@ public class CrawlerThread implements Runnable {
 
     Integer pageId = null;
     if (Common.isMatch(crawlerTask.getSite(), crawlerTask.getUrl())) {
-      CPage dbPage = pageRepository.findByUrl(crawlerTask.getUrl());
+      String pageUrl = Common.normalize(crawlerTask.getUrl());
+      CPage dbPage = pageRepository.findByUrl(pageUrl);
 
       if (dbPage == null) {
         dbPage = new CPage();
@@ -171,7 +172,7 @@ public class CrawlerThread implements Runnable {
       }
       dbPage.setLastModifiedAt(Date.from(Instant.now()));
 
-      dbPage.setUrl(crawlerTask.getUrl());
+      dbPage.setUrl(pageUrl);
       dbPage.setSiteId(crawlerTask.getSite().getId());
       dbPage.setType("product");
       dbPage.setTitle(page.getTitleText());
@@ -185,7 +186,7 @@ public class CrawlerThread implements Runnable {
       pageRepository.save(dbPage);
 
       pageId = dbPage.getId();
-      logger.info("saved page = " + pageId + ", url = " + crawlerTask.getUrl());
+      logger.info("saved page = " + pageId + ", url = " + pageUrl);
     }
 
     // find all links
@@ -338,8 +339,7 @@ public class CrawlerThread implements Runnable {
         this.retry(request);
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      logger.error(" >>>> download failed, " + e.getMessage());
+      logger.error(" >>>> download failed, " + e.getMessage(), e);
       this.retry(request);
     }
   }
