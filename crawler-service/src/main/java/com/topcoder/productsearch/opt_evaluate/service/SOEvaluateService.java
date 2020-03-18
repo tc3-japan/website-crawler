@@ -170,13 +170,15 @@ public class SOEvaluateService {
       sum += Math.pow((N - Math.abs(soTruthDetail.getRank() - resultDetail.getRank())), e);
     }
 
-    logger.info("finished evaluate, sum = " + sum);
     SOEvaluation evaluation = new SOEvaluation();
     evaluation.setScore(sum);
     evaluation.setResultId(soResult.getId());
     evaluation.setTruthId(soTruth.getId());
     evaluation.setSiteId(soTruth.getSiteId());
     soEvaluationRepository.save(evaluation);
+
+    logger.info("evaluation-id: " + evaluation.getId() + " score = " + sum);
+
     return evaluation;
   }
 }
