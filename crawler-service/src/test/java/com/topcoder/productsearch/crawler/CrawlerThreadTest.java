@@ -94,9 +94,9 @@ public class CrawlerThreadTest extends AbstractUnitTest {
   private WebRequest matchedUrlWebRequest = new WebRequest(new URL("https://www.uniqlo.com/us/en/boys-jersey-easy-" +
       "shorts-416524.html?dwvar_416524_color=COL57&cgid=boys-pants-shorts"));
   private WebRequest rootURLWebRequest = new WebRequest(new URL(webSite.getUrl()));
- 
-  
- 
+
+
+
 
 
   public CrawlerThreadTest() throws MalformedURLException {
@@ -168,7 +168,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     crawlerThread.getExpandUrl().clear();
     task.setUrl(matchedUrlWebRequest.getUrl().toString());
     task.setSourceUrl("http://test.com");
-    when(pageRepository.findByUrl(matchedUrlWebRequest.getUrl().toString())).thenReturn(cPage);
+    when(pageRepository.findByUrl(Common.normalize(matchedUrlWebRequest.getUrl().toString()))).thenReturn(cPage);
     when(destinationURLRepository.findByUrlAndPageId(webSite.getUrl(), 1)).thenReturn(createDestinationURL());
     when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(new SourceURL());
     when(sourceURLRepository.save(any(SourceURL.class))).thenReturn(new SourceURL());
