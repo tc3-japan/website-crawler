@@ -2,14 +2,8 @@ package com.topcoder.productsearch.common;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.topcoder.productsearch.api.exceptions.BadRequestException;
-import com.topcoder.productsearch.common.entity.SOTruth;
-import com.topcoder.productsearch.common.repository.SOTruthRepository;
-import com.topcoder.productsearch.opt_evaluate.service.SOEvaluateService;
-import com.topcoder.productsearch.opt_gen_truth.service.SOGenTruthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +12,19 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import com.topcoder.productsearch.api.services.UserService;
+import com.topcoder.productsearch.api.services.WebSiteService;
 import com.topcoder.productsearch.cleaner.service.CleanerService;
 import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
+import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.SOTruth;
 import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.SOTruthRepository;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
 import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
+import com.topcoder.productsearch.opt_evaluate.service.SOEvaluateService;
+import com.topcoder.productsearch.opt_gen_truth.service.SOGenTruthService;
 
 @Component
 public class ProcessLauncher implements ApplicationRunner {
@@ -41,12 +41,17 @@ public class ProcessLauncher implements ApplicationRunner {
   @Autowired
   WebSiteRepository webSiteRepository;
 
-
   /**
    * search opt truth repository
    */
   @Autowired
   SOTruthRepository soTruthRepository;
+
+  /**
+   * the web site service
+   */
+  @Autowired
+  WebSiteService webSiteService;
 
   /**
    * the crawler service
@@ -208,6 +213,7 @@ public class ProcessLauncher implements ApplicationRunner {
         return;
       }
       int siteId = Integer.parseInt(sites.get(0));
+
       CrawlerService crawlerService = crawlerServiceCreator.getCrawlerService(siteId);
 
       if (crawlerService == null) {
@@ -255,12 +261,33 @@ public class ProcessLauncher implements ApplicationRunner {
       //boolean crawl = args.containsOption("crawl");
       boolean crawl = true; // always true
       soGenTruthService.genTruth(site, searchWords, crawl);
+
+    } else if ("scrape".equalsIgnoreCase(procs.get(0))) {
+      // "scrape" task for scraping data from a page specified by the 'url' parameter. 
+      WebSite site = getSite(args);
+
+      List<String> urls = args.getOptionValues("url");
+      if (urls == null || urls.size() ==0 ) {
+        logger.error("url is required");
+        return;
+      }
+      logger.info("Start scraping page from: " + urls.get(0));
+      CPage page = webSiteService.crawl(site.getId(), urls.get(0));
+      if (page != null) {
+        logger.info(page.getUrl());
+        logger.info(page.getTitle());
+        logger.info(page.getContent());
+        //logger.info(page.getBody());
+      } else {
+        logger.info("page is null.");
+      }
     } else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
-      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=validate-pages");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
+      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=scrape,--url=...");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=opt_gen_truth,--search-words=\"keyword1 keyword2\"");
       logger.info("usage : ./gradlew bootRun -Pargs=--truth=1,--proc=opt_evaluate,--weights=1,2,3,4,5");
       logger.info("usage : ./gradlew bootRun -Pargs=--passwd={username:password}");
