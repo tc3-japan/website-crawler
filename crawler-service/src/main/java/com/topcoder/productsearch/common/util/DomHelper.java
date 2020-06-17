@@ -10,6 +10,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
 import com.gargoylesoftware.htmlunit.html.DomNode;
@@ -20,6 +22,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  * html dom helper
  */
 public class DomHelper {
+
+  /**
+   * the logger instance
+   */
+  private static final Logger logger = LoggerFactory.getLogger(DomHelper.class);
 
   /**
    * find all urls in page
@@ -51,6 +58,15 @@ public class DomHelper {
     if (cssSelectors == null || cssSelectors.trim().length() == 0) {
       return page.getBody().asXml();
     }
+    // Experiment : waiting for 1 sec.
+    try {
+      synchronized (page) {
+        page.wait(1000);
+      }
+    } catch (InterruptedException e) {
+      logger.warn(e.getMessage());
+    }
+
     String[] selectors = cssSelectors.split(";");
     List<String> contents = new LinkedList<>();
     for (String selector : selectors) {
@@ -58,7 +74,8 @@ public class DomHelper {
       DomNodeList<DomNode> domNodes = page.querySelectorAll(selector);
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < domNodes.size(); i++) {
-       sb.append(domNodes.get(i).asXml());
+        //sb.append(domNodes.get(i).asXml());
+        sb.append(domNodes.get(i).asText() + " ");
       }
      contents.add(String.format("<content selector=\"%s\">%s</content>", selector, sb.toString()));
     }

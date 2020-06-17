@@ -312,8 +312,13 @@ public class CrawlerThread implements Runnable {
         request.setAdditionalHeader("If-None-Match", dbPage.getEtag());
       }
 
-      logger.info("start download page = " + url);
+      if (crawlerTask.getSite().getSupportsJs()) {
+        // Enabling JS engine if the page is a product page.
+        boolean enableJS = Common.isMatch(crawlerTask.getSite(), crawlerTask.getUrl());
+        webClient.getOptions().setJavaScriptEnabled(enableJS);
+      }
 
+      logger.info("start download page = " + url + ", js-enabled: " + webClient.getOptions().isJavaScriptEnabled());
 
       HtmlPage page = webClient.getPage(request);
       int code = page.getWebResponse().getStatusCode();
@@ -339,7 +344,7 @@ public class CrawlerThread implements Runnable {
         this.retry(request);
       }
     } catch (Exception e) {
-      logger.error(" >>>> download failed, " + e.getMessage(), e);
+      logger.error(" >>>> download failed, url=" + url + ", error=" + e.getMessage(), e);
       this.retry(request);
     }
   }
