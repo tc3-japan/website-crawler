@@ -117,6 +117,7 @@ public class SolrService {
     httpSolrClient.commit();
   }
 
+
   /**
    * search product
    *
@@ -128,21 +129,14 @@ public class SolrService {
       throw new IllegalArgumentException("request must be specified.");
     }
 
-    SolrQuery query = new SolrQuery();
     logger.info("search product with params: " + request.toString());
 
-    if (request.getQuery() != null) {
-      query.set("q", String.join(" ", request.getQuery()));
-    } else {
-      query.set("q.alt", "*:*");
-    }
+    boolean dismax = "dismax".equalsIgnoreCase(request.getParser());
 
-    String qf = this.getQF(request.getManufacturerIds().isEmpty() ?
-        null : webSiteRepository.findOne(request.getManufacturerIds().get(0)), request.getWeights());
-    query.set("qf", qf);
-    query.set("defType", "dismax");
+    SolrQuery query = dismax ? buildDismaxQueryBase(request) // dismax query parser
+                            : buildStandardQueryBase(request); // standard query parser
 
-    if (!request.getManufacturerIds().isEmpty()) {
+    if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
       String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
       query.set("fq", "manufacturer_id:(" + fq + ")");
     }
@@ -152,6 +146,7 @@ public class SolrService {
     query.set("hl", "on");
     query.set("hl.fl", "content");
     query.setShowDebugInfo(request.isDebug());
+
     logger.info(query.toLocalParamsString());
 
     QueryResponse response = httpSolrClient.query(query);
@@ -191,6 +186,66 @@ public class SolrService {
       products.add(solrProduct);
     }
     return products;
+  }
+
+
+  /**
+   * build SolrQuery to use Standard Query Parser
+   * @param request
+   * @return
+   */
+  SolrQuery buildStandardQueryBase(ProductSearchRequest request) {
+
+    SolrQuery query = new SolrQuery();
+
+    if (request.getQuery() == null || request.getQuery().isEmpty()) {
+      query.set("q", "*:*");
+      return query;
+    }
+
+    String q = String.format("(%s)", String.join(" ", request.getQuery()));
+
+    List<Float> weights = request.getWeights();
+    if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
+      WebSite site = webSiteRepository.findOne(request.getManufacturerIds().get(0));
+      if (site != null) {
+        weights = site.getWeights();
+      }
+    }
+    List<String> fieldQueries = new ArrayList<String>(NUMBER_OF_HTML_AREA);
+    for (int i=0; i<NUMBER_OF_HTML_AREA; i++) {
+      Float w = null;
+      if (weights != null && weights.size() <= i + 1) {
+        w = weights.get(i);
+      }
+      String qi = String.format("html_area%d:%s^%f", (i + 1), q, (w != null ? w : 1f));
+      fieldQueries.add(qi);
+    }
+    query.set("q", String.join(" OR ", fieldQueries));
+
+    return query;
+  }
+
+  /**
+   * build SolrQuery to use Dismax Query Parser
+   * @param request
+   * @return
+   */
+  SolrQuery buildDismaxQueryBase(ProductSearchRequest request) {
+
+    SolrQuery query = new SolrQuery();
+
+    query.set("defType", "dismax");
+    if (request.getQuery() != null) {
+      query.set("q", String.join(" ", request.getQuery()));
+    } else {
+      query.set("q.alt", "*:*");
+    }
+    String qf = this.getQF(request.getManufacturerIds().isEmpty() ?
+        null : webSiteRepository.findOne(request.getManufacturerIds().get(0)), request.getWeights());
+    query.set("qf", qf);
+
+    return query;
   }
 
   /**
