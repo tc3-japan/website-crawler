@@ -53,4 +53,9 @@ public class ProductSearchRequest {
    * debug, will return explain
    */
   private boolean debug = false;
+
+  /**
+   * Query Parser, standard(default) or dismax
+   */
+  private String parser;
 }
