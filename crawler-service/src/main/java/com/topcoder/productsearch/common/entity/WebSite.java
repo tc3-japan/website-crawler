@@ -11,8 +11,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * the website entity
@@ -114,4 +116,14 @@ public class WebSite {
    */
   @Column(name = "google_param")
   private String googleParam;
+
+  /**
+   * get weights as list
+   * @return
+   */
+  @Transient
+  @JsonIgnore
+  public List<Float> getWeights() {
+    return Arrays.asList(new Float[] {weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9, weight10});
+  }
 }
