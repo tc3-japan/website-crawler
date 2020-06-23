@@ -1,5 +1,6 @@
 package com.topcoder.productsearch.common.util;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -67,17 +69,52 @@ public class DomHelper {
       logger.warn(e.getMessage());
     }
 
-    String[] selectors = cssSelectors.split(";");
+    WebClient webClient = page.getWebClient();
+    webClient.getOptions().setJavaScriptEnabled(true);
+    webClient.waitForBackgroundJavaScript(10000);
+
+    HtmlPage refreshPage = page;
+
+    try {
+      refreshPage = (HtmlPage)page.refresh();
+    } catch (IOException e) {
+      logger.warn(e.getMessage());
+    }
+
+    /*
+     * here is a sample css selector and xpath.
+     *
+     * html > head > title
+     * //meta[@name="description"]/@content;//meta[@name="keywords"]/@content
+     * .range-breadcrumb__list
+     */
+    String[] selectors = cssSelectors.split("\n");
     List<String> contents = new LinkedList<>();
     for (String selector : selectors) {
-      // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
-      DomNodeList<DomNode> domNodes = page.querySelectorAll(selector);
-      StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < domNodes.size(); i++) {
-        //sb.append(domNodes.get(i).asXml());
-        sb.append(domNodes.get(i).asText() + " ");
+      if (selector.equals("") || selector == null) {
+        // next selector
+        continue;
       }
-     contents.add(String.format("<content selector=\"%s\">%s</content>", selector, sb.toString()));
+      StringBuilder sb = new StringBuilder();
+      // if xpath in selector
+      if (selector.contains("/")) {
+        String[] xpaths = selector.split(";");
+        for (String xpath : xpaths) {
+          List<DomNode> domNodes = refreshPage.getByXPath(xpath);
+          for (int i = 0; i < domNodes.size(); i++) {
+            sb.append(domNodes.get(i).getNodeValue() + " ");
+          }
+        }
+      // if css selector
+      } else {
+        // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
+        DomNodeList<DomNode> domNodes = refreshPage.querySelectorAll(selector);
+        for (int i = 0; i < domNodes.size(); i++) {
+          //sb.append(domNodes.get(i).asXml());
+          sb.append(domNodes.get(i).asText() + " ");
+        }
+      }
+      contents.add(String.format("<content selector=\"%s\">%s</content>", selector, sb.toString()));
     }
     return String.join("\n", contents);
   }
