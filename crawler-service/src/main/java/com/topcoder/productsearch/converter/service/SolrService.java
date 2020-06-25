@@ -206,16 +206,18 @@ public class SolrService {
     String q = String.format("(%s)", String.join(" ", request.getQuery()));
 
     List<Float> weights = request.getWeights();
-    if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
-      WebSite site = webSiteRepository.findOne(request.getManufacturerIds().get(0));
-      if (site != null) {
-        weights = site.getWeights();
+    if (weights == null || weights.isEmpty()) {
+      if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
+        WebSite site = webSiteRepository.findOne(request.getManufacturerIds().get(0));
+        if (site != null) {
+          weights = site.getWeights();
+        }
       }
     }
     List<String> fieldQueries = new ArrayList<String>(NUMBER_OF_HTML_AREA);
     for (int i=0; i<NUMBER_OF_HTML_AREA; i++) {
       Float w = null;
-      if (weights != null && weights.size() <= i + 1) {
+      if (weights != null && i < weights.size()) {
         w = weights.get(i);
       }
       String qi = String.format("html_area%d:%s^%f", (i + 1), q, (w != null ? w : 1f));
