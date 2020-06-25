@@ -1,5 +1,30 @@
 package com.topcoder.productsearch.opt_gen_truth.service;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.solr.client.solrj.SolrServerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
@@ -19,21 +44,8 @@ import com.topcoder.productsearch.converter.service.SolrService;
 import com.topcoder.productsearch.crawler.CrawlerTask;
 import com.topcoder.productsearch.crawler.CrawlerThread;
 import com.topcoder.productsearch.crawler.CrawlerThreadPoolExecutor;
-import lombok.Setter;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import lombok.Setter;
 
 /**
  * search opt gen truth service
@@ -105,7 +117,41 @@ public class SOGenTruthService {
   /**
    * create reference data by scraping the result of Google search with some search words for the specific web site.
    *
-   * @param site        whe website
+   * @param site            the website
+   * @param searchWords     the search words
+   * @param searchWordsPath the text file path of search words
+   * @param crawl           crawl pages found in Google search if true
+   */
+  @Transactional
+  public void genTruth(WebSite site, String searchWords, String searchWordsPath) throws Exception {
+    boolean crawl = true;
+    if (searchWords != null) {
+      genTruth(site, searchWords, crawl);
+    } else if (searchWordsPath != null) {
+      Path targetSearchWordsPath = Paths.get(searchWordsPath).toAbsolutePath();
+      if (Files.isReadable(targetSearchWordsPath) == false) {
+        logger.info("no such file \"" + searchWordsPath + "\" or could not readable");
+        return;
+      }
+      List<String> searchWordsList = Files.readAllLines(targetSearchWordsPath, StandardCharsets.UTF_8);
+      if (searchWordsList.size() != 0) {
+        for (String targetSearchWords : searchWordsList) {
+          genTruth(site, targetSearchWords, crawl);
+        }
+      } else {
+        logger.info("the file " + searchWordsPath + " is empty");
+        return;
+      }
+    } else {
+      logger.info("search-words or search-words-path are required");
+      return;
+    }
+  }
+
+  /**
+   * create reference data by scraping the result of Google search with some search words for the specific web site.
+   *
+   * @param site        the website
    * @param searchWords the search words
    * @param crawl       crawl pages found in Google search if true
    */
