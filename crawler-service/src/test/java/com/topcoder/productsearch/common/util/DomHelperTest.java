@@ -1,10 +1,12 @@
 package com.topcoder.productsearch.common.util;
 
 
-import com.gargoylesoftware.htmlunit.html.DomNode;
-import com.gargoylesoftware.htmlunit.html.DomNodeList;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,10 +16,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomNode;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 
 /**
@@ -52,6 +55,9 @@ public class DomHelperTest {
   @Mock
   DomNodeList<DomNode> domNodes;
 
+  @Mock
+  WebClient webClient;
+
   @InjectMocks
   DomHelper domHelper;
 
@@ -82,11 +88,12 @@ public class DomHelperTest {
     when(domNodes.size()).thenReturn(1);
     when(domNodes.get(anyInt())).thenReturn(domNode);
 
-
     when(domNode.asXml()).thenReturn("<div>text</div>");
     when(page.querySelectorAll(anyString())).thenReturn(domNodes);
 
-    assertEquals(true, domHelper.getContentsByCssSelectors(page, "product-info;test").startsWith("<content selector=\"product-info\">"));
+    when(page.getWebClient()).thenReturn(webClient);
+
+    assertEquals(true, domHelper.getContentsByCssSelectors(page, "product-info\ntest").startsWith("<content selector=\"product-info\">"));
   }
 
   @Test

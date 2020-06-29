@@ -41,8 +41,8 @@ public class CrawlerServiceCreator {
    */
   @Autowired
   private WebSiteRepository webSiteRepository;
-  
-  
+
+
   public CrawlerService getCrawlerService(int siteId) {
     WebSite webSite = webSiteRepository.findOne(siteId);
     if (webSite == null) {
@@ -74,25 +74,31 @@ public class CrawlerServiceCreator {
 
       this.webSite = webSite;
       threadPoolExecutor = new CrawlerThreadPoolExecutor(webSite.getParallelSize(), webSite.getCrawlInterval());
+      final int maxDepth = webSite.getCrawlMaxDepth();
+
       // set task completed callback
       threadPoolExecutor.setExecutedHandler(runnable -> {
         CrawlerThread thread = (CrawlerThread) runnable;
         if (thread.getExpandUrl() != null && thread.getExpandUrl().size() > 0) {
           thread.getExpandUrl().forEach(url -> {
-            if (shouldVisit.getOrDefault(Common.normalize(url), Boolean.FALSE).equals(Boolean.TRUE)) {
-              return;
+
+            if (!alreadyVisitied(url) && thread.getCrawlerTask().getDepth() < maxDepth) {
+              CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite(), thread.getCrawlerTask().getUrl());
+              task.setDepth(thread.getCrawlerTask().getDepth() + 1);
+              pushTask(task);
             }
-            CrawlerTask task = new CrawlerTask(url, thread.getCrawlerTask().getSite(), thread.getCrawlerTask().getUrl());
-            task.setDepth(thread.getCrawlerTask().getDepth() + 1);
-            pushTask(task);
           });
         }
         checkTask();
       });
-  
+
       queueTasks = new LinkedBlockingQueue<>();
       shouldVisit = new HashMap<>();
-  
+
+    }
+
+    boolean alreadyVisitied(String url) {
+      return shouldVisit.getOrDefault(Common.normalize(url), Boolean.FALSE).equals(Boolean.TRUE);
     }
 
     /**
