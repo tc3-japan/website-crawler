@@ -60,26 +60,19 @@ public class DomHelper {
     if (cssSelectors == null || cssSelectors.trim().length() == 0) {
       return page.getBody().asXml();
     }
-    // Experiment : waiting for 1 sec.
-    try {
-      synchronized (page) {
-        page.wait(1000);
-      }
-    } catch (InterruptedException e) {
-      logger.warn(e.getMessage());
-    }
 
     WebClient webClient = page.getWebClient();
-    webClient.getOptions().setJavaScriptEnabled(true);
+    //webClient.getOptions().setJavaScriptEnabled(true);
     webClient.waitForBackgroundJavaScript(10000);
 
-    HtmlPage refreshPage = page;
-
+    //HtmlPage refreshPage = page;
+    /*
     try {
-      refreshPage = (HtmlPage)page.refresh();
+      page = (HtmlPage)page.refresh();
     } catch (IOException e) {
       logger.warn(e.getMessage());
     }
+    */
 
     /*
      * here is a sample css selector and xpath.
@@ -97,10 +90,10 @@ public class DomHelper {
       }
       StringBuilder sb = new StringBuilder();
       // if xpath in selector
-      if (selector.contains("/")) {
+      if (selector.startsWith("/")) {
         String[] xpaths = selector.split(";");
         for (String xpath : xpaths) {
-          List<DomNode> domNodes = refreshPage.getByXPath(xpath);
+          List<DomNode> domNodes = page.getByXPath(xpath);
           for (int i = 0; i < domNodes.size(); i++) {
             sb.append(domNodes.get(i).getNodeValue() + " ");
           }
@@ -108,12 +101,13 @@ public class DomHelper {
       // if css selector
       } else {
         // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
-        DomNodeList<DomNode> domNodes = refreshPage.querySelectorAll(selector);
+        DomNodeList<DomNode> domNodes = page.querySelectorAll(selector);
         for (int i = 0; i < domNodes.size(); i++) {
           //sb.append(domNodes.get(i).asXml());
           sb.append(domNodes.get(i).asText() + " ");
         }
       }
+      logger.debug(String.format("area#%d, content-size:%d, selector:%s", contents.size() + 1, sb.length(), selector));
       contents.add(String.format("<content selector=\"%s\">%s</content>", selector, sb.toString()));
     }
     return String.join("\n", contents);

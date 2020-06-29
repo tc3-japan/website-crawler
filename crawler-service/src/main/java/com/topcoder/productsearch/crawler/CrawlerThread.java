@@ -1,7 +1,6 @@
 package com.topcoder.productsearch.crawler;
 
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Date;
@@ -12,7 +11,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -60,7 +58,7 @@ public class CrawlerThread implements Runnable {
   /**
    * the params for task wait time
    */
-  private Integer taskInterval;
+  private Integer taskInterval = 1000;
 
   /**
    * task timeout
@@ -128,6 +126,14 @@ public class CrawlerThread implements Runnable {
     expandUrl = new HashSet<>();
   }
 
+  /**
+   * clean all resources
+   */
+  public void clean() {
+    if (webClient != null) {
+      webClient.close();
+    }
+  }
 
   /**
    * thread run
@@ -137,8 +143,10 @@ public class CrawlerThread implements Runnable {
     crawlerTask.setStartTime(System.currentTimeMillis());
     try {
       download(new WebRequest(new URL(crawlerTask.getUrl())));
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      logger.error("Error occurred in downloading page from " + crawlerTask.getUrl(), e);
+    } finally {
+      clean();
     }
   }
 
@@ -266,16 +274,16 @@ public class CrawlerThread implements Runnable {
   private void enqueue(String url) {
     if (crawlerService != null
         && crawlerService.getThreadPoolExecutor().hasReachedTimeLimit(crawlerTask.getSite().getCrawlTimeLimit())) {
-      logger.info("skip " + url + " , because of reached time limit");
+      logger.debug("skip " + url + " , because of reached time limit");
       return;
     }
     if (crawlerTask.getDepth() >= maxDepth) {
-      logger.info("skip " + url + " , because of reached max depth");
+      logger.debug("skip " + url + " , because of reached max depth[" + maxDepth + "]");
       return;
     }
     if (Boolean.TRUE.equals(crawlerTask.getSite().getSupportsRobotsTxt())
         && !Common.hasAccess(crawlerTask.getSite(), url)) {
-      logger.info("skip " + url + " , because of robots.txt disallow this");
+      logger.debug("skip " + url + " , because of robots.txt disallow this");
       return;
     }
 
