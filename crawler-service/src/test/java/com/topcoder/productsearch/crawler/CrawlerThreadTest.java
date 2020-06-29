@@ -1,6 +1,29 @@
 package com.topcoder.productsearch.crawler;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Date;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebClientOptions;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -11,35 +34,10 @@ import com.topcoder.productsearch.common.entity.SourceURL;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
 import com.topcoder.productsearch.common.repository.PageRepository;
-
 import com.topcoder.productsearch.common.repository.SourceURLRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.common.util.DomHelper;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.Date;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 /**
  * unit test for crawler thread
@@ -113,6 +111,7 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     when(htmlPage.getWebResponse()).thenReturn(webResponse);
     when(webClient.getPage(rootURLWebRequest)).thenReturn(htmlPage);
     when(webClient.getPage(matchedUrlWebRequest)).thenReturn(htmlPage);
+    when(webClient.getOptions()).thenReturn(new WebClientOptions());
     when(crawlerService.getThreadPoolExecutor()).thenReturn(threadPoolExecutor);
     when(threadPoolExecutor.hasReachedTimeLimit(anyInt())).thenReturn(false);
     PowerMockito.spy(Common.class);
