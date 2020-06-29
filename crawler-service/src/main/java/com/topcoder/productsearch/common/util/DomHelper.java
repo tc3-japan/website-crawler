@@ -61,7 +61,7 @@ public class DomHelper {
     }
 
     WebClient webClient = page.getWebClient();
-    //webClient.getOptions().setJavaScriptEnabled(true);
+    // TODO: make configurable
     webClient.waitForBackgroundJavaScript(10000);
 
     //HtmlPage refreshPage = page;
@@ -83,7 +83,7 @@ public class DomHelper {
     String[] selectors = cssSelectors.split("\n");
     List<String> contents = new LinkedList<>();
     for (String selector : selectors) {
-      if (selector.equals("") || selector == null) {
+      if (selector == null || selector.trim().length() == 0) {
         // next selector
         continue;
       }
