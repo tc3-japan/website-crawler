@@ -6,6 +6,8 @@ logging:
   level:
     root: INFO
     com.topcoder.productsearch: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.jdbc.core: DEBUG
     com.gargoylesoftware.htmlunit: ERROR
     com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter: OFF
@@ -18,6 +20,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       idle-timeout: 60000
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format__sql: true
   thymeleaf:
     cache: false
 
