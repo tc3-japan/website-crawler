@@ -213,7 +213,7 @@ public class SOEvaluateService {
         scores.add(eval.getScore());
       } catch (Exception e) {
         logger.error(String.format("An error occured in evaluating w/ the truth#%d : %s", truth.getId(), e.getMessage()), e);
-        result.incrErrorCount();
+        result.setErrorCount(result.getErrorCount() + 1);
       }
     }
     double[] dscores = scores.stream().mapToDouble(s -> s.doubleValue()).toArray();

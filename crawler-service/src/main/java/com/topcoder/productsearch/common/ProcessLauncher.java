@@ -266,14 +266,11 @@ public class ProcessLauncher implements ApplicationRunner {
       }
       logger.info("Start scraping page from: " + urls.get(0));
       CPage page = webSiteService.crawl(site.getId(), urls.get(0));
-      if (page != null) {
-        logger.info(page.getUrl());
-        logger.info(page.getTitle());
-        logger.info(page.getContent());
-        //logger.info(page.getBody());
-      } else {
-        logger.info("page is null.");
-      }
+
+      logger.info(page.getUrl());
+      logger.info(page.getTitle());
+      logger.info(page.getContent());
+      //logger.info(page.getBody());
     } else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");
