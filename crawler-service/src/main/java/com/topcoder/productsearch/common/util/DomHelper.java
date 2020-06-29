@@ -10,8 +10,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -20,6 +23,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  * html dom helper
  */
 public class DomHelper {
+
+  /**
+   * the logger instance
+   */
+  private static final Logger logger = LoggerFactory.getLogger(DomHelper.class);
 
   /**
    * find all urls in page
@@ -51,16 +59,58 @@ public class DomHelper {
     if (cssSelectors == null || cssSelectors.trim().length() == 0) {
       return page.getBody().asXml();
     }
-    String[] selectors = cssSelectors.split(";");
+
+    WebClient webClient = page.getWebClient();
+    //webClient.getOptions().setJavaScriptEnabled(true);
+    webClient.waitForBackgroundJavaScript(10000);
+
+    //HtmlPage refreshPage = page;
+    /*
+    try {
+      page = (HtmlPage)page.refresh();
+    } catch (IOException e) {
+      logger.warn(e.getMessage());
+    }
+    */
+
+    /*
+     * here is a sample css selector and xpath.
+     *
+     * html > head > title
+     * //meta[@name="description"]/@content;//meta[@name="keywords"]/@content
+     * .range-breadcrumb__list
+     */
+    String[] selectors = cssSelectors.split("\n");
     List<String> contents = new LinkedList<>();
     for (String selector : selectors) {
-      // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
-      DomNodeList<DomNode> domNodes = page.querySelectorAll(selector);
-      StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < domNodes.size(); i++) {
-       sb.append(domNodes.get(i).asXml());
+      if (selector.equals("") || selector == null) {
+        // next selector
+        continue;
       }
-     contents.add(String.format("<content selector=\"%s\">%s</content>", selector, sb.toString()));
+      StringBuilder sb = new StringBuilder();
+      // if xpath in selector
+      if (selector.startsWith("/")) {
+        String[] areaXpaths = selector.split(";");
+        for (String areaXpath : areaXpaths) {
+          List<DomNode> domNodes = page.getByXPath(areaXpath);
+          for (int i = 0; i < domNodes.size(); i++) {
+            sb.append(domNodes.get(i).getNodeValue() + " ");
+          }
+        }
+      // if css selector
+      } else {
+        String[] areaSelectors = selector.split(";");
+        for (String areaSelector : areaSelectors) {
+          // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
+          DomNodeList<DomNode> domNodes = page.querySelectorAll(areaSelector);
+          for (int i = 0; i < domNodes.size(); i++) {
+            //sb.append(domNodes.get(i).asXml());
+            sb.append(domNodes.get(i).asText() + " ");
+          }
+        }
+      }
+      logger.debug(String.format("area#%d, content-size:%d, selector:%s", contents.size() + 1, sb.length(), selector));
+      contents.add(String.format("<content selector=\"%s\">%s</content>", selector, sb.toString()));
     }
     return String.join("\n", contents);
   }

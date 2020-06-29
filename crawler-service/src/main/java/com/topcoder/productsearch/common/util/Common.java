@@ -30,6 +30,7 @@ import com.gargoylesoftware.css.parser.CSSErrorHandler;
 import com.gargoylesoftware.css.parser.CSSException;
 import com.gargoylesoftware.css.parser.CSSParseException;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.ScriptException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -353,16 +354,28 @@ public class Common {
     webClient.getOptions().setRedirectEnabled(true);
 
     webClient.setJavaScriptErrorListener(new JavaScriptErrorListener() {
-      @Override public void timeoutError(HtmlPage page, long allowedTime, long executionTime) {}
-      @Override public void scriptException(HtmlPage page, ScriptException scriptException) {}
-      @Override public void malformedScriptURL(HtmlPage page, String url, MalformedURLException malformedURLException) {}
-      @Override public void loadScriptError(HtmlPage page, URL scriptUrl, Exception exception) {}
+      @Override public void timeoutError(HtmlPage page, long allowedTime, long executionTime) {
+        logger.debug("Timeout Error: " + allowedTime + " < " + executionTime);
+      }
+      @Override public void scriptException(HtmlPage page, ScriptException scriptException) {
+        logger.debug("Script Exception: " + scriptException.getMessage());
+      }
+      @Override public void malformedScriptURL(HtmlPage page, String url, MalformedURLException malformedURLException) {
+        logger.debug("Malformed Script URL: " + malformedURLException.getMessage());
+      }
+      @Override public void loadScriptError(HtmlPage page, URL scriptUrl, Exception exception) {
+        logger.debug("Load Script Error: " + exception.getMessage());
+      }
+      @Override public void warn(String message, String sourceName, int line, String lineSource, int lineOffset) {}
     });
     webClient.setCssErrorHandler(new CSSErrorHandler() {
       @Override public void warning(CSSParseException exception) throws CSSException {}
       @Override public void fatalError(CSSParseException exception) throws CSSException {}
       @Override public void error(CSSParseException exception) throws CSSException {}
     });
+    //webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+    //webClient.waitForBackgroundJavaScript(10000);
+    //webClient.waitForBackgroundJavaScriptStartingBefore(10000);
 
     return webClient;
   }

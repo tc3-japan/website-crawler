@@ -1,16 +1,9 @@
 package com.topcoder.productsearch.common;
 
-import com.topcoder.productsearch.cleaner.service.CleanerService;
-import com.topcoder.productsearch.common.entity.SOTruth;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.repository.SOTruthRepository;
-import com.topcoder.productsearch.common.repository.WebSiteRepository;
-import com.topcoder.productsearch.converter.service.ConverterService;
-import com.topcoder.productsearch.crawler.service.CrawlerService;
-import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
-import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
-import com.topcoder.productsearch.opt_evaluate.service.SOEvaluateService;
-import com.topcoder.productsearch.opt_gen_truth.service.SOGenTruthService;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,9 +12,17 @@ import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import com.topcoder.productsearch.cleaner.service.CleanerService;
+import com.topcoder.productsearch.cleaner.service.ValidatePagesService;
+import com.topcoder.productsearch.common.entity.SOTruth;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.SOTruthRepository;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.converter.service.ConverterService;
+import com.topcoder.productsearch.crawler.service.CrawlerService;
+import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
+import com.topcoder.productsearch.opt_evaluate.service.SOEvaluateService;
+import com.topcoder.productsearch.opt_gen_truth.service.SOGenTruthService;
 
 /**
  * unit test for CrawlerRunner
@@ -98,7 +99,7 @@ public class ProcessLauncherTest {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    
+
     verify(crawlerServiceCreator, times(1)).getCrawlerService(any(Integer.class));
 
     DefaultApplicationArguments args = new DefaultApplicationArguments(new String[]{"--proc=crawler"});
@@ -180,23 +181,22 @@ public class ProcessLauncherTest {
       assertEquals(e.getMessage(), "cannot find truth where id = 2");
     }
     verify(soEvaluateService, times(1)).evaluate( any(SOTruth.class), anyString(), anyList());
-    
+
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_evaluate", "--site=1", "--truth=1"});
     processLauncher.run(args);
     verify(soEvaluateService, times(2)).evaluate( any(SOTruth.class), anyString(), anyList());
 
-
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1"});
     processLauncher.run(args);
-    verify(soGenTruthService, times(0)).genTruth(any(WebSite.class), anyString(), anyBoolean());
-
-
-
+    verify(soGenTruthService, times(1)).genTruth(any(WebSite.class), anyString(), anyString());
 
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1","--search-words=\"test word\""});
     processLauncher.run(args);
-    verify(soGenTruthService, times(1)).genTruth(any(WebSite.class), anyString(), anyBoolean());
+    verify(soGenTruthService, times(2)).genTruth(any(WebSite.class), anyString(), anyString());
 
+    args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1","--search-words-path=\"test path\""});
+    processLauncher.run(args);
+    verify(soGenTruthService, times(3)).genTruth(any(WebSite.class), anyString(), anyString());
   }
 
 
