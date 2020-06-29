@@ -1,6 +1,5 @@
 package com.topcoder.productsearch.common.util;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -91,20 +90,23 @@ public class DomHelper {
       StringBuilder sb = new StringBuilder();
       // if xpath in selector
       if (selector.startsWith("/")) {
-        String[] xpaths = selector.split(";");
-        for (String xpath : xpaths) {
-          List<DomNode> domNodes = page.getByXPath(xpath);
+        String[] areaXpaths = selector.split(";");
+        for (String areaXpath : areaXpaths) {
+          List<DomNode> domNodes = page.getByXPath(areaXpath);
           for (int i = 0; i < domNodes.size(); i++) {
             sb.append(domNodes.get(i).getNodeValue() + " ");
           }
         }
       // if css selector
       } else {
-        // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
-        DomNodeList<DomNode> domNodes = page.querySelectorAll(selector);
-        for (int i = 0; i < domNodes.size(); i++) {
-          //sb.append(domNodes.get(i).asXml());
-          sb.append(domNodes.get(i).asText() + " ");
+        String[] areaSelectors = selector.split(";");
+        for (String areaSelector : areaSelectors) {
+          // you can check more details in here https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
+          DomNodeList<DomNode> domNodes = page.querySelectorAll(areaSelector);
+          for (int i = 0; i < domNodes.size(); i++) {
+            //sb.append(domNodes.get(i).asXml());
+            sb.append(domNodes.get(i).asText() + " ");
+          }
         }
       }
       logger.debug(String.format("area#%d, content-size:%d, selector:%s", contents.size() + 1, sb.length(), selector));
