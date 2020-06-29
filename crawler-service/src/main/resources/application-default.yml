@@ -5,6 +5,7 @@ logging:
   # path: /var/log
   level:
     root: INFO
+    com.topcoder.productsearch: DEBUG
     org.springframework.jdbc.core: DEBUG
     com.gargoylesoftware.htmlunit: ERROR
     com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter: OFF

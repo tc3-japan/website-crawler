@@ -237,7 +237,7 @@ public class SOGenTruthService {
 
     CrawlerThreadPoolExecutor threadPoolExecutor = new CrawlerThreadPoolExecutor(webSite.getParallelSize(),
         webSite.getCrawlInterval());
-    threadPoolExecutor.setExecutedHandler(runnable -> {
+      threadPoolExecutor.setExecutedHandler(runnable -> {
     });
 
     details.forEach(soTruthDetail -> {
@@ -257,12 +257,12 @@ public class SOGenTruthService {
     // wait CrawlerThreadPoolExecutor finished all task
     while (true) {
       try {
-        Thread.sleep(100);
+        Thread.sleep(500);
         if (threadPoolExecutor.isTerminated()) {
           break;
         }
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        logger.warn(e.getMessage(), e);
       }
     }
 
