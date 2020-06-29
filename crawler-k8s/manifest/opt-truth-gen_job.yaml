@@ -14,7 +14,7 @@ spec:
         - --proc=opt_gen_truth
         - --site=1
         - --search-words=MENS Jeans
-        image: tc3jp/productsearch-service:develop-1.0.13.p1
+        image: tc3jp/productsearch-service:develop-1.0.14
         name: crawler
         env:
         - name: SPRING_JDBC_URL

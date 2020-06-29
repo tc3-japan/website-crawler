@@ -39,8 +39,4 @@ public class EvaluationResult {
 
   @JsonProperty("score_variance")
   private Float scoreVariance;
-
-  public void incrErrorCount() {
-    this.errorCount++;
-  }
 }

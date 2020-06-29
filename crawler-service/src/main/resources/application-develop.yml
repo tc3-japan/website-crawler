@@ -67,5 +67,5 @@ solr:
 
 optimization:
   list_size: 10
-  search_max_pages: 10
+  search_max_pages: 50
   priority_rank_threshold: 2
