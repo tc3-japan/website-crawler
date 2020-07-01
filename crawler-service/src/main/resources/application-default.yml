@@ -71,4 +71,9 @@ optimization:
   list_size: 10
   search_max_pages: 50
   priority_rank_threshold: 2
+  gen_truth:
+    proxy:
+      enabled: true
+      host: 127.0.0.1
+      port: 9150
 
