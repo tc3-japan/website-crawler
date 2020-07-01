@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gargoylesoftware.htmlunit.ProxyConfig;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
@@ -101,6 +102,24 @@ public class SOGenTruthService {
    */
   private WebClient webClient;
 
+  /**
+   * proxy enabled or not
+   */
+  @Value("${optimization.gen_truth.proxy.enabled:false}")
+  private Boolean proxyEnabled;
+
+  /**
+   * proxy enabled or not
+   */
+  @Value("${optimization.gen_truth.proxy.host:127.0.0.1}")
+  private String proxyHost;
+
+  /**
+   * proxy enabled or not
+   */
+  @Value("${optimization.gen_truth.proxy.port:9050}")
+  private Integer proxyPort;
+
   String unzipRealUrl(String href) {
     // remove all params
     href = href.split("\\?")[0];
@@ -149,6 +168,20 @@ public class SOGenTruthService {
   }
 
   /**
+   * set proxy configration to WebClient.
+   */
+  private void setProxyConfig() {
+    if (proxyEnabled) {
+      ProxyConfig proxyConfig = new ProxyConfig();
+      proxyConfig.setProxyHost(proxyHost);
+      proxyConfig.setProxyPort(proxyPort);
+      proxyConfig.setSocksProxy(true);
+      this.webClient.getOptions().setProxyConfig(proxyConfig);
+      logger.info("enabled proxy. host=" + proxyHost + " port=" + proxyPort);
+    }
+  }
+
+  /**
    * create reference data by scraping the result of Google search with some search words for the specific web site.
    *
    * @param site        the website
@@ -161,6 +194,9 @@ public class SOGenTruthService {
 
     URL url = new URL("https://www.google.com/search?q=" + params);
     logger.info("start request " + url.toString());
+
+    setProxyConfig();
+
     HtmlPage page = webClient.getPage(url);
     int rank = 1;
     int pageIndex = 0;
