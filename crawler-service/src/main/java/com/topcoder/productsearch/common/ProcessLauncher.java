@@ -199,8 +199,15 @@ public class ProcessLauncher implements ApplicationRunner {
         logger.info("run clean up process ...");
         cleanerService.clean(webSite);
       } else if (isConverter(procs)) {
-        logger.info("running converter process ...");
-        converterService.convert(webSite);
+
+        List<String> urls = args.getOptionValues("url");
+        if (urls == null || urls.size() == 0 ) {
+          logger.info("Running converter process ...");
+          converterService.convert(webSite);
+        } else {
+          logger.info("Running converter process for " + urls.get(0));
+          converterService.convert(webSite, urls.get(0));
+        }
       } else if (isValidatePages(procs)) {
         logger.info("running validate pages service process ...");
         validatePagesService.validate(webSite);
@@ -260,7 +267,7 @@ public class ProcessLauncher implements ApplicationRunner {
       WebSite site = getSite(args);
 
       List<String> urls = args.getOptionValues("url");
-      if (urls == null || urls.size() ==0 ) {
+      if (urls == null || urls.size() == 0) {
         logger.error("url is required");
         return;
       }

@@ -1,16 +1,17 @@
 package com.topcoder.productsearch.converter.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.topcoder.productsearch.cleaner.service.CleanerService;
+import com.topcoder.productsearch.common.entity.CPage;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.models.PageSearchCriteria;
 import com.topcoder.productsearch.common.repository.PageRepository;
-import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.common.util.Common;
 import com.topcoder.productsearch.converter.ConvertThread;
+
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  * the converter service
@@ -25,11 +26,6 @@ public class ConverterService {
    */
   @Autowired
   private PageRepository pageRepository;
-
-  /**
-   * WebSite repository
-   */
-  private WebSiteRepository webSiteRepository;
 
   /**
    * the solr service
@@ -58,5 +54,13 @@ public class ConverterService {
         webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
             threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService,
              webSite.getPageExpiredPeriod().longValue())));
+  }
+
+  public void convert(WebSite webSite, String url) {
+    if (webSite == null) {
+      throw new IllegalArgumentException("webSite must be specified.");
+    }
+    CPage cPage = pageRepository.findByUrl(url);
+    new ConvertThread(cPage, solrService, pageRepository, cleanerService, webSite.getPageExpiredPeriod().longValue()).run();
   }
 }
