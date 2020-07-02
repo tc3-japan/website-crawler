@@ -11,11 +11,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
@@ -122,7 +124,6 @@ public class SOGenTruthService {
    * @param searchWordsPath the text file path of search words
    * @param crawl           crawl pages found in Google search if true
    */
-  @Transactional
   public void genTruth(WebSite site, String searchWords, String searchWordsPath) throws Exception {
     boolean crawl = true;
     if (searchWords != null) {
@@ -148,6 +149,14 @@ public class SOGenTruthService {
     }
   }
 
+  List<String> splitAndQuote(String searchWords) {
+    List<String> words = new LinkedList<String>();
+    if (searchWords == null || searchWords.length() == 0) {
+      return words;
+    }
+    return Arrays.asList(searchWords.split("\\s+")).stream().map(s -> "\"" + s +"\"").collect(Collectors.toList());
+  }
+
   /**
    * create reference data by scraping the result of Google search with some search words for the specific web site.
    *
@@ -157,7 +166,8 @@ public class SOGenTruthService {
    */
   @Transactional
   public void genTruth(WebSite site, String searchWords, boolean crawl) throws Exception {
-    String params = searchWords + (site.getGoogleParam() == null ? "" : site.getGoogleParam());
+
+    String params = String.join(" ", splitAndQuote(searchWords)) + " " + (site.getGoogleParam() == null ? "" : site.getGoogleParam());
 
     URL url = new URL("https://www.google.com/search?q=" + params);
     logger.info("start request " + url.toString());
