@@ -183,7 +183,7 @@ public class SOGenTruthService {
     logger.info("# of Query: " + searchWordsList.size());
     int q = 0;
     for (String targetSearchWords : searchWordsList) {
-      logger.info(String.format("Processing Query#%d: %s", ++q, targetSearchWords));
+      logger.info(String.format("Query#%d: %s", ++q, targetSearchWords));
       genTruth(site, targetSearchWords, crawl);
       if (q < searchWordsList.size()) {
         waitInterval();
