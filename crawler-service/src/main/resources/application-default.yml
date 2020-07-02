@@ -5,9 +5,9 @@ logging:
   # path: /var/log
   level:
     root: INFO
-    com.topcoder.productsearch: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.topcoder.productsearch: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
     org.springframework.jdbc.core: DEBUG
     com.gargoylesoftware.htmlunit: ERROR
     com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter: OFF
@@ -21,7 +21,7 @@ spring:
     hikari:
       idle-timeout: 60000
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format__sql: true
@@ -72,8 +72,11 @@ optimization:
   search_max_pages: 50
   priority_rank_threshold: 2
   gen_truth:
+    # process interval (second)
+    interval: 60
     proxy:
-      enabled: true
+      enabled: false
+      type: socks
       host: 127.0.0.1
       port: 9050
 
