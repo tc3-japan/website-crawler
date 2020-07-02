@@ -69,3 +69,12 @@ optimization:
   list_size: 10
   search_max_pages: 50
   priority_rank_threshold: 2
+  gen_truth:
+    # process interval (second)
+    interval: 60
+    proxy:
+      enabled: false
+      type: socks
+      host: 127.0.0.1
+      port: 9050
+  

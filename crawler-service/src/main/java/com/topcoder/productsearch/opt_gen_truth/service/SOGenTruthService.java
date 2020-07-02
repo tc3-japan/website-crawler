@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,11 @@ public class SOGenTruthService {
   PageRepository pageRepository;
 
   /**
+   * the web client
+   */
+  private WebClient webClient;
+
+  /**
    * number of expected url need search
    */
   @Value("${optimization.list_size:10}")
@@ -98,11 +104,11 @@ public class SOGenTruthService {
    */
   @Value("${optimization.search_max_pages:10}")
   private Integer searchMaxPages;
-
   /**
-   * the web client
+   * proxy port
    */
-  private WebClient webClient;
+  @Value("${optimization.gen_truth.proxy.port:9050}")
+  private Integer proxyPort;
 
   /**
    * proxy enabled or not
@@ -111,16 +117,24 @@ public class SOGenTruthService {
   private Boolean proxyEnabled;
 
   /**
-   * proxy enabled or not
+   * proxy type (http | socks)
+   */
+  @Value("${optimization.gen_truth.proxy.type:socks}")
+  private String proxyType;
+
+  /**
+   * proxy host
    */
   @Value("${optimization.gen_truth.proxy.host:127.0.0.1}")
   private String proxyHost;
 
   /**
-   * proxy enabled or not
+   * process interval (seconds)
    */
-  @Value("${optimization.gen_truth.proxy.port:9050}")
-  private Integer proxyPort;
+  @Value("${optimization.gen_truth.interval:60}")
+  private Integer intervalSeconds;
+
+
 
   String unzipRealUrl(String href) {
     // remove all params
@@ -145,26 +159,35 @@ public class SOGenTruthService {
    */
   public void genTruth(WebSite site, String searchWords, String searchWordsPath) throws Exception {
     boolean crawl = true;
-    if (searchWords != null) {
-      genTruth(site, searchWords, crawl);
-    } else if (searchWordsPath != null) {
-      Path targetSearchWordsPath = Paths.get(searchWordsPath).toAbsolutePath();
-      if (Files.isReadable(targetSearchWordsPath) == false) {
-        logger.info("no such file \"" + searchWordsPath + "\" or could not readable");
-        return;
-      }
-      List<String> searchWordsList = Files.readAllLines(targetSearchWordsPath, StandardCharsets.UTF_8);
-      if (searchWordsList.size() != 0) {
-        for (String targetSearchWords : searchWordsList) {
-          genTruth(site, targetSearchWords, crawl);
-        }
-      } else {
-        logger.info("the file " + searchWordsPath + " is empty");
-        return;
-      }
-    } else {
+
+    if (StringUtils.isEmpty(searchWords) &&  StringUtils.isEmpty(searchWordsPath)) {
       logger.info("search-words or search-words-path are required");
       return;
+    }
+
+    if (searchWords != null) {
+      genTruth(site, searchWords, crawl);
+      return;
+    }
+
+    Path targetSearchWordsPath = Paths.get(searchWordsPath).toAbsolutePath();
+    if (Files.isReadable(targetSearchWordsPath) == false) {
+      logger.info("no such file \"" + searchWordsPath + "\" or could not readable");
+      return;
+    }
+    List<String> searchWordsList = Files.readAllLines(targetSearchWordsPath, StandardCharsets.UTF_8);
+    if (searchWordsList == null || searchWordsList.size() == 0) {
+      logger.info("the file " + searchWordsPath + " is empty");
+      return;
+    }
+    logger.info("# of Query: " + searchWordsList.size());
+    int q = 0;
+    for (String targetSearchWords : searchWordsList) {
+      logger.info(String.format("Processing Query#%d: %s", ++q, targetSearchWords));
+      genTruth(site, targetSearchWords, crawl);
+      if (q < searchWordsList.size()) {
+        waitInterval();
+      }
     }
   }
 
@@ -179,15 +202,33 @@ public class SOGenTruthService {
   /**
    * set proxy configration to WebClient.
    */
-  private void setProxyConfig() {
+  private void setProxyConfig(WebClient client) {
     if (proxyEnabled) {
       ProxyConfig proxyConfig = new ProxyConfig();
       proxyConfig.setProxyHost(proxyHost);
       proxyConfig.setProxyPort(proxyPort);
-      proxyConfig.setSocksProxy(true);
-      this.webClient.getOptions().setProxyConfig(proxyConfig);
-      logger.info("enabled proxy. host=" + proxyHost + " port=" + proxyPort);
+      if ("socks".equalsIgnoreCase(proxyType)) {
+        proxyConfig.setSocksProxy(true);
+      }
+      client.getOptions().setProxyConfig(proxyConfig);
+      logger.info(String.format("enabled proxy. type=%s host=%s port=%d", proxyType, proxyHost, proxyPort));
     }
+  }
+
+  /**
+   * sleep for the interval time
+   */
+  void waitInterval() {
+    System.out.print("Waiting " + intervalSeconds + " seconds.");
+    for (int i = 0; i < intervalSeconds; i++) {
+      try {
+        Thread.sleep(1000);
+        System.out.print(".");
+      } catch (InterruptedException e) {
+        logger.warn("InterruptedException occurred in sleep: " + e.getMessage());
+      }
+    }
+    System.out.println("");
   }
 
   /**
@@ -205,7 +246,7 @@ public class SOGenTruthService {
     URL url = new URL("https://www.google.com/search?q=" + params);
     logger.info("start request " + url.toString());
 
-    setProxyConfig();
+    setProxyConfig(this.webClient);
 
     HtmlPage page = webClient.getPage(url);
     int rank = 1;
@@ -333,7 +374,7 @@ public class SOGenTruthService {
     ProductSearchRequest request = new ProductSearchRequest();
     request.setManufacturerIds(Collections.singletonList(webSite.getId()));
     request.setQuery(Arrays.asList(searchWords.split("\\s+")));
-    request.setRows(2000);
+    request.setRows(numberOfUrl * 10);
     request.setWeights(Arrays.asList(new Float[] {1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F}));
     request.setDebug(true);
 
