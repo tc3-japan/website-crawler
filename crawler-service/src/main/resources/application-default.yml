@@ -73,7 +73,7 @@ optimization:
   priority_rank_threshold: 2
   gen_truth:
     # process interval (second)
-    interval: 60
+    interval: 30
     proxy:
       enabled: false
       type: socks

@@ -116,6 +116,8 @@ public class TestSOGenTruthService {
     site.setContentUrlPatterns("https://www.uniqlo.com/jp/store/goods/[\\d\\-]+");
     site.setGoogleParam("+site:https://www.uniqlo.com/jp/");
     site.setSupportsJs(false);
+
+    // TODO: refactor this
     soGenTruthService.genTruth(site, "クルーネックT MEN", false);
     verify(soTruthDetailRepository, times(1)).save(any(List.class));
     verify(soTruthRepository, times(1)).save(any(SOTruth.class));
