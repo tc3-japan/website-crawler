@@ -61,6 +61,18 @@ public class SolrService {
   private HttpSolrClient httpSolrClient;
 
   /**
+   * the retry count for errors in Solr.
+   */
+  @Value("${solr.retry_count:2}")
+  private Integer retryCount = 2;
+
+  /**
+   * the interval seconds in retrying query to Solr.
+   */
+  @Value("${solr.retry_interval:3}")
+  private Integer retryIntervalSeconds = 3;
+
+  /**
    * create new solr service
    *
    * @param serverURI the solr server uri
@@ -149,7 +161,7 @@ public class SolrService {
 
     logger.info(query.toLocalParamsString());
 
-    QueryResponse response = httpSolrClient.query(query);
+    QueryResponse response = execute(query);
 
     Map<String, String> debugInfo = new HashMap<>();
     if (request.isDebug() && response.getDebugMap() != null) {
@@ -188,6 +200,39 @@ public class SolrService {
     return products;
   }
 
+
+  /**
+   * Execute a query to Solr. The query will retry for specified times when some error occurred in Solr.
+   * @param query
+   * @return
+   * @throws SolrServerException
+   * @throws IOException
+   */
+  protected QueryResponse execute(SolrQuery query) throws SolrServerException, IOException {
+    for (int i = 0; i <= retryCount; i++) {
+      try {
+        logger.debug(String.format("[%d-Started ] SolrClient.query(%s)", Thread.currentThread().getId(), query.get("q")));
+        return httpSolrClient.query(query);
+      } catch(SolrServerException | IOException e) {
+        logger.error("Error occurred in processing query. " + e.getMessage());
+        if (i >= retryCount) {
+          throw e;
+        }
+        logger.info(String.format("Retry query[%d] after %d second(s).", (i + 1), retryIntervalSeconds));
+        try {
+          Thread.sleep(retryIntervalSeconds * 1000L);
+        } catch(InterruptedException ie) {
+          logger.warn(ie.getMessage());
+        }
+      } catch (RuntimeException e) {
+        logger.error("Error occrurred in processing Solr request: " + query, e);
+        throw e;
+      } finally {
+        logger.debug(String.format("[%d-Finished] SolrClient.query(%s)", Thread.currentThread().getId(), query.get("q")));
+      }
+    }
+    throw new IOException("Failed to query."); // never reach here.
+  }
 
   /**
    * build SolrQuery to use Standard Query Parser
@@ -333,7 +378,4 @@ public class SolrService {
     }
     return document;
   }
-
-
-
 }
