@@ -20,7 +20,7 @@ public class EvaluationResult {
   private List<Float> weights;
 
   @JsonProperty("data_count")
-  private Integer dataCount;
+  private Integer dataCount = 0;
 
   @JsonProperty("error_count")
   private Integer errorCount = 0;
@@ -39,4 +39,8 @@ public class EvaluationResult {
 
   @JsonProperty("score_variance")
   private Float scoreVariance;
+
+  @JsonProperty("elapsed_time_seconds")
+  private Integer elapsedTimeSeconds = 0;
+
 }
