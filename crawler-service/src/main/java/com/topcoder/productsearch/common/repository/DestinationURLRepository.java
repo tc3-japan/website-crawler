@@ -1,13 +1,16 @@
 package com.topcoder.productsearch.common.repository;
 
-import com.topcoder.productsearch.common.entity.DestinationURL;
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+
+import com.topcoder.productsearch.common.entity.DestinationURL;
 
 /**
  * The repository defines operations on DestinationURL entity.
  */
 @Repository
 public interface DestinationURLRepository extends CrudRepository<DestinationURL, Integer> {
-  DestinationURL findByUrlAndPageId(String url, Integer pageId);
+  List<DestinationURL> findByUrlAndPageId(String url, Integer pageId);
 }
