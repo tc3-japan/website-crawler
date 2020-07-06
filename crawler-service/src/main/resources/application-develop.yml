@@ -61,9 +61,10 @@ cors:
   allowed-origins: "*"
   allowed-methods: HEAD,GET,PUT,POST,DELETE
 
-# the convert solr uri
 solr:
   uri: http://solr:8983/solr/manufacturer_product
+  retry_count: 2
+  retry_interval: 3
 
 optimization:
   list_size: 10
