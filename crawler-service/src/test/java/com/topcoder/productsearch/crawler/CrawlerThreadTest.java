@@ -7,8 +7,10 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +32,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.topcoder.productsearch.AbstractUnitTest;
 import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.DestinationURL;
 import com.topcoder.productsearch.common.entity.SourceURL;
 import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.DestinationURLRepository;
@@ -168,8 +171,11 @@ public class CrawlerThreadTest extends AbstractUnitTest {
     task.setUrl(matchedUrlWebRequest.getUrl().toString());
     task.setSourceUrl("http://test.com");
     when(pageRepository.findByUrl(Common.normalize(matchedUrlWebRequest.getUrl().toString()))).thenReturn(cPage);
-    when(destinationURLRepository.findByUrlAndPageId(webSite.getUrl(), 1)).thenReturn(createDestinationURL());
-    when(sourceURLRepository.findByUrlAndPageId(task.getSourceUrl(), 1)).thenReturn(new SourceURL());
+
+    List<DestinationURL> destinationURLs = new ArrayList<DestinationURL>(1);
+    destinationURLs.add(createDestinationURL());
+    when(destinationURLRepository.findByUrlAndPageId(webSite.getUrl(), 1)).thenReturn(destinationURLs);
+
     when(sourceURLRepository.save(any(SourceURL.class))).thenReturn(new SourceURL());
     crawlerThread.download(matchedUrlWebRequest);
     assertEquals(1, crawlerThread.getExpandUrl().size());

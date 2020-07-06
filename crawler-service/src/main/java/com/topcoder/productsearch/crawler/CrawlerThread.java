@@ -233,27 +233,24 @@ public class CrawlerThread implements Runnable {
         return;
       }
 
-
       // Create records in the source_urls table with following data
       if (crawlerTask.getSourceUrl() != null && finalPageId != null) {
-        SourceURL sourceURL = sourceURLRepository.findByUrlAndPageId(crawlerTask.getSourceUrl(), finalPageId);
-        if (sourceURL == null) {
-          sourceURL = new SourceURL();
+        List<SourceURL> sourceURLs = sourceURLRepository.findByUrlAndPageId(crawlerTask.getSourceUrl(), finalPageId);
+        if (sourceURLs == null || sourceURLs.isEmpty()) {
+          SourceURL sourceURL = new SourceURL();
           sourceURL.setUrl(crawlerTask.getSourceUrl());
           sourceURL.setPageId(finalPageId);
           sourceURL.setCreatedAt(Date.from(Instant.now()));
-        } else {
-          sourceURL.setLastModifiedAt(Date.from(Instant.now()));
+          sourceURLRepository.save(sourceURL);
         }
-        sourceURLRepository.save(sourceURL);
       }
 
       if (finalPageId != null) {
-        DestinationURL destinationURL = destinationURLRepository.findByUrlAndPageId(urlLink, finalPageId);
+        List<DestinationURL> destinationURLs = destinationURLRepository.findByUrlAndPageId(urlLink, finalPageId);
         // page already have been processed from a previous thread during the execution and should be skipped.
         // only process not exist destinationURL
-        if (destinationURL == null) {
-          destinationURL = new DestinationURL();
+        if (destinationURLs == null || destinationURLs.isEmpty()) {
+          DestinationURL destinationURL = new DestinationURL();
           destinationURL.setCreatedAt(Date.from(Instant.now()));
           destinationURL.setUrl(urlLink);
           destinationURL.setPageId(finalPageId);

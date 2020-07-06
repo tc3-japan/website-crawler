@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -114,7 +115,7 @@ public class SOGenTruthService {
    * proxy enabled or not
    */
   @Value("${optimization.gen_truth.proxy.enabled:false}")
-  private Boolean proxyEnabled;
+  private Boolean proxyEnabled = false;
 
   /**
    * proxy type (http | socks)
@@ -185,6 +186,7 @@ public class SOGenTruthService {
     for (String targetSearchWords : searchWordsList) {
       logger.info(String.format("Query#%d: %s", ++q, targetSearchWords));
       genTruth(site, targetSearchWords, crawl);
+      logger.info(String.format("(%d/%d) done", q, searchWordsList.size()));
       if (q < searchWordsList.size()) {
         waitInterval();
       }
@@ -219,6 +221,9 @@ public class SOGenTruthService {
    * sleep for the interval time
    */
   void waitInterval() {
+    if (intervalSeconds == null || intervalSeconds <= 0) {
+      return;
+    }
     System.out.print("Waiting " + intervalSeconds + " seconds.");
     for (int i = 0; i < intervalSeconds; i++) {
       try {
@@ -244,6 +249,7 @@ public class SOGenTruthService {
     String params = String.join(" ", splitAndQuote(searchWords)) + " " + (site.getGoogleParam() == null ? "" : site.getGoogleParam());
 
     URL url = new URL("https://www.google.com/search?q=" + params);
+
     logger.info("start request " + url.toString());
 
     setProxyConfig(this.webClient);
@@ -387,6 +393,7 @@ public class SOGenTruthService {
       SOTruthDetail soTruthDetail = iter.next();
       SolrProduct p = productMap.get(soTruthDetail.getUrl());
       if (p == null) {
+        logger.info("no entry found in the API result for "  + soTruthDetail.getUrl());
         continue;
       }
       hitCount++;
@@ -397,10 +404,25 @@ public class SOGenTruthService {
       for (int i = 1; i <= 10; i++) {
         Common.setValueByName(soTruthDetail, "simArea" + i, scores.get("html_area" + i));
       }
+      logger.info(toLog(soTruthDetail));
     };
     soTruthDetailRepository.save(details);
-    logger.info("truth id: " + details.get(0).getTruthId() + ", # of details w/ similarities: " + hitCount);
-    logger.info("all processes done, exit ...");
+    logger.info(String.format("truth id: %d, query: %s, # of details: %d, # of similarities: %d",
+        details.get(0).getTruthId(), searchWords, details.size(), hitCount));
+    logger.info("all processes done.");
+  }
+
+  private String toLog(SOTruthDetail detail) {
+    if (detail == null) {
+      return "";
+    }
+    Function<Float, Float> f = n -> n != null ? n : 0f;
+    return String.format("truth#%d-%d %s [%f, %f, %f, %f, %f, %f, %f, %f, %f, %f]",
+        detail.getTruthId(), detail.getRank(), detail.getUrl(),
+        f.apply(detail.getSimArea1()), f.apply(detail.getSimArea2()), f.apply(detail.getSimArea3()),
+        f.apply(detail.getSimArea4()), f.apply(detail.getSimArea5()), f.apply(detail.getSimArea6()),
+        f.apply(detail.getSimArea7()), f.apply(detail.getSimArea8()), f.apply(detail.getSimArea9()),
+        f.apply(detail.getSimArea10()));
   }
 
   /**
