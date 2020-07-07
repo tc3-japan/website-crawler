@@ -93,7 +93,7 @@ public class TestSOEvaluateService {
     float eps = 0.000001f;
 
     SOEvaluation evaluation = soEvaluateService.evaluate(soTruth, "test word", weights);
-    assertEquals(evaluation.getScore(), 65, eps);
+    assertEquals(evaluation.getScore(), 1.0, eps);
 
     solrProducts.get(0).setScore(4.f);
     solrProducts.get(1).setScore(2.f);
@@ -102,14 +102,14 @@ public class TestSOEvaluateService {
     solrProducts.get(4).setScore(1.f);
 
     evaluation = soEvaluateService.evaluate(soTruth, "test word", weights);
-    assertEquals(evaluation.getScore(), 37, eps);
+    assertEquals(evaluation.getScore(), 0.407407, eps);
 
     solrProducts.get(0).setUrl("url10");
     evaluation = soEvaluateService.evaluate(soTruth, "test word", weights);
-    assertEquals(evaluation.getScore(), 34, eps);
+    assertEquals(evaluation.getScore(), 0.37037036, eps);
 
     when(soTruth.getSearchWords()).thenReturn("test word");
     evaluation = soEvaluateService.evaluate(soTruth, null, null);
-    assertEquals(evaluation.getScore(), 34, eps);
+    assertEquals(evaluation.getScore(), 0.37037036, eps);
   }
 }
