@@ -3,9 +3,16 @@ package com.topcoder.productsearch.opt_evaluate.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.slf4j.Logger;
@@ -98,6 +105,7 @@ public class SOEvaluateService {
   Integer evaluateThreshold;
 
 
+  @Transactional
   public SOEvaluation evaluate(SOTruth soTruth, String searchWords, List<Float> weights, String queryType, boolean saveResult) throws Exception {
 
     if (soTruth == null || soTruth.getId() == null) {
@@ -118,14 +126,15 @@ public class SOEvaluateService {
     request.setManufacturerIds(Collections.singletonList(soTruth.getSiteId()));
     request.setWeights(weights);
     request.setQuery(Arrays.asList(words.split("\\s+")));
-    request.setRows(listSize * 3);
+    request.setRows(listSize * 2);
     request.setParser(queryType);
 
     List<SolrProduct> products = solrService.searchProduct(request);
     List<SOResultDetail> soResultDetails = createSearchResultDetails(products);
 
     // evaluate
-    float score = calculateScore(soResultDetails, soTruthDetails);
+    //float score = calculateScore(soResultDetails, soTruthDetails);
+    float score = calculateNormalizedScore(soResultDetails, soTruthDetails);
 
     // If saveResult is false, return the result here.
     if (!saveResult) {
@@ -172,7 +181,6 @@ public class SOEvaluateService {
    * @param searchWords the search words
    * @param weights     the search weights
    */
-  @Transactional
   public SOEvaluation evaluate(SOTruth soTruth, String searchWords, List<Float> weights) throws Exception {
     // queryType: standard, saveResult: true
     return evaluate(soTruth, searchWords, weights, null, true);
@@ -189,6 +197,7 @@ public class SOEvaluateService {
     if (evaluateRequest == null) {
       throw new IllegalArgumentException("evaluateRequest must be specified.");
     }
+    long start = System.currentTimeMillis();
 
     List<Float> weights = evaluateRequest.getWeights();
     int truthId = evaluateRequest.getStartTruthId();
@@ -203,19 +212,30 @@ public class SOEvaluateService {
     if (headTruth == null) {
       throw new IllegalArgumentException(String.format("the specified truth is invalid. #%d does not exist.", truthId));
     }
-    List<SOTruth> soThruths = soTruthRepository.findFrom(headTruth.getSiteId(), truthId, new PageRequest(0, size));
+    List<SOTruth> soTruths = soTruthRepository.findFrom(headTruth.getSiteId(), truthId, new PageRequest(0, size));
 
-    logger.info("# of tests: " + soThruths.size());
-    List<Float> scores = new ArrayList<Float>(soThruths.size());
-    for(SOTruth truth : soThruths) {
-      try {
-        SOEvaluation eval = evaluate(truth, null, weights, evaluateRequest.getQueryType(), evaluateRequest.isSaveResult());
-        scores.add(eval.getScore());
-      } catch (Exception e) {
-        logger.error(String.format("An error occured in evaluating w/ the truth#%d : %s", truth.getId(), e.getMessage()), e);
-        result.setErrorCount(result.getErrorCount() + 1);
-      }
+    logger.info("# of tests: " + soTruths.size());
+    List<Float> scores = Collections.synchronizedList(new ArrayList<Float>(soTruths.size()));
+    AtomicInteger errorCount = new AtomicInteger(0);
+
+    ScheduledExecutorService executer = Executors.newScheduledThreadPool(soTruths.size());
+    //ScheduledExecutorService executer = Executors.newSingleThreadScheduledExecutor();
+    for(SOTruth truth : soTruths) {
+      executer.schedule(() -> {
+        try {
+          SOEvaluation eval = evaluate(truth, null, weights, evaluateRequest.getQueryType(), evaluateRequest.isSaveResult());
+          scores.add(eval.getScore());
+        } catch (Exception e) {
+          logger.error(String.format("An error occured in evaluating w/ the truth#%d : %s", truth.getId(), e.getMessage()), e);
+          errorCount.incrementAndGet();
+        }
+      }, 100, TimeUnit.MILLISECONDS);
     }
+    executer.shutdown();
+    if (!executer.awaitTermination(300, TimeUnit.SECONDS)) {
+      executer.shutdownNow();
+    }
+
     double[] dscores = scores.stream().mapToDouble(s -> s.doubleValue()).toArray();
 
     result.setWeights(weights);
@@ -225,10 +245,16 @@ public class SOEvaluateService {
     result.setScoreMin((float) StatUtils.min(dscores));
     result.setScoreMedian((float) StatUtils.percentile(dscores, 50));
     result.setScoreVariance((float) StatUtils.populationVariance(dscores));
+    result.setErrorCount(errorCount.get());
+    result.setElapsedTimeSeconds(elapsedTimeSeconds(start, System.currentTimeMillis()));
 
-    logger.debug("result: "  +  result);
+    logger.info("finished the evaluation for " + evaluateRequest);
 
     return result;
+  }
+
+  int elapsedTimeSeconds(long start, long end) {
+    return (int) ((end - start) / 1000L);
   }
 
   /**
@@ -239,8 +265,15 @@ public class SOEvaluateService {
   private List<SOResultDetail> createSearchResultDetails(List<SolrProduct> products) {
     products.sort((a, b) -> Math.round((b.getScore() - a.getScore()) * 1000000000.0f));
     List<SOResultDetail> soResultDetails = new ArrayList<>();
+    Set<String> urls = new HashSet<String>();
     for (int i = 0; i < products.size(); i++) {
       SolrProduct product = products.get(i);
+
+      // skip product with URL duplication
+      if (urls.contains(product.getUrl())) {
+        continue;
+      }
+      urls.add(product.getUrl());
       SOResultDetail soResultDetail = new SOResultDetail();
       soResultDetail.setRank(i + 1);
       soResultDetail.setScore(product.getScore());
@@ -249,6 +282,40 @@ public class SOEvaluateService {
       soResultDetails.add(soResultDetail);
     }
     return soResultDetails;
+  }
+
+  protected float calculateNormalizedScore(List<SOResultDetail> soResultDetails, List<SOTruthDetail> soTruthDetails) {
+    float score = calculateScore(soResultDetails, soTruthDetails);
+    float iscore = calculateIdealScore(soTruthDetails);
+    float nscore = iscore != 0 ? (score / iscore) : 0;
+
+    logger.info(String.format("Truth#%d size:%d, Result size:%d, score:%f = (%f / %f)", soTruthDetails.get(0).getId(), soTruthDetails.size(), soResultDetails.size(), nscore, score, iscore));
+
+    return nscore;
+  }
+
+  protected float calculateScore(List<SOResultDetail> soResultDetails, List<SOTruthDetail> soTruthDetails) {
+
+    Map<String, Integer> actualRankingMap = new HashMap<String, Integer>();
+    for(SOResultDetail d : soResultDetails) {
+      actualRankingMap.put(d.getUrl().toString(), d.getRank());
+    }
+    Map<String, Integer> truthRankingMap = new HashMap<String, Integer>();
+    for(SOTruthDetail d : soTruthDetails) {
+      truthRankingMap.put(d.getUrl().toString(), d.getRank());
+    }
+
+    return calculateScore(actualRankingMap, truthRankingMap);
+  }
+
+  protected float calculateIdealScore(List<SOTruthDetail> soTruthDetails) {
+
+    Map<String, Integer> truthRankingMap = new HashMap<String, Integer>();
+    for(SOTruthDetail d : soTruthDetails) {
+      truthRankingMap.put(d.getUrl().toString(), d.getRank());
+    }
+
+    return calculateScore(truthRankingMap, truthRankingMap);
   }
 
   /*
@@ -265,30 +332,29 @@ public class SOEvaluateService {
    * t  : Threshold for priority ranks (e.g: 3)
    * e(x) :  {2 if x ≦ t, 1 if x > t}
    */
-  private float calculateScore(List<SOResultDetail> soResultDetails, List<SOTruthDetail> soTruthDetails) {
-    Map<String, SOResultDetail> urlResultsMap = soResultDetails.stream()
-        .collect(Collectors.toMap(r -> r.getUrl().toLowerCase(), r -> r));
-    int N = soTruthDetails.size();
+  protected float calculateScore(Map<String, Integer> actualRanking, Map<String, Integer> truthRanking) {
+    int N = this.listSize;
     int t = evaluateThreshold;
     float sum = 0;
 
-    logger.info("start evaluate for product");
-    for (SOTruthDetail soTruthDetail : soTruthDetails) {
+    for (Entry<String, Integer> truth : truthRanking.entrySet()) {
 
-      SOResultDetail resultDetail = urlResultsMap.get(soTruthDetail.getUrl().toLowerCase());
+      String url = truth.getKey();
+      Integer truthRank = truthRanking.get(url);
+      Integer actualRank = actualRanking.get(url);
 
-      if (resultDetail == null) {
-        logger.info(String.format("[truth] %d:%s - [result] null - sum:%f", soTruthDetail.getRank(),
-            soTruthDetail.getUrl(), sum));
+      if (actualRank == null) {
+        logger.debug(String.format("[truth] %d - [result] n/a - +0 sum:%f, %s", truthRank, sum, url));
         continue;
-      } else {
-        logger.info(String.format("[truth] %d:%s - [result] %d:%s - sum:%f", soTruthDetail.getRank(),
-            soTruthDetail.getUrl(),
-            resultDetail.getRank(), resultDetail.getUrl(), sum));
       }
 
-      int e = soTruthDetail.getRank() <= t ? 2 : 1;
-      sum += Math.pow((N - Math.abs(soTruthDetail.getRank() - resultDetail.getRank())), e);
+      int e = truthRank <= t ? 2 : 1;
+      int s = N - Math.abs(truthRank - actualRank);
+      s = s < 0 ? 0 : s;
+      double score = Math.pow(s, e);
+      sum += score;
+
+      logger.debug(String.format("[truth] %d - [result] %d - +%f sum:%f, %s", truthRank, actualRank, score, sum, url));
     }
     return sum;
   }
