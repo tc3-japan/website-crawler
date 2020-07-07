@@ -34,6 +34,9 @@ spec:
           periodSeconds: 20
         ports:
         - containerPort: 8983
+        env:
+        - name: "SOLR_JAVA_MEM"
+          value: "-Xms512m -Xmx1g"
         volumeMounts:
         - mountPath: /var/solr
           name: solr-store
@@ -61,7 +64,7 @@ spec:
 
       - name: init-solr-log4jxml
         image: tc3jp/productsearch-solr:8.1.1-1.0.13
-        command: 
+        command:
         - "/bin/sh"
         - "-c"
         - "if [ ! -f /var/solr/log4j2.xml ] ; then cp /opt/solr/server/resources/log4j2.xml /var/solr/log4j2.xml ; else true; fi "
@@ -71,7 +74,7 @@ spec:
 
       - name: init-solr-xml
         image: tc3jp/productsearch-solr:8.1.1-1.0.13
-        command: 
+        command:
         - "/bin/sh"
         - "-c"
         - "if [ ! -f /var/solr/data/solr.xml ] ; then cp /opt/solr/solr.xml /var/solr/data/solr.xml; else true; fi "
@@ -81,7 +84,7 @@ spec:
 
       #- name: init-solr-secirutyjson
       #  image: tc3jp/productsearch-solr:8.1.1-1.0.13
-      #  command: 
+      #  command:
       #  - "/bin/sh"
       #  - "-c"
       #  - "if [ ! -f /var/solr/data/security.json ] ; then cp /opt/solr/security.json /var/solr/data/security.json; else true; fi "
@@ -98,4 +101,4 @@ spec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 10Gi
+          storage: 50Gi
