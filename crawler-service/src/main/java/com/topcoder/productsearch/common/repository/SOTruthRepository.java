@@ -16,6 +16,6 @@ import com.topcoder.productsearch.common.entity.SOTruth;
 @Repository
 public interface SOTruthRepository extends CrudRepository<SOTruth, Integer> {
 
-  @Query("select t from SOTruth t where t.siteId = :siteId and t.id >= :headId")
+  @Query("select t from SOTruth t where t.siteId = :siteId and t.invalid = false and t.id >= :headId")
   List<SOTruth> findFrom(@Param("siteId") Integer siteId, @Param("headId")Integer headId, Pageable pageable);
 }

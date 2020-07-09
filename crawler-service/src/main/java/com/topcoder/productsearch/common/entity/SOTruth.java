@@ -37,4 +37,7 @@ public class SOTruth {
   @Column(name = "last_modified_at")
   @UpdateTimestamp
   private Date lastModifiedAt;
+
+  @Column(name = "invalid")
+  private Boolean invalid = Boolean.FALSE;
 }
