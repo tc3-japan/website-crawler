@@ -27,7 +27,7 @@ spec:
           value: mypassword
         - name: TZ
           value: Asia/Tokyo
-        image: tc3jp/productsearch-mysql:8.0.17-1.0.13
+        image: tc3jp/productsearch-mysql:8.0.17-1.0.14.p1
         name: mysql
         ports:
         - containerPort: 3306

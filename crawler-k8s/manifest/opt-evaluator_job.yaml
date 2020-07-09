@@ -14,7 +14,7 @@ spec:
         - --proc=opt_evaluate
         - --truth=1
         - --weights=1,1,1,1,1,1,1,1,1,1
-        image: tc3jp/productsearch-service:develop-1.0.14
+        image: tc3jp/productsearch-service:develop-1.0.14.p1
         name: crawler
         env:
         - name: SPRING_JDBC_URL
