@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -94,15 +95,27 @@ public class SOEvaluateService {
    * number of expected url need search
    */
   @Setter // for unit test
-  @Value("${optimization.list_size:10}")
+  @Value("${optimization.evaluation.list_size:10}")
   private Integer listSize;
 
   /**
    * the search opt evaluate threshold value
    */
   @Setter // for unit test
-  @Value("${optimization.priority_rank_threshold:3}")
+  @Value("${optimization.evaluation.priority_rank_threshold:3}")
   Integer evaluateThreshold;
+
+  /**
+   * thread pool size for the search api call
+   */
+  @Value("${optimization.evaluation.thread_pool_size:20}")
+  Integer threadPoolSize = 20;
+
+  /**
+   * thread pool size for the search api call
+   */
+  @Value("${optimization.evaluation.max_truths_size:100}")
+  Integer maxTruthsSize = 100;
 
 
   @Transactional
@@ -197,6 +210,9 @@ public class SOEvaluateService {
     if (evaluateRequest == null) {
       throw new IllegalArgumentException("evaluateRequest must be specified.");
     }
+    if (evaluateRequest.getSize() > this.maxTruthsSize) {
+      throw new IllegalArgumentException("the size must be equal or less than " + this.maxTruthsSize + ".");
+    }
     long start = System.currentTimeMillis();
 
     List<Float> weights = evaluateRequest.getWeights();
@@ -215,21 +231,24 @@ public class SOEvaluateService {
     List<SOTruth> soTruths = soTruthRepository.findFrom(headTruth.getSiteId(), truthId, new PageRequest(0, size));
 
     logger.info("# of tests: " + soTruths.size());
+
+    Map<Integer, Float> truthScoresMap = Collections.synchronizedMap(new TreeMap<Integer, Float>());
     List<Float> scores = Collections.synchronizedList(new ArrayList<Float>(soTruths.size()));
     AtomicInteger errorCount = new AtomicInteger(0);
 
-    ScheduledExecutorService executer = Executors.newScheduledThreadPool(soTruths.size());
+    ScheduledExecutorService executer = Executors.newScheduledThreadPool(this.threadPoolSize);
     //ScheduledExecutorService executer = Executors.newSingleThreadScheduledExecutor();
     for(SOTruth truth : soTruths) {
       executer.schedule(() -> {
         try {
           SOEvaluation eval = evaluate(truth, null, weights, evaluateRequest.getQueryType(), evaluateRequest.isSaveResult());
           scores.add(eval.getScore());
+          truthScoresMap.put(truth.getId(), eval.getScore());
         } catch (Exception e) {
           logger.error(String.format("An error occured in evaluating w/ the truth#%d : %s", truth.getId(), e.getMessage()), e);
           errorCount.incrementAndGet();
         }
-      }, 100, TimeUnit.MILLISECONDS);
+      }, 200, TimeUnit.MILLISECONDS);
     }
     executer.shutdown();
     if (!executer.awaitTermination(300, TimeUnit.SECONDS)) {
@@ -245,6 +264,8 @@ public class SOEvaluateService {
     result.setScoreMin((float) StatUtils.min(dscores));
     result.setScoreMedian((float) StatUtils.percentile(dscores, 50));
     result.setScoreVariance((float) StatUtils.populationVariance(dscores));
+    result.setScoreStandardDeviation((float) Math.sqrt(StatUtils.populationVariance(dscores)));
+    result.setScores(truthScoresMap);
     result.setErrorCount(errorCount.get());
     result.setElapsedTimeSeconds(elapsedTimeSeconds(start, System.currentTimeMillis()));
 
@@ -289,7 +310,7 @@ public class SOEvaluateService {
     float iscore = calculateIdealScore(soTruthDetails);
     float nscore = iscore != 0 ? (score / iscore) : 0;
 
-    logger.info(String.format("Truth#%d size:%d, Result size:%d, score:%f = (%f / %f)", soTruthDetails.get(0).getId(), soTruthDetails.size(), soResultDetails.size(), nscore, score, iscore));
+    logger.info(String.format("Truth#%d size:%d, Result size:%d, score:%f = (%f / %f)", soTruthDetails.get(0).getTruthId(), soTruthDetails.size(), soResultDetails.size(), nscore, score, iscore));
 
     return nscore;
   }
