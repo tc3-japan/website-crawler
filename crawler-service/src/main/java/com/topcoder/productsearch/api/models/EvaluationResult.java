@@ -1,6 +1,7 @@
 package com.topcoder.productsearch.api.models;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -39,6 +40,12 @@ public class EvaluationResult {
 
   @JsonProperty("score_variance")
   private Float scoreVariance;
+
+  @JsonProperty("score_std_deviation")
+  private Float scoreStandardDeviation;
+
+  @JsonProperty("scores")
+  private Map<Integer, Float> scores;
 
   @JsonProperty("elapsed_time_seconds")
   private Integer elapsedTimeSeconds = 0;
