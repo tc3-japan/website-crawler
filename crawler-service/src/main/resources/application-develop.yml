@@ -5,7 +5,7 @@ logging:
   # path: /var/log
   level:
     root: INFO
-    org.springframework.jdbc.core: DEBUG
+    org.springframework.jdbc.core: INFO
     com.gargoylesoftware.htmlunit: ERROR
     com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter: OFF
 
@@ -18,7 +18,7 @@ spring:
     hikari:
       idle-timeout: 60000
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format__sql: true
