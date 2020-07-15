@@ -70,9 +70,9 @@ optimization:
   evaluation:
     list_size: 10
     search_max_pages: 50
-    priority_rank_threshold: 2
+    priority_rank_threshold: 3
     thread_pool_size: 20
-    max_truths_size: 100
+    max_truths_size: 200
   gen_truth:
     # process interval (second)
     interval: 30
