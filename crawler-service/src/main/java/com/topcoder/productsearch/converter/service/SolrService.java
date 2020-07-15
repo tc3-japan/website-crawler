@@ -11,6 +11,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.slf4j.Logger;
@@ -213,7 +214,7 @@ public class SolrService {
       try {
         logger.debug(String.format("[%d-Started ] SolrClient.query(%s)", Thread.currentThread().getId(), query.get("q")));
         return httpSolrClient.query(query);
-      } catch(SolrServerException | IOException e) {
+      } catch(SolrException | SolrServerException | IOException e) {
         logger.error("Error occurred in processing query. " + e.getMessage());
         if (i >= retryCount) {
           throw e;

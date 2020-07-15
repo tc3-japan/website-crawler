@@ -380,13 +380,16 @@ public class SOGenTruthService {
     ProductSearchRequest request = new ProductSearchRequest();
     request.setManufacturerIds(Collections.singletonList(webSite.getId()));
     request.setQuery(Arrays.asList(searchWords.split("\\s+")));
-    request.setRows(numberOfUrl * 10);
+    request.setRows(numberOfUrl * 30);
     request.setWeights(Arrays.asList(new Float[] {1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F}));
     request.setDebug(true);
 
     Map<String, SolrProduct> productMap = new HashMap<>();
     List<SolrProduct> products = solrService.searchProduct(request);
-    products.forEach(solrProduct -> productMap.put(solrProduct.getUrl(), solrProduct));
+    products.forEach(solrProduct -> {
+      //logger.info("Result: " + solrProduct.getUrl());
+      productMap.put(solrProduct.getUrl(), solrProduct);
+    });
 
     int hitCount = 0;
     for(Iterator<SOTruthDetail> iter = details.iterator(); iter.hasNext(); )  {
@@ -407,8 +410,8 @@ public class SOGenTruthService {
       logger.info(toLog(soTruthDetail));
     };
     soTruthDetailRepository.save(details);
-    logger.info(String.format("truth id: %d, query: %s, # of details: %d, # of similarities: %d",
-        details.get(0).getTruthId(), searchWords, details.size(), hitCount));
+    logger.info(String.format("truth id: %d, query: %s, # of details: %d, # of results: %d, # of similarities: %d",
+        details.get(0).getTruthId(), searchWords, details.size(), products.size(), hitCount));
     logger.info("all processes done.");
   }
 
