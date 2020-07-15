@@ -307,10 +307,12 @@ public class SOEvaluateService {
 
   protected float calculateNormalizedScore(List<SOResultDetail> soResultDetails, List<SOTruthDetail> soTruthDetails) {
     float score = calculateScore(soResultDetails, soTruthDetails);
-    float iscore = calculateIdealScore(soTruthDetails);
+    //float iscore = calculateIdealScore(soTruthDetails);
+    float iscore = calculateIdealScore(listSize, evaluateThreshold);
     float nscore = iscore != 0 ? (score / iscore) : 0;
 
-    logger.info(String.format("Truth#%d size:%d, Result size:%d, score:%f = (%f / %f)", soTruthDetails.get(0).getTruthId(), soTruthDetails.size(), soResultDetails.size(), nscore, score, iscore));
+    logger.info(String.format("Truth#%d size:%d, Result size:%d, score:%f = (%f / %f)",
+        soTruthDetails.get(0).getTruthId(), soTruthDetails.size(), soResultDetails.size(), nscore, score, iscore));
 
     return nscore;
   }
@@ -329,14 +331,24 @@ public class SOEvaluateService {
     return calculateScore(actualRankingMap, truthRankingMap);
   }
 
-  protected float calculateIdealScore(List<SOTruthDetail> soTruthDetails) {
+  protected float calculateIdealScore(int size, int threshold) {
+    float score = 0F;
+    for (int i = 0; i < size; i++) {
+      int e = (i + 1) <= threshold ? 2 : 1;
+      score += Math.pow(size, e);
+    }
+    return score;
+  }
 
+  protected float calculateIdealScore(List<SOTruthDetail> soTruthDetails) {
+    return calculateIdealScore(listSize, evaluateThreshold);
+    /*
     Map<String, Integer> truthRankingMap = new HashMap<String, Integer>();
     for(SOTruthDetail d : soTruthDetails) {
       truthRankingMap.put(d.getUrl().toString(), d.getRank());
     }
-
     return calculateScore(truthRankingMap, truthRankingMap);
+    */
   }
 
   /*
