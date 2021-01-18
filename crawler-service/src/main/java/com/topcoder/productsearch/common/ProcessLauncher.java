@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import com.topcoder.productsearch.common.entity.WebSite;
 import com.topcoder.productsearch.common.repository.SOTruthRepository;
 import com.topcoder.productsearch.common.repository.WebSiteRepository;
 import com.topcoder.productsearch.converter.service.ConverterService;
+import com.topcoder.productsearch.converter.service.SolrService;
 import com.topcoder.productsearch.crawler.service.CrawlerService;
 import com.topcoder.productsearch.crawler.service.CrawlerServiceCreator;
 import com.topcoder.productsearch.opt_evaluate.service.SOEvaluateService;
@@ -95,6 +97,10 @@ public class ProcessLauncher implements ApplicationRunner {
    */
   @Autowired
   SOGenTruthService soGenTruthService;
+
+
+  @Autowired
+  SolrService solrService;
 
   /**
    * get site by input args if exist
@@ -278,11 +284,50 @@ public class ProcessLauncher implements ApplicationRunner {
       logger.info(page.getTitle());
       logger.info(page.getContent());
       //logger.info(page.getBody());
+
+    } else if ("duplicate".equalsIgnoreCase(procs.get(0))) {
+
+      String docId = getParams(args, "id");
+      String docUrl = getParams(args, "url");
+      if (docId == null && docUrl == null) {
+        throw new IllegalArgumentException("parameter id or url is required");
+      }
+
+      SolrDocument doc = null;
+      if (docId != null) {
+        doc = this.solrService.findDocumentById(docId);
+      }
+      if (doc == null && docUrl != null) {
+        doc = this.solrService.findDocumentById(this.solrService.findByURL(docUrl));
+      }
+      if (doc == null) {
+        throw new IllegalArgumentException("no document found.");
+      }
+
+      String term = getParams(args, "term");
+      String ctr = getParams(args, "ctr");
+
+      if (term != null) {
+        doc.addField("ctr_term", term);
+      }
+      if (ctr != null) {
+        doc.addField("ctr", Float.parseFloat(ctr));
+      }
+      doc.removeFields("id");
+
+      this.solrService.createOrUpdate(doc);
+
+    } else if ("delete".equalsIgnoreCase(procs.get(0))) {
+
+      String docId = getParams(args, "id");
+      if (docId == null) {
+        throw new IllegalArgumentException("parameter id is required");
+      }
+      this.solrService.delete(docId);
     } else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
-      logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=crawler");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=scrape,--url=...");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=opt_gen_truth,--search-words=\"keyword1 keyword2\"");

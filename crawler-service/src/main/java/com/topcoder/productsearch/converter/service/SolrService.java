@@ -2,7 +2,12 @@ package com.topcoder.productsearch.converter.service;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -103,6 +108,26 @@ public class SolrService {
   }
 
   /**
+   * find product in solr by document ID
+   *
+   * @param id
+   * @return the solr id
+   * @throws IOException         if network exception happened
+   * @throws SolrServerException if solr server exception happened
+   */
+  public SolrDocument findDocumentById(String id) throws IOException, SolrServerException {
+    SolrQuery query = new SolrQuery();
+    query.set("q", String.format("id:\"%s\"", id));
+    query.set("fl", "id,product_url,manufacturer_id,manufacturer_name,page_updated_at,category,content,html_title,html_area1,html_area2,html_area3,html_area4,html_area5,html_area6,html_area7,html_area8,html_area9,html_area10,html_body,search_word_txt_ja,ctr_f,search_word2_txt_ja,ctr2_f");
+
+    QueryResponse response = httpSolrClient.query(query);
+    if (response.getResults().getNumFound() <= 0) {
+      return null;
+    }
+    return response.getResults().get(0);
+  }
+
+  /**
    * delete solr entity by url if exist
    *
    * @param url the url
@@ -111,10 +136,25 @@ public class SolrService {
    */
   public void deleteByURL(String url) throws IOException, SolrServerException {
     String id = findByURL(url);
-    if (id != null) {
-      httpSolrClient.deleteById(id);
-      httpSolrClient.commit();
+    if (id == null) {
+      return;
     }
+    delete(id);
+  }
+
+  /**
+   * delete solr entity by document ID if exist
+   *
+   * @param id the document ID
+   * @throws IOException         if network exception happened
+   * @throws SolrServerException if solr server exception happened
+   */
+  public void delete(String id) throws IOException, SolrServerException {
+    if (id == null) {
+      return;
+    }
+    httpSolrClient.deleteById(id);
+    httpSolrClient.commit();
   }
 
   /**
@@ -126,6 +166,32 @@ public class SolrService {
    */
   public void createOrUpdate(CPage page) throws IOException, SolrServerException {
     SolrInputDocument document = pageToDocument(page);
+    createOrUpdate(document);
+  }
+
+  public SolrInputDocument createSolrInputDocument(SolrDocument document) throws IOException, SolrServerException {
+    if (document == null) {
+      throw new IllegalArgumentException("document is required.");
+    }
+
+    SolrInputDocument input = new SolrInputDocument();
+    for (String field: document.getFieldNames()) {
+      input.addField(field, document.getFirstValue(field));
+    }
+    if (document.hasChildDocuments()) {
+      for (SolrDocument childDoc : document.getChildDocuments()) {
+        input.addChildDocument(createSolrInputDocument(childDoc));
+      }
+    }
+    return input;
+  }
+
+  public void createOrUpdate(SolrDocument document) throws IOException, SolrServerException {
+    SolrInputDocument input = createSolrInputDocument(document);
+    createOrUpdate(input);
+  }
+
+  public void createOrUpdate(SolrInputDocument document) throws IOException, SolrServerException {
     httpSolrClient.add(document);
     httpSolrClient.commit();
   }
@@ -153,9 +219,11 @@ public class SolrService {
       String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
       query.set("fq", "manufacturer_id:(" + fq + ")");
     }
+    //query.setFilterQueries("{!collapse field=product_url}");
+    //query.set("expand", true);
     query.set("start", request.getStart());
     query.set("rows", request.getRows());
-    query.set("fl", "id,manufacturer_id,manufacturer_name,product_url,page_updated_at,html_title,content,category,score");
+    query.set("fl", "id,score,product_url,html_title,manufacturer_id,manufacturer_name,page_updated_at,category,content");
     query.set("hl", "on");
     query.set("hl.fl", "content");
     query.setShowDebugInfo(request.isDebug());
@@ -175,6 +243,7 @@ public class SolrService {
         }
       });
     }
+    //response.getExpandedResults();
     List<SolrProduct> products = new LinkedList<>();
     for (int i = 0; i < response.getResults().size(); i++) {
       SolrProduct solrProduct = new SolrProduct();
