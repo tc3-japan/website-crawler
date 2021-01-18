@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "last_clicked_at",
+    "type": "pdate",
+    "required": false,
+    "indexed": true,
+    "stored": true
+  }
+}
