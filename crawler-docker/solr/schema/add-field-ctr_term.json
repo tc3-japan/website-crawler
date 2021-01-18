@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "ctr",
+    "type": "pfloat",
+    "required": false,
+    "indexed": true,
+    "stored": true
+  }
+}

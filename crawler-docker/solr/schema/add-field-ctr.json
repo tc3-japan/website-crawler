@@ -1,0 +1,9 @@
+{
+  "add-field": {
+    "name": "ctr_term",
+    "type": "text_ja",
+    "required": false,
+    "indexed": true,
+    "stored": true
+  }
+}
