@@ -83,6 +83,15 @@ else
     --data-binary @/opt/solr/add-field-product_url.json $SCHEMA_URL
 
   curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-ctr.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-ctr_term.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
+    --data-binary @/opt/solr/add-field-last_clicked_at.json $SCHEMA_URL
+
+  curl -X POST -H 'Content-type:application/json' \
     --data-binary @/opt/solr/replace-field-type-text_ja.json $SCHEMA_URL
 
   curl -X POST -H 'Content-type:application/json' \
