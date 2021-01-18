@@ -20,7 +20,7 @@ spec:
       terminationGracePeriodSeconds: 10
       restartPolicy: Always
       containers:
-      - image: tc3jp/productsearch-solr:8.1.1-1.0.13
+      - image: tc3jp/productsearch-solr:8.1.1-1.0.14
         name: solr
         readinessProbe:
           tcpSocket:
@@ -63,7 +63,7 @@ spec:
           name: solr-store
 
       - name: init-solr-log4jxml
-        image: tc3jp/productsearch-solr:8.1.1-1.0.13
+        image: tc3jp/productsearch-solr:8.1.1-1.0.14
         command:
         - "/bin/sh"
         - "-c"
@@ -73,7 +73,7 @@ spec:
           name: solr-store
 
       - name: init-solr-xml
-        image: tc3jp/productsearch-solr:8.1.1-1.0.13
+        image: tc3jp/productsearch-solr:8.1.1-1.0.14
         command:
         - "/bin/sh"
         - "-c"
@@ -83,7 +83,7 @@ spec:
           name: solr-store
 
       #- name: init-solr-secirutyjson
-      #  image: tc3jp/productsearch-solr:8.1.1-1.0.13
+      #  image: tc3jp/productsearch-solr:8.1.1-1.0.14
       #  command:
       #  - "/bin/sh"
       #  - "-c"
