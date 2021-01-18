@@ -1,7 +1,7 @@
 {
   "add-field": {
-    "name": "ctr",
-    "type": "pfloat",
+    "name": "ctr_term",
+    "type": "text_ja",
     "required": false,
     "indexed": true,
     "stored": true
