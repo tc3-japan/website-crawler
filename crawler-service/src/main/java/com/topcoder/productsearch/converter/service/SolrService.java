@@ -110,7 +110,7 @@ public class SolrService {
    * @throws IOException         if network exception happened
    * @throws SolrServerException if solr server exception happened
    */
-  public List<String> findByURLs(String url) throws IOException, SolrServerException {
+  public List<String> findIdsByURL(String url) throws IOException, SolrServerException {
     SolrQuery query = new SolrQuery();
     query.set("q", "product_url:\"" + url + "\"");
     QueryResponse response = httpSolrClient.query(query);
@@ -132,7 +132,7 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public void deleteByURL(String url) throws IOException, SolrServerException {
-    List<String> ids = findByURLs(url);
+    List<String> ids = findIdsByURL(url);
     for (String id : ids) {
       httpSolrClient.deleteById(id);
       httpSolrClient.commit();
@@ -349,6 +349,7 @@ public class SolrService {
     }
     return String.join(" ", qfParts);
   }
+
   /**
    * get Highlighting content
    * @param response the slor response
@@ -363,18 +364,35 @@ public class SolrService {
     return null;
   }
 
+  /**
+   * convert page entity to solr input documents
+   *
+   * @param page the page entity
+   * @return the solr input documents
+   * @throws IOException         if network exception happened
+   * @throws SolrServerException if solr server exception happened
+   */
+  private List<SolrInputDocument> pageToDocuments(CPage page) throws IOException, SolrServerException {
+    WebSite site = webSiteRepository.findOne(page.getSiteId());
+    List<SolrInputDocument> documents = new ArrayList<>();
+    for (String id : findIdsByURL(page.getUrl())) {
+      SolrInputDocument document = pageToDocument(page, id, site);
+      documents.add(document);
+    }
+    return documents;
+  }
 
   /**
    * convert page entity to solr input document
-   *
+   * 
    * @param page the page entity
+   * @param id
+   * @param site
    * @return the solr input document
    * @throws IOException         if network exception happened
    * @throws SolrServerException if solr server exception happened
    */
-  private SolrInputDocument pageToDocument(CPage page) throws IOException, SolrServerException {
-    WebSite site = webSiteRepository.findOne(page.getSiteId());
-    String id = findByURL(page.getUrl());
+  private SolrInputDocument pageToDocument(CPage page, String id, WebSite site) throws IOException, SolrServerException {
     DomHelper domHelper = new DomHelper();
 
     // set id if exist
@@ -400,40 +418,5 @@ public class SolrService {
       document.addField("html_area" + (i + 1), htmlAreas.get(i));
     }
     return document;
-  }
-
-  // TODO: split method(INSERT/UPDATE)
-  private List<SolrInputDocument> pageToDocuments(CPage page) throws IOException, SolrServerException {
-    WebSite site = webSiteRepository.findOne(page.getSiteId());
-    List<String> ids = findByURLs(page.getUrl());
-    DomHelper domHelper = new DomHelper();
-
-    // set id if exist
-    List<SolrInputDocument> documents = new ArrayList<>();
-    for (String id : ids) {
-      SolrInputDocument document = new SolrInputDocument();
-      if (id != null) {
-        document.addField("id", id);
-      }
-      document.addField("manufacturer_name", site.getName());
-      document.addField("product_url", page.getUrl());
-      document.addField("html_title", page.getTitle());
-      document.addField("html_body", page.getBody());
-
-      // force convert to string for solr document
-      // "1" will identify as number in solr document
-      document.addField("manufacturer_id", site.getId() + "");
-
-      document.addField("content", domHelper.htmlToText(page.getContent()));
-      document.addField("category", page.getCategory());
-      document.addField("page_updated_at", Date.from(Instant.now()));
-
-      List<String> htmlAreas = domHelper.getHtmlAreasFromContents(page.getContent());
-      for (int i = 0; i < htmlAreas.size(); i++) {
-        document.addField("html_area" + (i + 1), htmlAreas.get(i));
-      }
-      documents.add(document);
-    }
-    return documents;
   }
 }

@@ -25,7 +25,6 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -80,6 +79,12 @@ public class SolrServiceTest extends AbstractUnitTest {
     assertEquals(null, solrService.findByURL("test"));
     when(solrDocumentList.getNumFound()).thenReturn(1L);
     assertEquals("id", solrService.findByURL("test"));
+  }
+
+  @Test
+  public void testFindIdsByURL() throws IOException, SolrServerException {
+    when(solrDocumentList.getNumFound()).thenReturn(0L);
+    assertEquals(null, solrService.findIdsByURL("test"));
   }
 
   @Test
