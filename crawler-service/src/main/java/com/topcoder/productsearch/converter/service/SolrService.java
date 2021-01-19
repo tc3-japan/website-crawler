@@ -103,6 +103,28 @@ public class SolrService {
   }
 
   /**
+   * find products in solr by url
+   *
+   * @param url the url
+   * @return the solr id
+   * @throws IOException         if network exception happened
+   * @throws SolrServerException if solr server exception happened
+   */
+  public List<String> findByURLs(String url) throws IOException, SolrServerException {
+    SolrQuery query = new SolrQuery();
+    query.set("q", "product_url:\"" + url + "\"");
+    QueryResponse response = httpSolrClient.query(query);
+    if (response.getResults().getNumFound() <= 0) {
+      return null;
+    }
+    List<String> ids = new ArrayList<>();
+    for (SolrDocument result : response.getResults()) {
+      ids.add(result.get("id").toString());
+    }
+    return ids;
+  }
+
+  /**
    * delete solr entity by url if exist
    *
    * @param url the url
@@ -110,8 +132,8 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public void deleteByURL(String url) throws IOException, SolrServerException {
-    String id = findByURL(url);
-    if (id != null) {
+    List<String> ids = findByURLs(url);
+    for (String id : ids) {
       httpSolrClient.deleteById(id);
       httpSolrClient.commit();
     }
@@ -125,8 +147,8 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public void createOrUpdate(CPage page) throws IOException, SolrServerException {
-    SolrInputDocument document = pageToDocument(page);
-    httpSolrClient.add(document);
+    List<SolrInputDocument> documents = pageToDocuments(page);
+    httpSolrClient.add(documents);
     httpSolrClient.commit();
   }
 
@@ -378,5 +400,40 @@ public class SolrService {
       document.addField("html_area" + (i + 1), htmlAreas.get(i));
     }
     return document;
+  }
+
+  // TODO: split method(INSERT/UPDATE)
+  private List<SolrInputDocument> pageToDocuments(CPage page) throws IOException, SolrServerException {
+    WebSite site = webSiteRepository.findOne(page.getSiteId());
+    List<String> ids = findByURLs(page.getUrl());
+    DomHelper domHelper = new DomHelper();
+
+    // set id if exist
+    List<SolrInputDocument> documents = new ArrayList<>();
+    for (String id : ids) {
+      SolrInputDocument document = new SolrInputDocument();
+      if (id != null) {
+        document.addField("id", id);
+      }
+      document.addField("manufacturer_name", site.getName());
+      document.addField("product_url", page.getUrl());
+      document.addField("html_title", page.getTitle());
+      document.addField("html_body", page.getBody());
+
+      // force convert to string for solr document
+      // "1" will identify as number in solr document
+      document.addField("manufacturer_id", site.getId() + "");
+
+      document.addField("content", domHelper.htmlToText(page.getContent()));
+      document.addField("category", page.getCategory());
+      document.addField("page_updated_at", Date.from(Instant.now()));
+
+      List<String> htmlAreas = domHelper.getHtmlAreasFromContents(page.getContent());
+      for (int i = 0; i < htmlAreas.size(); i++) {
+        document.addField("html_area" + (i + 1), htmlAreas.get(i));
+      }
+      documents.add(document);
+    }
+    return documents;
   }
 }
