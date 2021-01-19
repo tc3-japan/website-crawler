@@ -2,7 +2,12 @@ package com.topcoder.productsearch.converter.service;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -154,9 +159,6 @@ public class SolrService {
   public void deleteByURL(String url) throws IOException, SolrServerException {
     List<String> ids = findIdsByURL(url);
     for (String id : ids) {
-      if (id == null) {
-        continue;
-      }
       delete(id);
     }
   }
