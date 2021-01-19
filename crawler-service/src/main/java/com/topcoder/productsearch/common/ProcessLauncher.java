@@ -320,10 +320,17 @@ public class ProcessLauncher implements ApplicationRunner {
     } else if ("delete".equalsIgnoreCase(procs.get(0))) {
 
       String docId = getParams(args, "id");
-      if (docId == null) {
-        throw new IllegalArgumentException("parameter id is required");
+      String docUrl = getParams(args, "url");
+      if (docId == null && docUrl == null) {
+        throw new IllegalArgumentException("parameter id or url is required");
       }
-      this.solrService.delete(docId);
+
+      if (docId != null) {
+        this.solrService.delete(docId);
+      } else {
+        this.solrService.deleteByURL(docUrl);
+      }
+
     } else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");

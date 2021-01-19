@@ -98,13 +98,11 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public String findByURL(String url) throws IOException, SolrServerException {
-    SolrQuery query = new SolrQuery();
-    query.set("q", "product_url:\"" + url + "\"");
-    QueryResponse response = httpSolrClient.query(query);
-    if (response.getResults().getNumFound() <= 0) {
+    List<String> ids = findIdsByURL(url);
+    if (ids == null || ids.isEmpty()) {
       return null;
     }
-    return response.getResults().get(0).get("id").toString();
+    return ids.get(0);
   }
 
   /**
@@ -116,13 +114,13 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public List<String> findIdsByURL(String url) throws IOException, SolrServerException {
+    List<String> ids = new ArrayList<>();
     SolrQuery query = new SolrQuery();
     query.set("q", "product_url:\"" + url + "\"");
     QueryResponse response = httpSolrClient.query(query);
     if (response.getResults().getNumFound() <= 0) {
-      return null;
+      return ids;
     }
-    List<String> ids = new ArrayList<>();
     for (SolrDocument result : response.getResults()) {
       ids.add(result.get("id").toString());
     }
@@ -445,8 +443,14 @@ public class SolrService {
   private List<SolrInputDocument> pageToDocuments(CPage page) throws IOException, SolrServerException {
     WebSite site = webSiteRepository.findOne(page.getSiteId());
     List<SolrInputDocument> documents = new ArrayList<>();
-    for (String id : findIdsByURL(page.getUrl())) {
-      SolrInputDocument document = pageToDocument(page, id, site);
+    List<String> ids = findIdsByURL(page.getUrl());
+    if (!ids.isEmpty()) {
+      for (String id : findIdsByURL(page.getUrl())) {
+        SolrInputDocument document = pageToDocument(page, id, site);
+        documents.add(document);
+      }
+    } else {
+      SolrInputDocument document = pageToDocument(page, null, site);
       documents.add(document);
     }
     return documents;
