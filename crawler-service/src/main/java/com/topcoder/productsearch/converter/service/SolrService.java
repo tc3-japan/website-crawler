@@ -369,9 +369,7 @@ public class SolrService {
     // If multiple words are specified, sort in ascending order
     List<String> qList = Arrays.asList(q.split("\\s"));
     qList.sort(Comparator.naturalOrder());
-    // TODO: delimiter
-    //q = String.join("%20", qList);
-    q = String.join("+", qList);
+    q = String.join(" ", qList);
 
     List<Float> weights = request.getWeights();
     if (weights == null || weights.isEmpty()) {
@@ -392,7 +390,7 @@ public class SolrService {
       fieldQueries.add(qi);
     }
 
-    query.set("q", "{!boost b=sum(1,mul(if(eq(ctr_term,\"" + q + "\"),ctr,0)," + ctrNumber + "))}"
+    query.set("q", "{!boost b=\"sum(1,mul(if(eq(ctr_term,\'" + q + "\'),ctr,0)," + ctrNumber + "))\"}"
         +  String.join(" OR ", fieldQueries));
     logger.debug("query: " + query.getQuery());
 
