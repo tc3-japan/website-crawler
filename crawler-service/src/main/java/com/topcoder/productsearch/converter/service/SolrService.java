@@ -1,13 +1,18 @@
 package com.topcoder.productsearch.converter.service;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -77,6 +82,12 @@ public class SolrService {
    */
   @Value("${solr.retry_interval:3}")
   private Integer retryIntervalSeconds = 3;
+
+  /**
+   * the CTR number for search product in Solr.
+   */
+  @Value("${solr.ctr_number:1000}")
+  private Integer ctrNumber = 1000;
 
   /**
    * create new solr service
@@ -236,9 +247,14 @@ public class SolrService {
     SolrQuery query = dismax ? buildDismaxQueryBase(request) // dismax query parser
                             : buildStandardQueryBase(request); // standard query parser
 
+    String fq = null;
     if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
-      String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
-      query.set("fq", "manufacturer_id:(" + fq + ")");
+      fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
+    }
+    if (fq != null) {
+      query.setFilterQueries("manufacturer_id:(" + fq + ")", "{!collapse field=product_url}");
+    } else {
+      query.setFilterQueries("{!collapse field=product_url}");
     }
     //query.setFilterQueries("{!collapse field=product_url}");
     //query.set("expand", true);
@@ -339,7 +355,22 @@ public class SolrService {
       return query;
     }
 
-    String q = String.format("(%s)", String.join(" ", request.getQuery()));
+    String q = String.format("%s", String.join(" ", request.getQuery()));
+
+    // Normalize the query string
+    Pattern p = Pattern.compile("([ｦ-ﾟＡ-Ｚａ-ｚ０-９！”＃＄％＆’（）＝～｜‘｛＋＊｝＜＞？／＿－＾￥＠「；：」，、。・　]+)");
+    Matcher m = p.matcher(q);
+    StringBuffer sb = new StringBuffer();
+    while(m.find()) {
+      m.appendReplacement(sb, Normalizer.normalize(m.group(), Normalizer.Form.NFKD));
+    }
+    q = m.appendTail(sb).toString();
+
+    // If multiple words are specified, sort in ascending order
+    List<String> qList = Arrays.asList(q.split("\\s"));
+    qList.sort(Comparator.naturalOrder());
+    // TODO: Error when searching multiple words
+    q = "(" + String.join(" ", qList) + ")";
 
     List<Float> weights = request.getWeights();
     if (weights == null || weights.isEmpty()) {
@@ -359,7 +390,10 @@ public class SolrService {
       String qi = String.format("html_area%d:%s^%f", (i + 1), q, (w != null ? w : 1f));
       fieldQueries.add(qi);
     }
-    query.set("q", String.join(" OR ", fieldQueries));
+
+    query.set("q", "{!boost b=sum(1,mul(if(eq(ctr_term,\"" + q + "\"),ctr,0)," + ctrNumber + "))}"
+        +  String.join(" OR ", fieldQueries));
+    logger.debug("query: " + query.getQuery());
 
     return query;
   }
