@@ -369,8 +369,9 @@ public class SolrService {
     // If multiple words are specified, sort in ascending order
     List<String> qList = Arrays.asList(q.split("\\s"));
     qList.sort(Comparator.naturalOrder());
-    // TODO: Error when searching multiple words
-    q = "(" + String.join(" ", qList) + ")";
+    // TODO: delimiter
+    //q = String.join("%20", qList);
+    q = String.join("+", qList);
 
     List<Float> weights = request.getWeights();
     if (weights == null || weights.isEmpty()) {
@@ -387,7 +388,7 @@ public class SolrService {
       if (weights != null && i < weights.size()) {
         w = weights.get(i);
       }
-      String qi = String.format("html_area%d:%s^%f", (i + 1), q, (w != null ? w : 1f));
+      String qi = String.format("html_area%d:%s^%f", (i + 1), "(" + q + ")", (w != null ? w : 1f));
       fieldQueries.add(qi);
     }
 
