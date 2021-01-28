@@ -1,18 +1,13 @@
 package com.topcoder.productsearch.converter.service;
 
 import java.io.IOException;
-import java.text.Normalizer;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -358,18 +353,7 @@ public class SolrService {
     String q = String.format("%s", String.join(" ", request.getQuery()));
 
     // Normalize the query string
-    Pattern p = Pattern.compile("([ｦ-ﾟＡ-Ｚａ-ｚ０-９！”＃＄％＆’（）＝～｜‘｛＋＊｝＜＞？／＿－＾￥＠「；：」，、。・　]+)");
-    Matcher m = p.matcher(q);
-    StringBuffer sb = new StringBuffer();
-    while(m.find()) {
-      m.appendReplacement(sb, Normalizer.normalize(m.group(), Normalizer.Form.NFKD));
-    }
-    q = m.appendTail(sb).toString();
-
-    // If multiple words are specified, sort in ascending order
-    List<String> qList = Arrays.asList(q.split("\\s"));
-    qList.sort(Comparator.naturalOrder());
-    q = String.join(" ", qList);
+    q = Common.normalizeSearchWord(q);
 
     List<Float> weights = request.getWeights();
     if (weights == null || weights.isEmpty()) {
