@@ -3,3 +3,4 @@
 **/.DS_Store
 crawler-service/out
 *.log
+crawler-docker/*.tar
