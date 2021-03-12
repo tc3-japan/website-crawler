@@ -1,3 +1,19 @@
+CREATE TABLE `click_logs`  (
+	`id`                     	int(11) UNSIGNED AUTO_INCREMENT NOT NULL,
+	`query_id`               	varchar(512) NULL,
+	`search_words`           	varchar(512) NOT NULL,
+	`normalized_search_words`	varchar(512) NOT NULL,
+	`page_url`               	varchar(768) NOT NULL,
+	`page_rank`              	tinyint(3) UNSIGNED NULL,
+	`created_date`           	date NOT NULL,
+	`created_at`             	datetime NULL DEFAULT CURRENT_TIMESTAMP,
+	`last_modified_at`       	datetime NULL,
+	PRIMARY KEY(`id`,`created_date`)
+)
+ENGINE = InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+
 CREATE TABLE `destination_urls`  (
 	`id`              	int(11) UNSIGNED AUTO_INCREMENT NOT NULL,
 	`url`             	varchar(768) NOT NULL,
@@ -17,6 +33,8 @@ CREATE TABLE `pages`  (
 	`type`             	varchar(20) NOT NULL,
 	`title`            	varchar(1024) NULL,
 	`body`             	longtext NULL,
+	`content`          	longtext NULL,
+	`category`         	varchar(256) NULL,
 	`etag`             	varchar(256) NULL,
 	`last_modified`    	varchar(256) NULL DEFAULT 'CURRENT_TIMESTAMP',
 	`created_at`       	datetime NOT NULL,
@@ -175,6 +193,7 @@ CREATE TABLE `web_sites`  (
 	`weight10`                   	decimal(15,5) UNSIGNED NULL,
 	`created_at`                 	datetime NULL DEFAULT CURRENT_TIMESTAMP,
 	`last_modified_at`           	datetime NULL,
+	`deleted`                    	tinyint(1) UNSIGNED NULL DEFAULT '0',
 	PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
@@ -235,6 +254,12 @@ ALTER TABLE `search_opt_evaluations`
 	ADD CONSTRAINT `fk_sopt_evaluations_siteid`
 	FOREIGN KEY(`site_id`)
 	REFERENCES `web_sites`(`id`);
+
+CREATE INDEX `idx_clicklogs_cdate_nsearchwords`
+	ON `click_logs`(`created_date`, `normalized_search_words`);
+
+CREATE INDEX `idx_clicklogs_id`
+	ON `click_logs`(`id`);
 
 CREATE INDEX `idx_destination_urls_pageid` USING BTREE
 	ON `destination_urls`(`page_id`);
