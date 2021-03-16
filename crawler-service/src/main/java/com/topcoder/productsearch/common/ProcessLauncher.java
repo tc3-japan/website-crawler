@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.topcoder.productsearch.calctr.service.CalctrService;
 import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,12 @@ public class ProcessLauncher implements ApplicationRunner {
 
   @Autowired
   SolrService solrService;
+
+  /**
+   * calctr service
+   */
+  @Autowired
+  CalctrService calctrService;
 
   /**
    * get site by input args if exist
@@ -324,7 +331,20 @@ public class ProcessLauncher implements ApplicationRunner {
         throw new IllegalArgumentException("parameter id is required");
       }
       this.solrService.delete(docId);
-    } else {
+    } else if ("calctr".equalsIgnoreCase(procs.get(0))) {
+      String calcPeriodStr = getParams(args, "calc_period");
+      if (calcPeriodStr == null) {
+        throw new IllegalArgumentException("parameter calc_period is required");
+      }
+      int calcPeriod;
+      try {
+        calcPeriod = Integer.parseInt(calcPeriodStr);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("parameter calc_period is invalid integer value");
+      }
+      calctrService.calctr(calcPeriod);
+    }
+    else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter");
       logger.info("usage : ./gradlew bootRun -Pargs=--proc=converter");
@@ -334,6 +354,7 @@ public class ProcessLauncher implements ApplicationRunner {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=opt_gen_truth,--search-words-path=\"search-words.txt\"");
       logger.info("usage : ./gradlew bootRun -Pargs=--truth=1,--proc=opt_evaluate,--weights=1,2,3,4,5");
       logger.info("usage : ./gradlew bootRun -Pargs=--passwd={username:password}");
+      logger.info("usage : ./gradlew bootRun -Pargs=--calc_period=15,--proc=calctr");
     }
   }
 }

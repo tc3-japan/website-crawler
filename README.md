@@ -12,12 +12,13 @@
 
 ## Quick Start
 
-1. To start the mySql server in Docker:
+1. To start the mySql server and solr in Docker:
    ```bash
-   cd crawler-database
-   docker-compose up
-   ```
-
+   cd website-crawler/crawler-docker
+   docker-compose up -d mysql
+   docker-compose up -d solr
+```
+   
 1. Edit database settings on src/main/resources/application-default.yml
     ```yaml
     spring:
@@ -37,21 +38,21 @@
     solr:
         uri: http://localhost:8983/solr/manufacturer_product
     ```
- 
+
     NOTE: if you get error for loading the application config in below steps, you may need to edit `applicationConfig` in `build.gradle` to absolute path
- 
+
 1. Migrate the database
     ```bash
     ./gradlew flywayMigrate
     ```
- 
+
 1. Building with Gradle, in project root:
     ```bash
     ./gradlew build
     ```
     
        after build, you can found bug report in *./⁨crawler-service⁩/build⁩/⁨reports⁩/⁨spotbugs⁩/index.html*
- 
+
 1. To Run Test case, in project root:
     ```bash
     ./gradlew clean test jacocoTestReport
@@ -63,24 +64,8 @@
     ./gradlew bootRun -Pargs=--site=1,--proc=crawler
     ```
 
-1. Download and Run the Docker Image for pre-configured Solr Core with Test Data:
+1.  Verify the Solr core:
   
-		1. Download the Solr docker image.
-		    docker pull azh4r/solr-productsearch-test_data:8.1.1
-		
-		2. Run the Docker container. 
-			docker run -d -t --name tc3 -p 0.0.0.0:8983:8983 azh4r/solr-productsearch-test_data:8.1.1
-		
-		3. Open a shell inside the Docker container and run the preconfigured Solr instance.
-			 
-			docker exec -i -t tc3 bash
-			cd opt/solr-8.1.1
-			bin/solr start -force
-		
-		Now Solr is running in docker image mapped to port 8983 on your host.
-	
-	To verify the Solr core:
-	
 		1. Point your browser to http://localhost:8983 to open Solr Admin
 		
 		2. Select manufacturer_product Core from the drop down Menu on the LHS Navigation menu. This will give you more options specific to the Core. 
@@ -88,11 +73,11 @@
 		3. Select the Query from the LHS menu
 		
 		4. Execute the default query (q field = *:*) and in the response numFound will have a value = 835.  That is 835 records exists in the Solr Index. 
-
+	
 1.  To Run the API service, in project root:
     ```bash
     ./gradlew bootRun -Pargs=--rest
-    ``` 
+    ```
 
     The service is running at http://localhost:8090/api/
 
@@ -111,7 +96,7 @@ You should remove all potential bugs or flaws found by Spot Bugs.
 ## Unit Test
 Unit test is integrated in the build process
 
-## Verifcation starting from web-crawler to converter.  
+## Verifcation
 
 Following is not necessarily needed for challenge#3 F2F, but is here as a reference if the developer needs to reproduce the data.
 
@@ -122,3 +107,4 @@ Following is not necessarily needed for challenge#3 F2F, but is here as a refere
    - update deleted to 1 in pages table, then run this again and check the solr service
    - update some last_modified_at in pages table to 2018-10-10, then run this again and check the solr service
 4. update pages table last_modified_at value, then use `./gradlew bootRun -Pargs=--proc=converter,--only-data-cleanup,--site=1` to run cleanup process independently
+5. run `./gradlew bootRun -Pargs=--calc_period=15,--proc=calctr` will collect users' click logs and calculate click-through rate of pages in search results. 
