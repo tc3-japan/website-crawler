@@ -24,7 +24,9 @@ import com.topcoder.productsearch.api.securities.RestCondition;
     "com.topcoder.productsearch.converter",
     "com.topcoder.productsearch.opt_gen_truth",
     "com.topcoder.productsearch.opt_evaluate",
-    "com.topcoder.productsearch.cleaner"})
+    "com.topcoder.productsearch.cleaner",
+    "com.topcoder.productsearch.calctr"
+})
 public class Application {
 
   /**
