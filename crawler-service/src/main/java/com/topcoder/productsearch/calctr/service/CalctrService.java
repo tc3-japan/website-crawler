@@ -142,7 +142,7 @@ public class CalctrService {
     for (SolrDocument document : solrDocuments) {
       try {
         // New CTR = (ctr * P  < T) ? (ctr * P) : 0
-        float ctr = Float.parseFloat(document.get(CTR).toString());
+        double ctr = Double.parseDouble(document.get(CTR).toString());
         document.setField(CTR, ctr * p < t ? ctr * p : 0);
         solrService.createOrUpdate(document);
       } catch (Exception e) {

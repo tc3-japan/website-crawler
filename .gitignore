@@ -3,3 +3,5 @@
 **/.DS_Store
 crawler-service/out
 *.log
+crawler-docker/mysql_data.tar
+crawler-docker/solr_data.tar

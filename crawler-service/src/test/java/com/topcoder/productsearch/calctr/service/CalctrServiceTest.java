@@ -69,22 +69,28 @@ public class CalctrServiceTest {
     List<SolrDocument> documents = new ArrayList<>();
     List<SolrDocument> excludeDocuments = new ArrayList<>();
     SolrDocument d1 = new SolrDocument();
+    d1.setField("id","1");
     d1.setField("product_url", "http://sofa");
     d1.setField("ctr_term", "sofa");
     documents.add(d1);
 
     SolrDocument d2 = new SolrDocument();
+    d1.setField("id","d2");
     d2.setField("product_url", "http://bed");
     documents.add(d2);
 
     SolrDocument d3 = new SolrDocument();
+    d1.setField("id","d3");
     d3.setField("product_url", "http://bed02");
     d3.setField("ctr_term", "sofa");
     d3.setField("ctr", "1.2");
     documents.add(d3);
     excludeDocuments.add(d3);
+
+    SolrInputDocument newDoc = new SolrInputDocument();
+    newDoc.setField("id","new_id");
     when(solrService.findByURLs(any())).thenReturn(documents);
-    when(solrService.createSolrInputDocument(any())).thenReturn(new SolrInputDocument());
+    when(solrService.createSolrInputDocument(any())).thenReturn(newDoc);
     when(solrService.findByCtrAndIds(any())).thenReturn(excludeDocuments);
   }
 
@@ -98,7 +104,7 @@ public class CalctrServiceTest {
     calctrService.calctr(10);
     verify(solrService, times(1)).findByCtrAndIds(any());
     verify(solrService, times(1)).findByURLs(any());
-    verify(solrService, times(3)).createOrUpdate(any(SolrInputDocument.class));
+    verify(solrService, times(2)).createOrUpdate(any(SolrInputDocument.class));
     verify(solrService, times(1)).createOrUpdate(any(SolrDocument.class));
   }
 }
