@@ -30,6 +30,16 @@ public class CalctrService {
    */
   private static final Logger logger = LoggerFactory.getLogger(CalctrService.class);
 
+  /**
+   * fields name
+   */
+  private static final String CTR_TERM = "ctr_term";
+  private static final String CTR = "ctr";
+  private static final String LAST_CLICKED_AT = "last_clicked_at";
+  private static final String PRODUCT_URL = "product_url";
+  public static final String VERSION = "_version_";
+  public static final String ID = "id";
+
 
   /**
    * the p value
@@ -96,9 +106,16 @@ public class CalctrService {
           logger.info("no document find in solr, where url = " + c2.getUrl());
           continue;
         }
-        document.setField("ctr_term", c2.getWords());
-        document.setField("ctr", c2.getCtr());
-        document.setField("last_clicked_at", c2.getLastClickDate());
+
+        document.setField(CTR_TERM, c2.getWords());
+        if (document.get(CTR) != null) {
+          // (old CTR + new CTR) * 0.5
+          document.setField(CTR, (Double.parseDouble(document.get(CTR).getFirstValue().toString()) + c2.getCtr()) * 0.5);
+        } else {
+          // (new CTR) * 0.5
+          document.setField(CTR, c2.getCtr() * 0.5);
+        }
+        document.setField(LAST_CLICKED_AT, c2.getLastClickDate());
         solrService.createOrUpdate(document);
         proceeds.add(document.get("id").getValue().toString());
       } catch (Exception e) {
@@ -108,6 +125,11 @@ public class CalctrService {
     }
 
     // step 5, Update all documents which have CTR except for documents updated in (4) as:
+    if (proceeds.isEmpty()) {
+      logger.info("no any document proceed, so we skip step 5");
+      return;
+    }
+
     try {
       solrDocuments = solrService.findByCtrAndIds(proceeds);
       logger.info(String.format("step5: found solrDocuments by urls and exclude ids, size = %d", solrDocuments.size()));
@@ -120,8 +142,8 @@ public class CalctrService {
     for (SolrDocument document : solrDocuments) {
       try {
         // New CTR = (ctr * P  < T) ? (ctr * P) : 0
-        float ctr = Float.parseFloat(document.get("ctr").toString());
-        document.setField("ctr", ctr * p < t ? ctr * p : 0);
+        float ctr = Float.parseFloat(document.get(CTR).toString());
+        document.setField(CTR, ctr * p < t ? ctr * p : 0);
         solrService.createOrUpdate(document);
       } catch (Exception e) {
         logger.info("set new ctr failed");
@@ -138,24 +160,30 @@ public class CalctrService {
    * @return the exist or new solr document
    */
   SolrInputDocument getSolrDocument(List<SolrDocument> solrDocuments, ClickLogCount2 c2) throws IOException, SolrServerException {
-    SolrInputDocument finalDocument = null;
+    SolrDocument docWithoutCtr = null;
+
+    // search by product url and words
     for (SolrDocument document : solrDocuments) {
-      String url = document.get("product_url").toString();
-      Object ctrTerm = document.get("ctr_term");
+      String url = document.get(PRODUCT_URL).toString();
+      Object ctrTerm = document.get(CTR_TERM);
       if (c2.getUrl().equalsIgnoreCase(url)) {
         // use this to set new CTR_TERM
         if (ctrTerm == null) {
-          return solrService.createSolrInputDocument(document);
+          docWithoutCtr = document;
         } else if (ctrTerm.toString().equalsIgnoreCase(c2.getWords())) {
           return solrService.createSolrInputDocument(document);
-        } else {
-          finalDocument = solrService.createSolrInputDocument(document);
-          finalDocument.remove("_version_");
-          finalDocument.setField("id", UUID.randomUUID().toString());
         }
       }
     }
-    return finalDocument;
+
+    if (docWithoutCtr != null) {
+      // this is new document, so need remove all information and add new ID
+      SolrInputDocument document = solrService.createSolrInputDocument(docWithoutCtr);
+      document.remove(VERSION);
+      document.setField(ID, UUID.randomUUID().toString());
+      return document;
+    }
+    return null;
   }
 
 
