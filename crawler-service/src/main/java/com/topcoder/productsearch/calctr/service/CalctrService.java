@@ -203,7 +203,7 @@ public class CalctrService {
     count2s.forEach(c2 -> {
       if (cachedC1s.containsKey(c2.getWords())) {
         ClickLogCount1 c1 = cachedC1s.get(c2.getWords());
-        c2.setCtr(c2.getCnt() * 1.0f / c1.getCnt() / c1.getCnt());
+        c2.setCtr(c2.getCnt() * 1.0f / c1.getCnt());
       } else {
         c2.setCtr(1);
       }
