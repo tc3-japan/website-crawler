@@ -331,6 +331,7 @@ public class ProcessLauncher implements ApplicationRunner {
         throw new IllegalArgumentException("parameter id is required");
       }
       this.solrService.delete(docId);
+
     } else if ("calctr".equalsIgnoreCase(procs.get(0))) {
       String calcPeriodStr = getParams(args, "calc_period");
       if (calcPeriodStr == null) {
@@ -343,6 +344,13 @@ public class ProcessLauncher implements ApplicationRunner {
         throw new IllegalArgumentException("parameter calc_period is invalid integer value");
       }
       calctrService.calctr(calcPeriod);
+
+    } else if ("clearctr".equalsIgnoreCase(procs.get(0))) {
+      String docId = getParams(args, "id");
+      if (docId == null) {
+        throw new IllegalArgumentException("parameter id is required");
+      }
+      this.calctrService.clearCTR(docId);
     }
     else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");
