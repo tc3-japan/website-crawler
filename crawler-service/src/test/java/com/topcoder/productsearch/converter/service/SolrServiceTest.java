@@ -200,7 +200,7 @@ public class SolrServiceTest extends AbstractUnitTest {
     when(solrDocumentList.size()).thenReturn(1);
     List<String> ids = new ArrayList<>();
     ids.add(UUID.randomUUID().toString());
-    List<SolrDocument> documents = solrService.findByCtrAndIds(ids);
+    List<SolrDocument> documents = solrService.findDocsHavingCTR(ids);
     verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
     assertEquals(1, documents.size());
   }

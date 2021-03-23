@@ -17,7 +17,7 @@ import com.topcoder.productsearch.common.repository.ClickLogsRepository;
  * the click logs service
  */
 @Service
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor(onConstructor_ = { @Autowired })
 public class ClickLogsService {
 
   /**
@@ -48,14 +48,14 @@ public class ClickLogsService {
       clickLogs.setLastModifiedAt(null);
       clickLogsRepository.save(clickLogs);
       return "Successfully registered the click logs";
-    }catch (DataIntegrityViolationException dException) {
+    } catch (DataIntegrityViolationException dException) {
       throw new BadRequestException(dException.getMostSpecificCause().getMessage());
     }
   }
 
   /**
    * get normalized search words
-   * 
+   *
    * @param searchWords the request value of search_words
    * @return normalized search words
    */

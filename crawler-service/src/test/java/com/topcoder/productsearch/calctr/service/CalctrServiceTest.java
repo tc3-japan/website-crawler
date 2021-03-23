@@ -1,7 +1,15 @@
 package com.topcoder.productsearch.calctr.service;
 
-import com.topcoder.productsearch.calctr.model.ClickLogCount1;
-import com.topcoder.productsearch.converter.service.SolrService;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -13,16 +21,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import com.topcoder.productsearch.converter.service.SolrService;
 
 /**
  * Calctr service test
@@ -91,7 +90,7 @@ public class CalctrServiceTest {
     newDoc.setField("id","new_id");
     when(solrService.findByURLs(any())).thenReturn(documents);
     when(solrService.createSolrInputDocument(any())).thenReturn(newDoc);
-    when(solrService.findByCtrAndIds(any())).thenReturn(excludeDocuments);
+    when(solrService.findDocsHavingCTR(any())).thenReturn(excludeDocuments);
   }
 
   /**
@@ -99,10 +98,10 @@ public class CalctrServiceTest {
    */
   @Test
   public void testCalctr() throws IOException, SolrServerException {
-    calctrService.setP(0.5f);
-    calctrService.setT(0.5f);
-    calctrService.calctr(10);
-    verify(solrService, times(1)).findByCtrAndIds(any());
+    calctrService.setDecayRate(0.5f);
+    calctrService.setMinThreshold(0.05f);
+    calctrService.process(10);
+    verify(solrService, times(1)).findDocsHavingCTR(any());
     verify(solrService, times(1)).findByURLs(any());
     verify(solrService, times(2)).createOrUpdate(any(SolrInputDocument.class));
     verify(solrService, times(1)).createOrUpdate(any(SolrDocument.class));

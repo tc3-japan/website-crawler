@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequestMapping("/click_logs")
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor(onConstructor_ = { @Autowired })
 public class ClickLogsController {
 
   /**
@@ -39,10 +39,10 @@ public class ClickLogsController {
   @ResponseStatus(HttpStatus.OK)
   public String create(@Valid @RequestBody ClickLogsRequest request) {
     return clickLogsService
-      .create(request.getSearchId(), 
-              request.getSearchWords(),
-              request.getPageUrl(),
-              request.getPageRank());
+        .create(request.getSearchId(),
+            request.getSearchWords(),
+            request.getPageUrl(),
+            request.getPageRank());
   }
 
 }

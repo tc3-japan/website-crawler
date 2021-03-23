@@ -123,7 +123,7 @@ public class SolrService {
    * @param excludes the exclude
    * @return the documents
    */
-  public List<SolrDocument> findByCtrAndIds(List<String> excludes) throws IOException, SolrServerException {
+  public List<SolrDocument> findDocsHavingCTR(List<String> excludes) throws IOException, SolrServerException {
     String qTpl = "ctr:[* TO *]";
     if (excludes != null && excludes.size() > 0) {
       qTpl += " AND %s";

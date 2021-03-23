@@ -343,14 +343,17 @@ public class ProcessLauncher implements ApplicationRunner {
       } catch (Exception e) {
         throw new IllegalArgumentException("parameter calc_period is invalid integer value");
       }
-      calctrService.calctr(calcPeriod);
+      calctrService.process(calcPeriod);
 
-    } else if ("clearctr".equalsIgnoreCase(procs.get(0))) {
+    } else if ("update_ctr".equalsIgnoreCase(procs.get(0))) {
       String docId = getParams(args, "id");
       if (docId == null) {
         throw new IllegalArgumentException("parameter id is required");
       }
-      this.calctrService.clearCTR(docId);
+      String term = getParams(args, "term");
+      String ctr = getParams(args, "ctr");
+      Float fctr = ctr != null ? Float.valueOf(ctr) : null;
+      this.calctrService.updateCTR(docId, fctr, term);
     }
     else {
       logger.info("usage : ./gradlew bootRun -Pargs=--site=1,--proc=converter,--only-data-cleanup");

@@ -42,18 +42,18 @@ public class CalctrService {
 
 
   /**
-   * the p value
+   * the decayRate
    */
-  @Value("${calctr.p}")
+  @Value("${calctr.ctr_decay_rate}")
   @Setter
-  Float p;
+  Float decayRate;
 
   /**
-   * the t value
+   * the minThreshold
    */
-  @Value("${calctr.t}")
+  @Value("${calctr.ctr_min_threshold}")
   @Setter
-  Float t;
+  Float minThreshold;
 
   /**
    * DB entity manager
@@ -68,21 +68,15 @@ public class CalctrService {
   SolrService solrService;
 
   /**
-   * last n days
-   */
-  private int lastNDays;
-
-  /**
    * start calctr processtor
    *
    * @param lastNDays the last N days
    */
-  public void calctr(int lastNDays) {
-    this.lastNDays = lastNDays;
+  public void process(int lastNDays) {
     // step 1
-    List<ClickLogCount1> count1s = countBySearchWords();
+    List<ClickLogCount1> count1s = countBySearchWords(lastNDays);
     // step 2
-    List<ClickLogCount2> count2s = countBySearchWordsAndUrl();
+    List<ClickLogCount2> count2s = countBySearchWordsAndUrl(lastNDays);
     // step 3
     this.calculateCTR(count2s, count1s);
 
@@ -93,15 +87,13 @@ public class CalctrService {
       solrDocuments = solrService.findByURLs(count2s.stream().map(ClickLogCount2::getUrl).collect(Collectors.toList()));
       logger.info(String.format("step4: found solrDocuments by urls, size = %d", solrDocuments.size()));
     } catch (Exception e) {
-      e.printStackTrace();
-      logger.error("calctr get documents by url failed, " + e.getMessage());
+      logger.error("calctr get documents by url failed, " + e.getMessage(), e);
       return;
     }
 
     for (ClickLogCount2 c2 : count2s) {
-      SolrInputDocument document;
       try {
-        document = getSolrDocument(solrDocuments, c2);
+        SolrInputDocument document = getSolrDocument(solrDocuments, c2);
         if (document == null) {
           logger.info("no document find in solr, where url = " + c2.getUrl());
           continue;
@@ -117,36 +109,33 @@ public class CalctrService {
         }
         document.setField(LAST_CLICKED_AT, c2.getLastClickDate());
         solrService.createOrUpdate(document);
-        proceeds.add(document.get("id").getValue().toString());
+        proceeds.add(document.get(ID).getValue().toString());
       } catch (Exception e) {
-        e.printStackTrace();
-        logger.error(e.getMessage());
+        logger.error(e.getMessage(), e);
       }
     }
 
     // step 5, Update all documents which have CTR except for documents updated in (4) as:
-    /*
-    if (proceeds.isEmpty()) {
-      logger.info("no any document proceed, so we skip step 5");
-      return;
-    }
-    */
-
     try {
-      solrDocuments = solrService.findByCtrAndIds(proceeds);
+      solrDocuments = solrService.findDocsHavingCTR(proceeds);
       logger.info(String.format("step5: found solrDocuments by urls and exclude ids, size = %d", solrDocuments.size()));
     } catch (Exception e) {
-      e.printStackTrace();
-      logger.error("step5: calctr get documents by url and exclude id failed, " + e.getMessage());
+      logger.error("step5: calctr get documents by url and exclude id failed, " + e.getMessage(), e);
       return;
     }
 
     for (SolrDocument document : solrDocuments) {
       try {
-        // New CTR = (ctr * P  < T) ? (ctr * P) : 0
+        // New CTR = (ctr * P)
+        // delete the document if the new CTR is less than T.
         double ctr = Double.parseDouble(document.get(CTR).toString());
-        document.setField(CTR, ctr * p < t ? ctr * p : 0);
-        solrService.createOrUpdate(document);
+        double newCtr = ctr * decayRate;
+        if (newCtr < minThreshold) {
+          solrService.delete(document.get(ID).toString());
+        } else {
+          document.setField(CTR, newCtr);
+          solrService.createOrUpdate(document);
+        }
       } catch (Exception e) {
         logger.info("set new ctr failed");
         e.printStackTrace();
@@ -179,7 +168,8 @@ public class CalctrService {
     }
 
     if (docWithoutCtr != null) {
-      // this is new document, so need remove all information and add new ID
+      // make a copy of docWithoutCtr.
+      // this is new document, so need remove version and add new ID
       SolrInputDocument document = solrService.createSolrInputDocument(docWithoutCtr);
       document.remove(VERSION);
       document.setField(ID, UUID.randomUUID().toString());
@@ -203,11 +193,11 @@ public class CalctrService {
       cachedC1s.put(c1.getWords(), c1);
     });
     count2s.forEach(c2 -> {
-      if (cachedC1s.containsKey(c2.getWords())) {
+      if (c2.getWords() != null && cachedC1s.containsKey(c2.getWords())) {
         ClickLogCount1 c1 = cachedC1s.get(c2.getWords());
         c2.setCtr(c2.getCnt() * 1.0f / c1.getCnt());
       } else {
-        c2.setCtr(1);
+        logger.warn(String.format("Unexpected situation. No C1 is found for '%s'", c2.getWords()));
       }
     });
   }
@@ -217,9 +207,10 @@ public class CalctrService {
    *
    * @return the list of count
    */
-  List<ClickLogCount1> countBySearchWords() {
+  @SuppressWarnings("unchecked")
+  List<ClickLogCount1> countBySearchWords(int lastNDays) {
     String sqlTpl = "select normalized_search_words, count(*) as cnt from click_logs where created_at > (CURRENT_DATE - %d) group by normalized_search_words";
-    List<Object[]> db = entityManager.createNativeQuery(String.format(sqlTpl, this.lastNDays)).getResultList();
+    List<Object[]> db = entityManager.createNativeQuery(String.format(sqlTpl, lastNDays)).getResultList();
     List<ClickLogCount1> logCount1List = new ArrayList<>();
     db.forEach(objects -> {
       ClickLogCount1 cnt = new ClickLogCount1();
@@ -233,9 +224,10 @@ public class CalctrService {
   /**
    * Count the number of records per search_words and page_url with the latest click_date in aggregated records.
    */
-  List<ClickLogCount2> countBySearchWordsAndUrl() {
+  @SuppressWarnings("unchecked")
+  List<ClickLogCount2> countBySearchWordsAndUrl(int lastNDays) {
     String sqlTpl = "select normalized_search_words,page_url, count(*) as c2, max(created_date) as latest_click_date from click_logs where created_at > (CURRENT_DATE - %d) group by normalized_search_words, page_url";
-    List<Object[]> db = entityManager.createNativeQuery(String.format(sqlTpl, this.lastNDays)).getResultList();
+    List<Object[]> db = entityManager.createNativeQuery(String.format(sqlTpl, lastNDays)).getResultList();
     List<ClickLogCount2> count2List = new ArrayList<>();
     db.forEach(objects -> {
       ClickLogCount2 cnt = new ClickLogCount2();
@@ -249,10 +241,15 @@ public class CalctrService {
   }
 
   /* for test */
-  public void clearCTR(String docId) throws Exception {
+  public void updateCTR(String docId, Float ctr, String term) throws Exception {
     SolrDocument doc = this.solrService.findDocumentById(docId);
-    doc.remove(CTR);
-    doc.remove(CTR_TERM);
+    if (ctr == null || term == null) {
+      doc.remove(CTR);
+      doc.remove(CTR_TERM);
+    } else {
+      doc.setField(CTR, ctr);
+      doc.setField(CTR_TERM, term);
+    }
     this.solrService.createOrUpdate(doc);
   }
 }
