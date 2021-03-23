@@ -204,7 +204,7 @@ public class ProcessLauncherTest {
 
     args = new DefaultApplicationArguments(new String[]{"--calc_period=15", "--proc=calctr"});
     processLauncher.run(args);
-    verify(calctrService, times(1)).calctr(anyInt());
+    verify(calctrService, times(1)).process(anyInt());
 
     args = new DefaultApplicationArguments(new String[]{"--proc=calctr"});
     try {
