@@ -1,15 +1,15 @@
 package com.topcoder.productsearch.converter.service;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.topcoder.productsearch.api.models.ProductSearchRequest;
+import com.topcoder.productsearch.api.models.SolrProduct;
+import com.topcoder.productsearch.common.entity.CPage;
+import com.topcoder.productsearch.common.entity.WebSite;
+import com.topcoder.productsearch.common.repository.WebSiteRepository;
+import com.topcoder.productsearch.common.util.Common;
+import com.topcoder.productsearch.common.util.DomHelper;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -25,16 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.topcoder.productsearch.api.models.ProductSearchRequest;
-import com.topcoder.productsearch.api.models.SolrProduct;
-import com.topcoder.productsearch.common.entity.CPage;
-import com.topcoder.productsearch.common.entity.WebSite;
-import com.topcoder.productsearch.common.repository.WebSiteRepository;
-import com.topcoder.productsearch.common.util.Common;
-import com.topcoder.productsearch.common.util.DomHelper;
-
-import lombok.Getter;
-import lombok.Setter;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * the solr service
@@ -108,6 +102,39 @@ public class SolrService {
   }
 
   /**
+   * find by urls
+   *
+   * @param urls the url list
+   * @return the documents
+   */
+  public List<SolrDocument> findByURLs(List<String> urls) throws IOException, SolrServerException {
+    if (urls == null || urls.size() == 0) {
+      return new ArrayList<SolrDocument>(0);
+    }
+    SolrQuery query = new SolrQuery();
+    query.set("q", "product_url:(" + StringUtils.join(urls.stream().map(u -> String.format("\"%s\"", u)).collect(Collectors.toList()), " ") + ")");
+    logger.info("findByUrls where q = " + query.get("q"));
+    return httpSolrClient.query(query).getResults();
+  }
+
+  /**
+   * find all ctr document and not in id array
+   *
+   * @param excludes the exclude
+   * @return the documents
+   */
+  public List<SolrDocument> findDocsHavingCTR(List<String> excludes) throws IOException, SolrServerException {
+    String qTpl = "ctr:[* TO *]";
+    if (excludes != null && excludes.size() > 0) {
+      qTpl += " AND %s";
+    }
+    SolrQuery query = new SolrQuery();
+    query.set("q", String.format(qTpl, StringUtils.join(excludes.stream().map(e -> String.format("-id:\"%s\"", e)).collect(Collectors.toList()), " AND ")));
+    logger.info("findByCtrAndIds where q = " + query.get("q"));
+    return httpSolrClient.query(query).getResults();
+  }
+
+  /**
    * find product in solr by document ID
    *
    * @param id
@@ -175,7 +202,7 @@ public class SolrService {
     }
 
     SolrInputDocument input = new SolrInputDocument();
-    for (String field: document.getFieldNames()) {
+    for (String field : document.getFieldNames()) {
       input.addField(field, document.getFirstValue(field));
     }
     if (document.hasChildDocuments()) {
@@ -213,7 +240,7 @@ public class SolrService {
     boolean dismax = "dismax".equalsIgnoreCase(request.getParser());
 
     SolrQuery query = dismax ? buildDismaxQueryBase(request) // dismax query parser
-                            : buildStandardQueryBase(request); // standard query parser
+        : buildStandardQueryBase(request); // standard query parser
 
     if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
       String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
@@ -256,12 +283,12 @@ public class SolrService {
       if (document.get("category") != null) {
         solrProduct.setCategory(document.get("category").toString());
       }
-      if (document.get("content") != null ) {
+      if (document.get("content") != null) {
         solrProduct.setDigest(Common.firstNOfString(document.get("content").toString(), request.getFirstNOfContent()));
         solrProduct.setHighlighting(getHighlighting(response, solrProduct.getId(), "content"));
       }
       solrProduct.setTitle(document.get("html_title").toString());
-      if (document.get("manufacturer_id") != null ) {
+      if (document.get("manufacturer_id") != null) {
         solrProduct.setManufacturerId(document.get("manufacturer_id").toString());
       }
       solrProduct.setExplain(debugInfo.get(solrProduct.getId()));
@@ -273,6 +300,7 @@ public class SolrService {
 
   /**
    * Execute a query to Solr. The query will retry for specified times when some error occurred in Solr.
+   *
    * @param query
    * @return
    * @throws SolrServerException
@@ -283,7 +311,7 @@ public class SolrService {
       try {
         logger.debug(String.format("[%d-Started ] SolrClient.query(%s)", Thread.currentThread().getId(), query.get("q")));
         return httpSolrClient.query(query);
-      } catch(SolrException | SolrServerException | IOException e) {
+      } catch (SolrException | SolrServerException | IOException e) {
         logger.error("Error occurred in processing query. " + e.getMessage());
         if (i >= retryCount) {
           throw e;
@@ -291,7 +319,7 @@ public class SolrService {
         logger.info(String.format("Retry query[%d] after %d second(s).", (i + 1), retryIntervalSeconds));
         try {
           Thread.sleep(retryIntervalSeconds * 1000L);
-        } catch(InterruptedException ie) {
+        } catch (InterruptedException ie) {
           logger.warn(ie.getMessage());
         }
       } catch (RuntimeException e) {
@@ -306,6 +334,7 @@ public class SolrService {
 
   /**
    * build SolrQuery to use Standard Query Parser
+   *
    * @param request
    * @return
    */
@@ -330,7 +359,7 @@ public class SolrService {
       }
     }
     List<String> fieldQueries = new ArrayList<String>(NUMBER_OF_HTML_AREA);
-    for (int i=0; i<NUMBER_OF_HTML_AREA; i++) {
+    for (int i = 0; i < NUMBER_OF_HTML_AREA; i++) {
       Float w = null;
       if (weights != null && i < weights.size()) {
         w = weights.get(i);
@@ -345,6 +374,7 @@ public class SolrService {
 
   /**
    * build SolrQuery to use Dismax Query Parser
+   *
    * @param request
    * @return
    */
@@ -367,16 +397,17 @@ public class SolrService {
 
   /**
    * get search qf
-   * @param site the site
+   *
+   * @param site    the site
    * @param weights the weights
    * @return the qf string
    */
   String getQF(WebSite site, List<Float> weights) {
     List<String> qfParts = new LinkedList<>();
-    if (weights != null && weights.size()>0) {
+    if (weights != null && weights.size() > 0) {
       int i = 0;
       for (Float w : weights) {
-        qfParts.add(String.format("html_area%d^%.2f", (++i), (w != null ? w : 0f )));
+        qfParts.add(String.format("html_area%d^%.2f", (++i), (w != null ? w : 0f)));
       }
       return String.join(" ", qfParts);
     }
@@ -396,15 +427,17 @@ public class SolrService {
     }
     return String.join(" ", qfParts);
   }
+
   /**
    * get Highlighting content
+   *
    * @param response the slor response
-   * @param id the document id
-   * @param field the document filed
+   * @param id       the document id
+   * @param field    the document filed
    * @return the Highlighting string
    */
-  private List<String> getHighlighting(QueryResponse response, String id, String field){
-    if(response.getHighlighting().containsKey(id)){
+  private List<String> getHighlighting(QueryResponse response, String id, String field) {
+    if (response.getHighlighting().containsKey(id)) {
       return response.getHighlighting().get(id).get(field);
     }
     return null;
