@@ -125,10 +125,12 @@ public class CalctrService {
     }
 
     // step 5, Update all documents which have CTR except for documents updated in (4) as:
+    /*
     if (proceeds.isEmpty()) {
       logger.info("no any document proceed, so we skip step 5");
       return;
     }
+    */
 
     try {
       solrDocuments = solrService.findByCtrAndIds(proceeds);
@@ -246,4 +248,11 @@ public class CalctrService {
     return count2List;
   }
 
+  /* for test */
+  public void clearCTR(String docId) throws Exception {
+    SolrDocument doc = this.solrService.findDocumentById(docId);
+    doc.remove(CTR);
+    doc.remove(CTR_TERM);
+    this.solrService.createOrUpdate(doc);
+  }
 }

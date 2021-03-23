@@ -108,6 +108,9 @@ public class SolrService {
    * @return the documents
    */
   public List<SolrDocument> findByURLs(List<String> urls) throws IOException, SolrServerException {
+    if (urls == null || urls.size() == 0) {
+      return new ArrayList<SolrDocument>(0);
+    }
     SolrQuery query = new SolrQuery();
     query.set("q", "product_url:(" + StringUtils.join(urls.stream().map(u -> String.format("\"%s\"", u)).collect(Collectors.toList()), " ") + ")");
     logger.info("findByUrls where q = " + query.get("q"));
@@ -121,7 +124,10 @@ public class SolrService {
    * @return the documents
    */
   public List<SolrDocument> findByCtrAndIds(List<String> excludes) throws IOException, SolrServerException {
-    String qTpl = "ctr:[* TO *] AND %s";
+    String qTpl = "ctr:[* TO *]";
+    if (excludes != null && excludes.size() > 0) {
+      qTpl += " AND %s";
+    }
     SolrQuery query = new SolrQuery();
     query.set("q", String.format(qTpl, StringUtils.join(excludes.stream().map(e -> String.format("-id:\"%s\"", e)).collect(Collectors.toList()), " AND ")));
     logger.info("findByCtrAndIds where q = " + query.get("q"));
