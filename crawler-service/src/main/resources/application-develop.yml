@@ -81,4 +81,7 @@ optimization:
       type: socks
       host: 127.0.0.1
       port: 9050
-  
+
+calctr:
+  p: 0.5
+  t: 0.5
