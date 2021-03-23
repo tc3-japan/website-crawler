@@ -117,7 +117,7 @@ public class CalctrService {
 
     // step 5, Update all documents which have CTR except for documents updated in (4) as:
     try {
-      solrDocuments = solrService.findByCtrAndIds(proceeds);
+      solrDocuments = solrService.findDocsHavingCTR(proceeds);
       logger.info(String.format("step5: found solrDocuments by urls and exclude ids, size = %d", solrDocuments.size()));
     } catch (Exception e) {
       logger.error("step5: calctr get documents by url and exclude id failed, " + e.getMessage(), e);

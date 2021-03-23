@@ -90,7 +90,7 @@ public class CalctrServiceTest {
     newDoc.setField("id","new_id");
     when(solrService.findByURLs(any())).thenReturn(documents);
     when(solrService.createSolrInputDocument(any())).thenReturn(newDoc);
-    when(solrService.findByCtrAndIds(any())).thenReturn(excludeDocuments);
+    when(solrService.findDocsHavingCTR(any())).thenReturn(excludeDocuments);
   }
 
   /**
@@ -101,7 +101,7 @@ public class CalctrServiceTest {
     calctrService.setDecayRate(0.5f);
     calctrService.setMinThreshold(0.05f);
     calctrService.process(10);
-    verify(solrService, times(1)).findByCtrAndIds(any());
+    verify(solrService, times(1)).findDocsHavingCTR(any());
     verify(solrService, times(1)).findByURLs(any());
     verify(solrService, times(2)).createOrUpdate(any(SolrInputDocument.class));
     verify(solrService, times(1)).createOrUpdate(any(SolrDocument.class));
