@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import com.topcoder.productsearch.calctr.service.CalctrService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -58,6 +59,9 @@ public class ProcessLauncherTest {
 
   @Mock
   SOGenTruthService soGenTruthService;
+
+  @Mock
+  CalctrService calctrService;
 
   @Mock
   SOTruth soTruth;
@@ -197,6 +201,24 @@ public class ProcessLauncherTest {
     args = new DefaultApplicationArguments(new String[]{"--proc=opt_gen_truth", "--site=1","--search-words-path=\"test path\""});
     processLauncher.run(args);
     verify(soGenTruthService, times(3)).genTruth(any(WebSite.class), anyString(), anyString());
+
+    args = new DefaultApplicationArguments(new String[]{"--calc_period=15", "--proc=calctr"});
+    processLauncher.run(args);
+    verify(calctrService, times(1)).process(anyInt());
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=calctr"});
+    try {
+      processLauncher.run(args);
+    } catch (Exception e) {
+      assertEquals(e.getMessage(), "parameter calc_period is required");
+    }
+
+    args = new DefaultApplicationArguments(new String[]{"--proc=calctr", "--calc_period=x"});
+    try {
+      processLauncher.run(args);
+    } catch (Exception e) {
+      assertEquals(e.getMessage(), "parameter calc_period is invalid integer value");
+    }
   }
 
 

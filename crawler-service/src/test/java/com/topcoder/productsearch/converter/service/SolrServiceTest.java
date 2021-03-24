@@ -25,9 +25,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -203,5 +202,25 @@ public class SolrServiceTest extends AbstractUnitTest {
 
     assertEquals("html_area1 html_area2 html_area3 html_area4 html_area5 html_area6 html_area7 html_area8 html_area9 html_area10",
       solrService.getQF(null, null));
+  }
+
+  @Test
+  public void testFindByURLs() throws IOException, SolrServerException {
+    when(solrDocumentList.size()).thenReturn(1);
+    List<String> urls = new ArrayList<>();
+    urls.add("http://gooogle.com");
+    List<SolrDocument> documents = solrService.findByURLs(urls);
+    verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
+    assertEquals(1, documents.size());
+  }
+
+  @Test
+  public void testFindFindByURLs() throws IOException, SolrServerException {
+    when(solrDocumentList.size()).thenReturn(1);
+    List<String> ids = new ArrayList<>();
+    ids.add(UUID.randomUUID().toString());
+    List<SolrDocument> documents = solrService.findDocsHavingCTR(ids);
+    verify(httpSolrClient, times(1)).query(any(SolrQuery.class));
+    assertEquals(1, documents.size());
   }
 }
