@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -24,8 +25,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -41,7 +42,7 @@ public class SolrServiceTest extends AbstractUnitTest {
   @Mock
   QueryResponse queryResponse;
 
-  @Mock
+  @Spy
   SolrDocumentList solrDocumentList;
 
   @Mock
@@ -59,9 +60,10 @@ public class SolrServiceTest extends AbstractUnitTest {
     solrService.setWebSiteRepository(webSiteRepository);
 
     when(httpSolrClient.getBaseURL()).thenReturn("http://test.com");
-    when(solrDocumentList.get(0)).thenReturn(solrDocument);
+    doReturn(solrDocument).when(solrDocumentList).get(0);
     when(solrDocument.get("id")).thenReturn("id");
     when(queryResponse.getResults()).thenReturn(solrDocumentList);
+
     SolrQuery query = new SolrQuery();
     query.set("q", "product_url:\"test\"");
     when(httpSolrClient.query(any(SolrQuery.class))).thenReturn(queryResponse);
@@ -77,8 +79,23 @@ public class SolrServiceTest extends AbstractUnitTest {
   public void testFindByURL() throws IOException, SolrServerException {
     when(solrDocumentList.getNumFound()).thenReturn(0L);
     assertEquals(null, solrService.findByURL("test"));
+
+    solrDocumentList.add(solrDocument);
     when(solrDocumentList.getNumFound()).thenReturn(1L);
     assertEquals("id", solrService.findByURL("test"));
+  }
+
+  @Test
+  public void testFindIdsByURL() throws IOException, SolrServerException {
+    when(solrDocumentList.getNumFound()).thenReturn(0L);
+    assertNotEquals(null, solrService.findIdsByURL("test"));
+    assert(solrService.findIdsByURL("test").isEmpty());
+
+    solrDocumentList.add(solrDocument);
+    when(solrDocumentList.getNumFound()).thenReturn(1L);
+    assertNotEquals(null, solrService.findIdsByURL("test"));
+    assertEquals(1, solrService.findIdsByURL("test").size());
+    assertEquals("id", solrService.findIdsByURL("test").get(0));
   }
 
   @Test
@@ -86,6 +103,8 @@ public class SolrServiceTest extends AbstractUnitTest {
     when(solrDocumentList.getNumFound()).thenReturn(0L);
     solrService.deleteByURL("test");
     verify(httpSolrClient, times(0)).deleteById(any(String.class));
+
+    solrDocumentList.add(solrDocument);
     when(solrDocumentList.getNumFound()).thenReturn(1L);
     solrService.deleteByURL("test");
     verify(httpSolrClient, times(1)).deleteById(any(String.class));

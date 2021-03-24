@@ -73,6 +73,12 @@ public class SolrService {
   private Integer retryIntervalSeconds = 3;
 
   /**
+   * the CTR number for search product in Solr.
+   */
+  @Value("${solr.ctr_number:1000}")
+  private Integer ctrNumber = 1000;
+
+  /**
    * create new solr service
    *
    * @param serverURI the solr server uri
@@ -92,13 +98,33 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public String findByURL(String url) throws IOException, SolrServerException {
+    List<String> ids = findIdsByURL(url);
+    if (ids == null || ids.isEmpty()) {
+      return null;
+    }
+    return ids.get(0);
+  }
+
+  /**
+   * find products in solr by url
+   *
+   * @param url the url
+   * @return the solr id
+   * @throws IOException         if network exception happened
+   * @throws SolrServerException if solr server exception happened
+   */
+  public List<String> findIdsByURL(String url) throws IOException, SolrServerException {
+    List<String> ids = new ArrayList<>();
     SolrQuery query = new SolrQuery();
     query.set("q", "product_url:\"" + url + "\"");
     QueryResponse response = httpSolrClient.query(query);
     if (response.getResults().getNumFound() <= 0) {
-      return null;
+      return ids;
     }
-    return response.getResults().get(0).get("id").toString();
+    for (SolrDocument result : response.getResults()) {
+      ids.add(result.get("id").toString());
+    }
+    return ids;
   }
 
   /**
@@ -162,11 +188,10 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public void deleteByURL(String url) throws IOException, SolrServerException {
-    String id = findByURL(url);
-    if (id == null) {
-      return;
+    List<String> ids = findIdsByURL(url);
+    for (String id : ids) {
+      delete(id);
     }
-    delete(id);
   }
 
   /**
@@ -192,8 +217,10 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public void createOrUpdate(CPage page) throws IOException, SolrServerException {
-    SolrInputDocument document = pageToDocument(page);
-    createOrUpdate(document);
+    List<SolrInputDocument> documents = pageToDocuments(page);
+    for (SolrInputDocument document : documents) {
+      createOrUpdate(document);
+    }
   }
 
   public SolrInputDocument createSolrInputDocument(SolrDocument document) throws IOException, SolrServerException {
@@ -242,9 +269,14 @@ public class SolrService {
     SolrQuery query = dismax ? buildDismaxQueryBase(request) // dismax query parser
         : buildStandardQueryBase(request); // standard query parser
 
+    String fq = null;
     if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
-      String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
-      query.set("fq", "manufacturer_id:(" + fq + ")");
+      fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
+    }
+    if (fq != null) {
+      query.setFilterQueries("manufacturer_id:(" + fq + ")", "{!collapse field=product_url}");
+    } else {
+      query.setFilterQueries("{!collapse field=product_url}");
     }
     //query.setFilterQueries("{!collapse field=product_url}");
     //query.set("expand", true);
@@ -347,7 +379,10 @@ public class SolrService {
       return query;
     }
 
-    String q = String.format("(%s)", String.join(" ", request.getQuery()));
+    String q = String.join(" ", request.getQuery());
+
+    // Normalize the query string
+    q = Common.normalizeSearchWord(q);
 
     List<Float> weights = request.getWeights();
     if (weights == null || weights.isEmpty()) {
@@ -364,10 +399,13 @@ public class SolrService {
       if (weights != null && i < weights.size()) {
         w = weights.get(i);
       }
-      String qi = String.format("html_area%d:%s^%f", (i + 1), q, (w != null ? w : 1f));
+      String qi = String.format("html_area%d:%s^%f", (i + 1), "(" + q + ")", (w != null ? w : 1f));
       fieldQueries.add(qi);
     }
-    query.set("q", String.join(" OR ", fieldQueries));
+
+    query.set("q", "{!boost b=\"sum(1,mul(if(eq(ctr_term,\'" + q + "\'),ctr,0)," + ctrNumber + "))\"}"
+        +  String.join(" OR ", fieldQueries));
+    logger.debug("query: " + query.getQuery());
 
     return query;
   }
@@ -443,18 +481,41 @@ public class SolrService {
     return null;
   }
 
+  /**
+   * convert page entity to solr input documents
+   *
+   * @param page the page entity
+   * @return the solr input documents
+   * @throws IOException         if network exception happened
+   * @throws SolrServerException if solr server exception happened
+   */
+  private List<SolrInputDocument> pageToDocuments(CPage page) throws IOException, SolrServerException {
+    WebSite site = webSiteRepository.findOne(page.getSiteId());
+    List<SolrInputDocument> documents = new ArrayList<>();
+    List<String> ids = findIdsByURL(page.getUrl());
+    if (!ids.isEmpty()) {
+      for (String id : findIdsByURL(page.getUrl())) {
+        SolrInputDocument document = pageToDocument(page, id, site);
+        documents.add(document);
+      }
+    } else {
+      SolrInputDocument document = pageToDocument(page, null, site);
+      documents.add(document);
+    }
+    return documents;
+  }
 
   /**
    * convert page entity to solr input document
    *
    * @param page the page entity
+   * @param id
+   * @param site
    * @return the solr input document
    * @throws IOException         if network exception happened
    * @throws SolrServerException if solr server exception happened
    */
-  private SolrInputDocument pageToDocument(CPage page) throws IOException, SolrServerException {
-    WebSite site = webSiteRepository.findOne(page.getSiteId());
-    String id = findByURL(page.getUrl());
+  private SolrInputDocument pageToDocument(CPage page, String id, WebSite site) throws IOException, SolrServerException {
     DomHelper domHelper = new DomHelper();
 
     // set id if exist

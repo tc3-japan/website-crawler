@@ -7,12 +7,15 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -378,5 +381,29 @@ public class Common {
     //webClient.waitForBackgroundJavaScriptStartingBefore(10000);
 
     return webClient;
+  }
+
+  /**
+   * Normalize the word for search.
+   * 
+   * @param word  the search term
+   * @return Search words after normalization
+   */
+  public static String normalizeSearchWord(String word) {
+    // Normalize the query string
+    Pattern p = Pattern.compile("([ｦ-ﾟＡ-Ｚａ-ｚ０-９！”＃＄％＆’（）＝～｜‘｛＋＊｝＜＞？／＿－＾￥＠「；：」，、。・　]+)");
+    Matcher m = p.matcher(word);
+    StringBuffer sb = new StringBuffer();
+    while(m.find()) {
+      m.appendReplacement(sb, Normalizer.normalize(m.group(), Normalizer.Form.NFKC));
+    }
+    word = m.appendTail(sb).toString();
+
+    // If multiple words are specified, sort in ascending order
+    List<String> qList = Arrays.asList(word.split("\\s"));
+    qList.sort(Comparator.naturalOrder());
+    word = String.join(" ", qList);
+
+    return word;
   }
 }
