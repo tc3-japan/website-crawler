@@ -379,7 +379,7 @@ public class SolrService {
       return query;
     }
 
-    String q = String.format("%s", String.join(" ", request.getQuery()));
+    String q = String.join(" ", request.getQuery());
 
     // Normalize the query string
     q = Common.normalizeSearchWord(q);
@@ -507,7 +507,7 @@ public class SolrService {
 
   /**
    * convert page entity to solr input document
-   * 
+   *
    * @param page the page entity
    * @param id
    * @param site
