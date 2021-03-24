@@ -68,6 +68,7 @@ solr:
   uri: http://127.0.0.1:8983/solr/manufacturer_product
   retry_count: 2
   retry_interval: 3
+  ctr_number: 1000
 
 optimization:
   evaluation:

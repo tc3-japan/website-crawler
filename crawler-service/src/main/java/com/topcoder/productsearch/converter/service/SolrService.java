@@ -79,6 +79,12 @@ public class SolrService {
   private Integer retryIntervalSeconds = 3;
 
   /**
+   * the CTR number for search product in Solr.
+   */
+  @Value("${solr.ctr_number:1000}")
+  private Integer ctrNumber = 1000;
+
+  /**
    * create new solr service
    *
    * @param serverURI the solr server uri
@@ -236,9 +242,14 @@ public class SolrService {
     SolrQuery query = dismax ? buildDismaxQueryBase(request) // dismax query parser
                             : buildStandardQueryBase(request); // standard query parser
 
+    String fq = null;
     if (request.getManufacturerIds() != null && !request.getManufacturerIds().isEmpty()) {
-      String fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
-      query.set("fq", "manufacturer_id:(" + fq + ")");
+      fq = request.getManufacturerIds().stream().map(Object::toString).collect(Collectors.joining(" "));
+    }
+    if (fq != null) {
+      query.setFilterQueries("manufacturer_id:(" + fq + ")", "{!collapse field=product_url}");
+    } else {
+      query.setFilterQueries("{!collapse field=product_url}");
     }
     //query.setFilterQueries("{!collapse field=product_url}");
     //query.set("expand", true);
@@ -339,7 +350,10 @@ public class SolrService {
       return query;
     }
 
-    String q = String.format("(%s)", String.join(" ", request.getQuery()));
+    String q = String.format("%s", String.join(" ", request.getQuery()));
+
+    // Normalize the query string
+    q = Common.normalizeSearchWord(q);
 
     List<Float> weights = request.getWeights();
     if (weights == null || weights.isEmpty()) {
@@ -356,10 +370,13 @@ public class SolrService {
       if (weights != null && i < weights.size()) {
         w = weights.get(i);
       }
-      String qi = String.format("html_area%d:%s^%f", (i + 1), q, (w != null ? w : 1f));
+      String qi = String.format("html_area%d:%s^%f", (i + 1), "(" + q + ")", (w != null ? w : 1f));
       fieldQueries.add(qi);
     }
-    query.set("q", String.join(" OR ", fieldQueries));
+
+    query.set("q", "{!boost b=\"sum(1,mul(if(eq(ctr_term,\'" + q + "\'),ctr,0)," + ctrNumber + "))\"}"
+        +  String.join(" OR ", fieldQueries));
+    logger.debug("query: " + query.getQuery());
 
     return query;
   }
