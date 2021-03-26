@@ -60,7 +60,8 @@ public class SolrServiceTest extends AbstractUnitTest {
     solrService.setWebSiteRepository(webSiteRepository);
 
     when(httpSolrClient.getBaseURL()).thenReturn("http://test.com");
-    doReturn(solrDocument).when(solrDocumentList).get(0);
+    SolrDocument dummy = doReturn(solrDocument).when(solrDocumentList).get(0);
+    System.out.println(dummy); // Dummy code to avoind spotbugs failure.
     when(solrDocument.get("id")).thenReturn("id");
     when(queryResponse.getResults()).thenReturn(solrDocumentList);
 

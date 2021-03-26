@@ -150,12 +150,12 @@ public class SolrService {
    * @return the documents
    */
   public List<SolrDocument> findDocsHavingCTR(List<String> excludes) throws IOException, SolrServerException {
-    String qTpl = "ctr:[* TO *]";
+    String q = "ctr:[* TO *]";
     if (excludes != null && excludes.size() > 0) {
-      qTpl += " AND %s";
+      q += " AND " + StringUtils.join(excludes.stream().map(e -> String.format("-id:\"%s\"", e)).collect(Collectors.toList()), " AND ");
     }
     SolrQuery query = new SolrQuery();
-    query.set("q", String.format(qTpl, StringUtils.join(excludes.stream().map(e -> String.format("-id:\"%s\"", e)).collect(Collectors.toList()), " AND ")));
+    query.set("q", q);
     logger.info("findByCtrAndIds where q = " + query.get("q"));
     return httpSolrClient.query(query).getResults();
   }
