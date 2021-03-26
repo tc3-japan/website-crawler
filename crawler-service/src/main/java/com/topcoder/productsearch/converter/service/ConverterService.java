@@ -50,8 +50,11 @@ public class ConverterService {
     if (webSite == null) {
       throw new IllegalArgumentException("webSite must be specified.");
     }
-    Common.readAndProcessPage(new PageSearchCriteria(webSite.getId(), null),
-        webSite.getParallelSize(), pageRepository, (threadPoolExecutor, cPage) ->
+    Common.readAndProcessPage(
+        new PageSearchCriteria(webSite.getId(), null), // specify site-id
+        webSite.getParallelSize(), // batch-size TODO: need modification
+        pageRepository,
+        (threadPoolExecutor, cPage) ->
             threadPoolExecutor.submit(new ConvertThread(cPage, solrService, pageRepository, cleanerService,
              webSite.getPageExpiredPeriod().longValue())));
   }
