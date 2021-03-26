@@ -1,21 +1,21 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: converter-cronjob
+  name: calctr-cronjob
 spec:
-  schedule: "0 2 * * *"
+  schedule: "0 0 */7 * *"
   jobTemplate:
     spec:
       template:
         metadata:
           labels:
-            app: converter-cronjob
+            app: calctr-cronjob
         spec:
           restartPolicy: OnFailure
           containers:
           - args:
-            - --proc=converter
-            - --site=1
+            - --proc=calctr
+            - --calc_period=7
             image: tc3jp/productsearch-service:develop-1.0.15
             name: crawler
             env:

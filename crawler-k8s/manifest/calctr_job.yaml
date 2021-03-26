@@ -1,18 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: crawler-job
+  name: calctr-job
 spec:
   template:
     metadata:
       labels:
-        app: crawler-job
+        app: calctr-job
     spec:
       restartPolicy: Never
       containers:
       - args:
-        - --proc=crawler
-        - --site=1
+        - --proc=calctr
+        - --calc_period=7
         image: tc3jp/productsearch-service:develop-1.0.15
         name: crawler
         env:

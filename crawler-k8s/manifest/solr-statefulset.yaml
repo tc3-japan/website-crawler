@@ -23,7 +23,7 @@ spec:
       terminationGracePeriodSeconds: 10
       restartPolicy: Always
       containers:
-      - image: tc3jp/productsearch-solr:8.1.1-1.0.14
+      - image: tc3jp/productsearch-solr:8.1.1-1.0.15
         name: solr
         readinessProbe:
           tcpSocket:

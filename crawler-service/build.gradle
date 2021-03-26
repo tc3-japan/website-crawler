@@ -45,7 +45,7 @@ plugins {
 }
 apply plugin: 'com.palantir.docker'
 
-version = '1.0.14.p2'
+version = '1.0.15'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
