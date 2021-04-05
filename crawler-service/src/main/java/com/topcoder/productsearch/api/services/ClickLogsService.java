@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import com.topcoder.productsearch.api.exceptions.BadRequestException;
 import com.topcoder.productsearch.common.entity.ClickLogs;
 import com.topcoder.productsearch.common.repository.ClickLogsRepository;
+import com.topcoder.productsearch.common.util.Common;
 
 /**
  * the click logs service
@@ -60,8 +61,8 @@ public class ClickLogsService {
    * @return normalized search words
    */
   private String getNormalizedSearchWords(String searchWords) {
-    // must fix
-    return searchWords;
+
+    return Common.normalizeSearchWord(searchWords);
   }
 
 }
