@@ -491,37 +491,39 @@ public class SolrService {
    */
   private List<SolrInputDocument> pageToDocuments(CPage page) throws IOException, SolrServerException {
     WebSite site = webSiteRepository.findOne(page.getSiteId());
-    List<SolrInputDocument> documents = new ArrayList<>();
-    List<String> ids = findIdsByURL(page.getUrl());
-    if (!ids.isEmpty()) {
-      for (String id : findIdsByURL(page.getUrl())) {
-        SolrInputDocument document = pageToDocument(page, id, site);
-        documents.add(document);
+    List<SolrInputDocument> solrInputDocuments = new ArrayList<>();
+
+    List<SolrDocument> solrDocuments = findByURLs(urls);
+    if (!solrDocuments.isEmpty()) {
+      for (SolrDocument solrDocument : solrDocuments) {
+        SolrInputDocument solrInputDocument = pageToDocument(page, solrDocument, site);
+        solrInputDocuments.add(solrInputDocument);
       }
     } else {
-      SolrInputDocument document = pageToDocument(page, null, site);
-      documents.add(document);
+      SolrInputDocument solrInputDocument = pageToDocument(page, null, site);
+      solrInputDocuments.add(solrInputDocument);
     }
-    return documents;
+    return solrInputDocuments;
   }
 
   /**
    * convert page entity to solr input document
    *
    * @param page the page entity
-   * @param id
+   * @param solr document
    * @param site
    * @return the solr input document
    * @throws IOException         if network exception happened
    * @throws SolrServerException if solr server exception happened
    */
-  private SolrInputDocument pageToDocument(CPage page, String id, WebSite site) throws IOException, SolrServerException {
+  private SolrInputDocument pageToDocument(CPage page, SolrDocument solrDocument, WebSite site) throws IOException, SolrServerException {
     DomHelper domHelper = new DomHelper();
 
     // set id if exist
     SolrInputDocument document = new SolrInputDocument();
+    Object id = solrDocument.getFieldValue("id");
     if (id != null) {
-      document.addField("id", id);
+      document.addField("id", String.valueOf(String.valueOf(id)));
     }
     document.addField("manufacturer_name", site.getName());
     document.addField("product_url", page.getUrl());
@@ -531,6 +533,15 @@ public class SolrService {
     // force convert to string for solr document
     // "1" will identify as number in solr document
     document.addField("manufacturer_id", site.getId() + "");
+
+    Object ctr = solrDocument.getFieldValue("ctr");
+    if (ctr != null) {
+        document.addField("ctr", String.valueOf(ctr));
+    }
+    Object ctrTerm = solrDocument.getFieldValue("ctr_term");
+    if (ctrTerm != null) {
+        document.addField("ctr_term", String.valueOf(ctrTerm));
+    }
 
     document.addField("content", domHelper.htmlToText(page.getContent()));
     document.addField("category", page.getCategory());
