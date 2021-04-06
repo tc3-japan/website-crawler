@@ -4,26 +4,24 @@
         <meta charset="utf-8">
         <title>Sample of search product and click logs API</title>
         <script src="lib.js"></script>
+        <script src="ui.js"></script>
     </head>
     <body>
         <div><p>Sample of search product and click logs API</p></div>
-        <div>
-            <input type="text" size="50" id="searchwords" placeholder="please input search words">
-        </div><br>
-        <div>
-            <button onclick="searchProduct();" type="button" id="searchproducs">
-                search producs
-            </button>
-        </div><br>
+            <div>
+                <input type="text" size="50" id="searchwords" placeholder="Please input search word(s)" onkeypress="onEnter(event.keyCode)">
+            </div><br>
+            <div>
+                <input type="button" id="searchproducs" value="Search" onclick="doSearchProduct()">
+            </div><br>
         <div id="responsehere">
         </div><br>
         <div>
             <p>How to use</p>
             <ol>
-                <li>Enter some search words in the text box. (e.g. 'bed', 'Office chair')</li>
-                <li>Click the [search products] button.</li>
-                <li>Search results will be displayed with a table.</li>
-                <li>Click some links in the first column [No] in the table.</li>
+                <li>Enter search words in the text box (e.g. 'bed', 'Office chair') and Click the [Search] button.</li>
+                <li>Results of the search will be displayed with a table.</li>
+                <li>Click some links in the [url] colum in the table.</li>
                 <li>Click logs will be created in the click_logs table.</li>
             </ol>
         </div>
