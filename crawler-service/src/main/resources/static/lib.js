@@ -1,17 +1,19 @@
 
+const API_ENDPOINT_PREFIX = 'http://localhost:8090/api/';
 const SEARCH_ID_PREFIX = 'MYAPP-';
 
-var search_id;
+let search_id;
+
 
 /**
  * create json for click logs
  */
-function createJsonForClickLogs(url, linkNo, searchWords) {
+function createJsonForClickLogs(url, rank, searchWords) {
     var data = {
             "search_id": search_id,
             "search_words": searchWords,
             "page_url": url,
-            "page_rank": linkNo
+            "page_rank": rank
         };
     return JSON.stringify(data);
 }
@@ -19,50 +21,50 @@ function createJsonForClickLogs(url, linkNo, searchWords) {
 /**
  * create json for search products
  */
-function createJsonForSearchProducts(searchWords) {
+function createJsonForSearchProducts(searchWords, siteId, start, rows) {
     var data = {
             "query" : [searchWords],
-            "manufacturer_ids": [3],
-            "weights": [3,2.5,2,1.5,1],
-            "start": 1,
-            "rows" : 20,
-            "debug": true
+            "manufacturer_ids": [siteId],
+            "start": start,
+            "rows" : rows
         };
     return JSON.stringify(data);
 }
 
 /**
+ * send click logs to click logs API endpoint
+ */
+function sendClickLog(url, rank, searchWords) {
+    return doPost(createJsonForClickLogs(url, rank, searchWords), "click_logs");
+}
+
+/**
+ * get search product by search words
+ */
+function searchProduct(searchWords, siteId = 1, start = 1, rows = 20) {
+    return doPost(createJsonForSearchProducts(searchWords, siteId, start, rows), "search_products")
+    .then(response => {
+        return response.json();
+    });
+}
+
+/**
  * post to website crawler api
- * 
+ *
  * @param body json data
  * @param postUrl json data
  */
 function doPost(body, path) {
     const request = new Request(
-        "http://localhost:8090/api/" + path, 
-        {method: "POST", 
+        API_ENDPOINT_PREFIX + path,
+        {method: "POST",
          headers: {
             "Content-Type": "application/json",
             "Authorization": "Basic YWRtaW46YWRtaW5wYXNz"
          },
          body: body});
 
-    fetch(request)
-        .then(response => {
-            if (response.status === 200) {
-                if (path == "search_products") {
-                    return response.json();
-                }
-            }
-        })
-        .then(data => {
-            if (path == "search_products") {
-                appendSearchProductsResponseToTable(data);
-            }
-        })
-        .catch(error => {
-            alert("Error occured \n" + error);
-        });
+    return fetch(request);
 }
 
 /**

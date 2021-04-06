@@ -1,34 +1,46 @@
 
 const enterKeyCode = 13;
-const displayCaption = ["no", "score", "url", "title", "digest"];
+const displayCaption = ["rank", "score", "url", "title", "digest"];
+
 
 /**
- * send click logs to click logs API endpoint
+ * send click logs to API
  */
-function sendClickLogs(url, linkNo) {
+function doSendClickLog(url, rank) {
     var searchWords = document.getElementById("searchwords").value
-    doPost(createJsonForClickLogs(url, linkNo, searchWords), "click_logs");
-    alert(url + "is clicked");
+    sendClickLog(url, rank, searchWords)
+        .then(response => {
+            alert("Click on ["  + url + "] has been recorded.");
+        })
+        .catch(error => {
+            alert("Error occured: \n" + error);
+        });
 }
 
 /**
- * get search product by search words
+ * search products by words
  */
-function searchProduct() {
+function doSearchProduct() {
     removeTableElement();
     refreshSearchId();
     var searchWords = document.getElementById("searchwords").value
-    doPost(createJsonForSearchProducts(searchWords), "search_products");
+    searchProduct(searchWords, 2)
+        .then(data => {
+            appendSearchProductsResponseToTable(data);
+        })
+        .catch(error => {
+            alert("Error occured \n" + error);
+        });
 }
 
 /**
- * get search product by search words when you press enter in a text field
- * 
- * @param pressed key code 
+ * search products when pressing enter in a text field
+ *
+ * @param pressed key code
  */
  function onEnter(code) {
     if(code == enterKeyCode) {
-        searchProduct();
+        doSearchProduct();
     }
 }
 
@@ -42,7 +54,7 @@ function removeTableElement() {
 
 /**
  * append search products response to table
- * 
+ *
  * @param response search producs response
  */
 function appendSearchProductsResponseToTable(json) {
@@ -50,8 +62,8 @@ function appendSearchProductsResponseToTable(json) {
 }
 
 /**
- * create table element
- * 
+ * create table for the search result
+ *
  * @param json search producs result
  */
 function createTable(json) {
@@ -59,28 +71,33 @@ function createTable(json) {
     var table = document.createElement("table");
     var thead = document.createElement("thead");
     for (var i = 0; i < displayCaption.length; i++) {
-        var td = document.createElement('td');
-        td.textContent = displayCaption[i];
-        thead.appendChild(td);
+        var th = document.createElement('th');
+        th.textContent = displayCaption[i];
+        thead.appendChild(th);
     }
     var tbody = document.createElement("tbody");
     for (var j = 0; j < json.length; j++) {
         var tr = document.createElement("tr");
-        var tdNo = document.createElement("td");
-        tdNo.textContent = j + 1;
-        tr.appendChild(tdNo);
+        var tdRank = document.createElement("td");
+        tdRank.textContent = j + 1;
+        tr.appendChild(tdRank);
         for (var k = 0; k < displayCaption.length; k++) {
-            var captionDate = json[j][displayCaption[k]];
-            if (captionDate != undefined) {
+            var itemText = json[j][displayCaption[k]];
+            if (itemText != undefined) {
                 td = document.createElement("td");
                 if (displayCaption[k] == "url") {
                     var a = document.createElement("a");
-                    a.textContent = captionDate;
-                    a.href = "javascript:void(0);";
-                    a.setAttribute("onclick", "sendClickLogs('" + a.textContent + "','" + tdNo.textContent + "')");
+                    a.textContent = itemText;
+                    a.href = itemText;
+                    (function(rank) {
+                        a.addEventListener('click', function(e){
+                            doSendClickLog(a.textContent, rank);
+                            e.preventDefault();
+                        }, false)
+                    })(j + 1)
                     td.appendChild(a);
                 } else {
-                    td.textContent = captionDate;
+                    td.textContent = itemText;
                 }
                 td.setAttribute("id", displayCaption[k] + (j + 1));
                 tr.appendChild(td);
@@ -91,13 +108,4 @@ function createTable(json) {
     table.appendChild(thead);
     table.appendChild(tbody);
     root.appendChild(table);
-}
-
-function isDisplayData(key) {
-    for (var i = 0; i < displayCaption.length; i++) {
-        if (key == displayCaption[i]) {
-            return true;
-        }
-    }
-    return false;
 }
