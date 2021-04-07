@@ -114,17 +114,28 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   public List<String> findIdsByURL(String url) throws IOException, SolrServerException {
-    List<String> ids = new ArrayList<>();
+    List<SolrDocument> docs = findDocumentsByURL(url);
+    if (docs == null || docs.size() == 0) {
+      return new ArrayList<String>();
+    }
+    return docs.stream().map(d -> d.get("id").toString()).collect(Collectors.toList());
+  }
+
+  public List<SolrDocument> findDocumentsByURL(String url) throws IOException, SolrServerException {
+    if (url == null || url.trim().length() == 0) {
+      throw new IllegalArgumentException("url must be specified.");
+    }
+    List<SolrDocument> docs = new ArrayList<>();
     SolrQuery query = new SolrQuery();
     query.set("q", "product_url:\"" + url + "\"");
     QueryResponse response = httpSolrClient.query(query);
     if (response.getResults().getNumFound() <= 0) {
-      return ids;
+      return docs;
     }
-    for (SolrDocument result : response.getResults()) {
-      ids.add(result.get("id").toString());
+    for (SolrDocument doc : response.getResults()) {
+      docs.add(doc);
     }
-    return ids;
+    return docs;
   }
 
   /**
@@ -491,18 +502,20 @@ public class SolrService {
    */
   private List<SolrInputDocument> pageToDocuments(CPage page) throws IOException, SolrServerException {
     WebSite site = webSiteRepository.findOne(page.getSiteId());
-    List<SolrInputDocument> documents = new ArrayList<>();
-    List<String> ids = findIdsByURL(page.getUrl());
-    if (!ids.isEmpty()) {
-      for (String id : findIdsByURL(page.getUrl())) {
-        SolrInputDocument document = pageToDocument(page, id, site);
-        documents.add(document);
-      }
-    } else {
-      SolrInputDocument document = pageToDocument(page, null, site);
-      documents.add(document);
+    List<SolrInputDocument> inputDocs = new ArrayList<>();
+
+    List<SolrDocument> docs = findDocumentsByURL(page.getUrl());
+    for (SolrDocument d : docs) {
+      SolrInputDocument inputDoc = createSolrInputDocument(d);
+      updateContent(inputDoc, page);
+      inputDocs.add(inputDoc);
     }
-    return documents;
+
+    if(inputDocs.size() == 0) {
+      SolrInputDocument inputDoc = pageToDocument(page, null, site);
+      inputDocs.add(inputDoc);
+    }
+    return inputDocs;
   }
 
   /**
@@ -516,29 +529,37 @@ public class SolrService {
    * @throws SolrServerException if solr server exception happened
    */
   private SolrInputDocument pageToDocument(CPage page, String id, WebSite site) throws IOException, SolrServerException {
-    DomHelper domHelper = new DomHelper();
-
     // set id if exist
     SolrInputDocument document = new SolrInputDocument();
     if (id != null) {
-      document.addField("id", id);
+      document.setField("id", id);
     }
-    document.addField("manufacturer_name", site.getName());
-    document.addField("product_url", page.getUrl());
-    document.addField("html_title", page.getTitle());
-    document.addField("html_body", page.getBody());
+    document.setField("manufacturer_name", site.getName());
+    document.setField("manufacturer_id", site.getId() + "");
+    return updateContent(document, page);
+  }
 
-    // force convert to string for solr document
-    // "1" will identify as number in solr document
-    document.addField("manufacturer_id", site.getId() + "");
+  /**
+   * update contents of the given SolrInputDocument with the specified CPage object.
+   * @param document
+   * @param page
+   * @return
+   * @throws IOException
+   * @throws SolrServerException
+   */
+  private SolrInputDocument updateContent(SolrInputDocument document, CPage page) throws IOException, SolrServerException {
+    DomHelper domHelper = new DomHelper();
 
-    document.addField("content", domHelper.htmlToText(page.getContent()));
-    document.addField("category", page.getCategory());
-    document.addField("page_updated_at", Date.from(Instant.now()));
+    document.setField("product_url", page.getUrl());
+    document.setField("html_title", page.getTitle());
+    document.setField("html_body", page.getBody());
+    document.setField("content", domHelper.htmlToText(page.getContent()));
+    document.setField("category", page.getCategory());
+    document.setField("page_updated_at", Date.from(Instant.now()));
 
     List<String> htmlAreas = domHelper.getHtmlAreasFromContents(page.getContent());
     for (int i = 0; i < htmlAreas.size(); i++) {
-      document.addField("html_area" + (i + 1), htmlAreas.get(i));
+      document.setField("html_area" + (i + 1), htmlAreas.get(i));
     }
     return document;
   }

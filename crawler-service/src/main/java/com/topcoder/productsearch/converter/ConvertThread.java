@@ -73,7 +73,7 @@ public class ConvertThread implements Runnable {
         logger.info("URL was marked deleted in database so deleting from solr index. page#" + cPage.getId() + ", " + cPage.getUrl());
       } else if (cPage.getLastModifiedAt() != null && (cPage.getLastModifiedAt().before(expireDate)))  {
         solrService.deleteByURL(cPage.getUrl());
-        logger.info("URL has not been modified for greater than expiry period, deleting from solr index. page#"+ cPage.getId() + ", " + cPage.getUrl());
+        logger.info("URL has not been modified for a long time, deleting from solr index. page#"+ cPage.getId() + ", " + cPage.getUrl());
       } else if (cPage.getLastProcessedAt() == null || cPage.getLastModifiedAt().after(cPage.getLastProcessedAt())) {
 
         // create or update to avoid creating duplicate records
