@@ -532,10 +532,10 @@ public class SolrService {
     // set id if exist
     SolrInputDocument document = new SolrInputDocument();
     if (id != null) {
-      document.addField("id", id);
+      document.setField("id", id);
     }
-    document.addField("manufacturer_name", site.getName());
-    document.addField("manufacturer_id", site.getId() + "");
+    document.setField("manufacturer_name", site.getName());
+    document.setField("manufacturer_id", site.getId() + "");
     return updateContent(document, page);
   }
 
@@ -550,16 +550,16 @@ public class SolrService {
   private SolrInputDocument updateContent(SolrInputDocument document, CPage page) throws IOException, SolrServerException {
     DomHelper domHelper = new DomHelper();
 
-    document.addField("product_url", page.getUrl());
-    document.addField("html_title", page.getTitle());
-    document.addField("html_body", page.getBody());
-    document.addField("content", domHelper.htmlToText(page.getContent()));
-    document.addField("category", page.getCategory());
-    document.addField("page_updated_at", Date.from(Instant.now()));
+    document.setField("product_url", page.getUrl());
+    document.setField("html_title", page.getTitle());
+    document.setField("html_body", page.getBody());
+    document.setField("content", domHelper.htmlToText(page.getContent()));
+    document.setField("category", page.getCategory());
+    document.setField("page_updated_at", Date.from(Instant.now()));
 
     List<String> htmlAreas = domHelper.getHtmlAreasFromContents(page.getContent());
     for (int i = 0; i < htmlAreas.size(); i++) {
-      document.addField("html_area" + (i + 1), htmlAreas.get(i));
+      document.setField("html_area" + (i + 1), htmlAreas.get(i));
     }
     return document;
   }
