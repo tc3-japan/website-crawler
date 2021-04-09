@@ -41,7 +41,7 @@ function sendClickLog(url, rank, searchWords) {
 /**
  * get search product by search words
  */
-function searchProduct(searchWords, siteId = 1, start = 1, rows = 20) {
+function searchProduct(searchWords, siteId = 1, start = 0, rows = 20) {
     return doPost(createJsonForSearchProducts(searchWords, siteId, start, rows), "search_products")
     .then(response => {
         return response.json();

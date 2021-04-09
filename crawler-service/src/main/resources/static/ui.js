@@ -89,12 +89,12 @@ function createTable(json) {
                     var a = document.createElement("a");
                     a.textContent = itemText;
                     a.href = itemText;
-                    (function(rank) {
+                    (function(url, rank) {
                         a.addEventListener('click', function(e){
-                            doSendClickLog(a.textContent, rank);
+                            doSendClickLog(url, rank);
                             e.preventDefault();
                         }, false)
-                    })(j + 1)
+                    })(a.textContent, j + 1)
                     td.appendChild(a);
                 } else {
                     td.textContent = itemText;
