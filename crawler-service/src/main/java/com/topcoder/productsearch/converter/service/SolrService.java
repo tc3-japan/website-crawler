@@ -182,8 +182,6 @@ public class SolrService {
   public SolrDocument findDocumentById(String id) throws IOException, SolrServerException {
     SolrQuery query = new SolrQuery();
     query.set("q", String.format("id:\"%s\"", id));
-    query.set("fl", "id,product_url,manufacturer_id,manufacturer_name,page_updated_at,category,content,html_title,html_area1,html_area2,html_area3,html_area4,html_area5,html_area6,html_area7,html_area8,html_area9,html_area10,html_body,search_word_txt_ja,ctr_f,search_word2_txt_ja,ctr2_f");
-
     QueryResponse response = httpSolrClient.query(query);
     if (response.getResults().getNumFound() <= 0) {
       return null;
@@ -414,7 +412,7 @@ public class SolrService {
     }
 
     // TODO: template
-    query.set("q", "{!boost b=\"sum(1,mul(if(eq(ctr_term,\'" + q + "\'),ctr,0)," + ctrNumber + "))\"}"
+    query.set("q", "{!boost b=\"sum(1,mul(if(eq(ctr_term,'" + q + "'),ctr,0)," + ctrNumber + "))\"}"
         +  String.join(" OR ", fieldQueries));
     logger.debug("query: " + query.getQuery());
 

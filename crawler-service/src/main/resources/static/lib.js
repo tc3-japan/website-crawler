@@ -1,5 +1,6 @@
 
-const API_ENDPOINT_PREFIX = 'http://localhost:8090/api/';
+// const API_ENDPOINT_PREFIX = 'http://a8d32cafd5f184564b25c4c0c94d0248-1387517607.us-west-2.elb.amazonaws.com:8090/api/'
+const API_ENDPOINT_PREFIX = '/api/';
 const SEARCH_ID_PREFIX = 'MYAPP-';
 
 let search_id;
