@@ -289,8 +289,7 @@ public class SolrService {
     } else {
       query.setFilterQueries("{!collapse field=product_url}");
     }
-    //query.setFilterQueries("{!collapse field=product_url}");
-    //query.set("expand", true);
+
     query.set("start", request.getStart());
     query.set("rows", request.getRows());
     query.set("fl", "id,score,product_url,html_title,manufacturer_id,manufacturer_name,page_updated_at,category,content");
@@ -414,6 +413,7 @@ public class SolrService {
       fieldQueries.add(qi);
     }
 
+    // TODO: template
     query.set("q", "{!boost b=\"sum(1,mul(if(eq(ctr_term,\'" + q + "\'),ctr,0)," + ctrNumber + "))\"}"
         +  String.join(" OR ", fieldQueries));
     logger.debug("query: " + query.getQuery());
