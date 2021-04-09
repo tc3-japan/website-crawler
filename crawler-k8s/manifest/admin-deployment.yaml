@@ -10,6 +10,9 @@ metadata:
   name: app-admin
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: app-admin
   strategy: {}
   template:
     metadata:
@@ -19,7 +22,10 @@ spec:
     spec:
       containers:
       - name: admin
-        image: azh4r/productsearch-app-admin:1.0.1
+        image: tc3jp/productsearch-app-admin:develop-1.0.15p1
+        env:
+        - name: PORT
+          value: "8080"
         ports:
         - containerPort: 8080
         resources: {}
