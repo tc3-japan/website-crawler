@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backup-click-logs-job
+spec:
+  template:
+    metadata:
+      labels:
+        app: backup-click-logs-job
+    spec:
+      restartPolicy: Never
+      containers:
+      - image: tc3jp/productsearch-backup-click-log:develop-1.0.15
+        name: crawler
+        env:
+        - name: HOST
+          value: mysql
+        - name: PORT
+          value: 3306
+        - name: USER
+          value: root
+        - name: PASSWORD
+          value: mypassword
+        volumeMounts:
+        - mountPath: /tmp
+          name: backup-volume
+      volumes:
+      - name: backup-volume
+        hostPath:
+          path: /tmp
