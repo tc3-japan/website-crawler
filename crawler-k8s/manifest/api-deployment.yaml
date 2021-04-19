@@ -23,7 +23,7 @@ spec:
       containers:
       - args:
         - --rest
-        image: tc3jp/productsearch-service:develop-1.0.15
+        image: tc3jp/productsearch-service:develop-1.0.15p3
         name: api
         env:
         - name: SPRING_JDBC_URL

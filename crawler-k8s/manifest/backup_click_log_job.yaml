@@ -10,7 +10,7 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - image: tc3jp/productsearch-backup-click-log:develop-1.0.15
+      - image: tc3jp/productsearch-backup-click-log:develop-1.0.15p1
         name: crawler
         env:
         - name: HOST
